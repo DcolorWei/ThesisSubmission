@@ -10,17 +10,42 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     BaseHeader: typeof import('./components/layouts/BaseHeader.vue')['default']
+<<<<<<< Updated upstream
     BaseSide: typeof import('./components/layouts/BaseSide.vue')['default']
+=======
+    DialogPerson: typeof import('./components/mutually/DialogPerson.vue')['default']
+>>>>>>> Stashed changes
     ElButton: typeof import('element-plus/es')['ElButton']
     ElConfigProvider: typeof import('element-plus/es')['ElConfigProvider']
+<<<<<<< Updated upstream
     ElDatePicker: typeof import('element-plus/es')['ElDatePicker']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElInput: typeof import('element-plus/es')['ElInput']
     ElMenu: typeof import('element-plus/es')['ElMenu']
     ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
     ElMenuItemGroup: typeof import('element-plus/es')['ElMenuItemGroup']
+=======
+    ElDescriptions: typeof import('element-plus/es')['ElDescriptions']
+    ElDescriptionsItem: typeof import('element-plus/es')['ElDescriptionsItem']
+    ElDialog: typeof import('element-plus/es')['ElDialog']
+    ElInput: typeof import('element-plus/es')['ElInput']
+    ElMenu: typeof import('element-plus/es')['ElMenu']
+    ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
+    ElOption: typeof import('element-plus/es')['ElOption']
+    ElPagination: typeof import('element-plus/es')['ElPagination']
+    ElRow: typeof import('element-plus/es')['ElRow']
+    ElSelect: typeof import('element-plus/es')['ElSelect']
+>>>>>>> Stashed changes
     ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
     ElTag: typeof import('element-plus/es')['ElTag']
+<<<<<<< Updated upstream
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
+=======
+    ElText: typeof import('element-plus/es')['ElText']
+    ElTimeline: typeof import('element-plus/es')['ElTimeline']
+    ElTimelineItem: typeof import('element-plus/es')['ElTimelineItem']
+    RouterLink: typeof import('vue-router')['RouterLink']
+    RouterView: typeof import('vue-router')['RouterView']
+>>>>>>> Stashed changes
   }
 }
