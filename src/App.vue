@@ -1,12 +1,8 @@
 <template>
   <el-config-provider namespace="ep">
     <BaseHeader />
-    <div style="display: flex">
-      <BaseSide />
-      <div>
-        <img alt="Vue logo" class="element-plus-logo" src="./assets/logo.png" />
-        <HelloWorld msg="Hello Vue 3.0 + Element Plus + Vite" />
-      </div>
+    <div class="router">
+      <RouterView style="max-width: 90vw;margin: 0 auto;"></RouterView>
     </div>
   </el-config-provider>
 </template>
@@ -15,6 +11,13 @@
 #app {
   text-align: center;
   color: var(--ep-text-color-primary);
+}
+
+.router {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .element-plus-logo {
