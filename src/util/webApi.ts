@@ -1,17 +1,27 @@
 import axios from 'axios'
 import { Params } from './type'
 
-axios.defaults.baseURL = ''
+axios.defaults.baseURL = 'http://home.viger.xyz:9511'
 const get = async <T>(url: string, params: Params<Object>): Promise<T> => {
-    
     return new Promise<T>(r => {
-        axios.get(url)
+        axios({
+            url: url,
+            method: 'get',
+            params: params
+        }).then(res => r(res.data as T)).catch(() => r(null as T))
     })
 }
 
-const post = async <T>(url: string, data: Params<T>): Promise<T> => {
+const post = async <T, K = any>(url: string, data: Params<K>): Promise<T> => {
     return new Promise<T>(r => {
-        axios.post(url, data)
+        axios({
+            url: url,
+            method: 'post',
+            data: data,
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
             .then(res => r(res.data as T))
             .catch(() => r(null as T))
     })
@@ -20,5 +30,5 @@ const post = async <T>(url: string, data: Params<T>): Promise<T> => {
 
 
 export default {
-
+    get, post
 }

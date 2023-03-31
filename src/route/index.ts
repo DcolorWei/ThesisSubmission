@@ -3,7 +3,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import ThesisStatus from '../views/student/ThesisStatus.vue'
 import SubmitThesis from '../views/student/SubmitThesis.vue'
 import ProcessMag from '~/views/teacher/ProcessMag.vue'
-import TeacherMag from '../views/teacher/TeacherMag.vue'
+import PersonMag from '../views/teacher/PersonMag.vue'
 import InnerOuterAudit from '~/views/teacher/InnerOuterAudit.vue'
 import DefenceMag from '../views/teacher/DefenceMag.vue'
 
@@ -11,7 +11,7 @@ const routes = [
     { path: '/thesisstatus', component: ThesisStatus },
     { path: '/processmag', component: ProcessMag },
     { path: '/submitthesis', component: SubmitThesis },
-    { path: '/teachermag', component: TeacherMag },
+    { path: '/personmag', component: PersonMag },
 
     { path: '/innerouteraudit', component: InnerOuterAudit },
     { path: '/defencemag', component: DefenceMag },

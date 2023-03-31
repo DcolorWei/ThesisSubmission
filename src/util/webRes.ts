@@ -3,6 +3,7 @@ import { CapacityStatus } from "../entity/enum/capacity";
 import { StudentInfo } from "../entity/base/Student";
 import { Capacity } from "~/entity/base/Capacity";
 import { DefenceInfo } from "~/entity/base/Defence";
+import { ProcessDetail, Status } from "~/entity/base/Process";
 
 /**
  * 学生使用的接口
@@ -11,7 +12,7 @@ import { DefenceInfo } from "~/entity/base/Defence";
 //获得学生信息
 export interface StudentInfoRes {
     code: number;
-    data: StudentInfo;
+    data: StudentInfo[];
     message: string;
 }
 
@@ -115,124 +116,30 @@ export interface UsualRes {
 /**
  * 教师信息
  */
-export interface getTeacherInfoRes {
-    /**
-     * 学院名称
-     */
-    departmentName: null | string;
-    /**
-     * 邮箱地址
-     */
-    emailAddress: null | string;
-    /**
-     * 唯一用户id
-     */
-    id: number;
-    /**
-     * 内审流程数
-     */
-    innerProcessNum: number;
-    /**
-     * 教师姓名
-     */
-    name: string;
-    /**
-     * 答辩流程数
-     */
-    oralDefenceProcessNum: number;
-    /**
-     * 外审流程数
-     */
-    outerProcessNum: number;
-    /**
-     * 联系电话
-     */
-    phoneNumber: null | string;
-    /**
-     * 角色列表
-     */
-    role: string[] | null;
-    /**
-     * 学校名称
-     */
-    schoolName: null | string;
-    /**
-     * 教师工号
-     */
-    teacherID: null | string;
-    /**
-     * 职称
-     */
-    title: Title;
-    /**
-     * ding用户id
-     */
-    userId: string;
-}
+export interface GetTeacherInfoRes {
+    code: number;
+    message: string;
+    data: TeacherInfo[];
+};
 
 /**
  * 获取学生信息
 */
 export interface GetStudentInfoRes {
-    /**
-     * 学业导师
-     */
-    academicTutor: null | TeacherInfo;
-    emailAddress: null;
-    /**
-     * 流程
-     */
-    flow: null | CapacityStatus;
-    id: number;
-    name: string;
-    /**
-     * 挂名导师
-     */
-    nominalTutor: null | TeacherInfo;
-    phoneNumber: null;
-    role: string[];
-    studentId: null;
-    userId: string;
-}
-
+    code: number;
+    message: string;
+    data: StudentInfo[];
+};
 
 /**
  * 流程详情
  */
-export interface GetCapacityStatusRes {
-    /**
-     * 答辩组
-     */
-    defenceGroup: null;
-    /**
-     * 流程id
-     */
-    id: number;
-    /**
-     * 内审教师
-     */
-    innerAuditor: null | TeacherInfo;
-    /**
-     * 外审教师
-     */
-    outerAuditor: null | TeacherInfo;
-    /**
-     * 流程状态
-     */
-    status: CapacityStatus;
-    /**
-     * 归属学生id
-     */
-    studentId: number;
-    /**
-     * 归属学生姓名
-     */
-    studentName: string;
-    /**
-     * 确认老师
-     */
-    verifier: null | TeacherInfo;
-}
+export interface GetFlowDetailRes {
+    code: number;
+    message: string;
+    data: ProcessDetail[];
+};
+
 
 export interface AssignAuditRes {
     flows: Capacity[];
