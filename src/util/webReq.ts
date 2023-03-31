@@ -94,45 +94,6 @@ export interface UpdateTeacherReq {
     userId: string;
 }
 
-export interface CreateTeacherRes {
-    /**
-     * 学院名称
-     */
-    departmentName: null | string;
-    /**
-     * 邮箱地址
-     */
-    emailAddress: null | string;
-    /**
-     * 教师姓名
-     */
-    name: string;
-    /**
-     * 联系电话
-     */
-    phoneNumber: null | string;
-    /**
-     * 角色列表
-     */
-    role: string[] | null;
-    /**
-     * 学校名称
-     */
-    schoolName: null | string;
-    /**
-     * 教师工号
-     */
-    teacherID: null | string;
-    /**
-     * 职称
-     */
-    title: Title;
-    /**
-     * ding用户id
-     */
-    userId: string;
-}
-
 
 //更新学生信息
 export interface UpdateStudentReq {
@@ -142,23 +103,6 @@ export interface UpdateStudentReq {
     academicTutorId: string;
     emailAddress: null;
     id: number;
-    name: string;
-    /**
-     * 挂名导师用户id
-     */
-    nominalTutorId: string;
-    phoneNumber: null;
-    role: string[];
-    studentId: null;
-    userId: string;
-}
-
-export interface CreateStudentReq {
-    /**
-     * 学业导师用户id
-     */
-    academicTutorId: string;
-    emailAddress: null;
     name: string;
     /**
      * 挂名导师用户id

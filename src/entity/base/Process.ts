@@ -1,3 +1,4 @@
+import { DefenceInfo } from "./Defence";
 import { TeacherInfo } from "./Teacher";
 
 /**
@@ -7,7 +8,7 @@ export interface ProcessDetail {
     /**
      * 答辩组
      */
-    defenceGroup?: null;
+    defenceGroup?: null | DefenceInfo;
     /**
      * 流程id
      */

@@ -2,6 +2,7 @@ import { TeacherInfo, Title } from "../entity/base/Teacher";
 import { CapacityStatus } from "../entity/enum/capacity";
 import { StudentInfo } from "../entity/base/Student";
 import { Capacity } from "~/entity/base/Capacity";
+import { DefenceInfo } from "~/entity/base/Defence";
 
 /**
  * 学生使用的接口
@@ -36,6 +37,51 @@ export interface ProcessStatusRes {
      * 论文ID
      */
     thesisNo: number;
+}
+
+export interface Response {
+    /**
+     * 状态列表
+     */
+    history: History;
+    /**
+     * flow id
+     */
+    id: number;
+    /**
+     * FlowStatus，流程状态
+     */
+    status: string;
+}
+
+/**
+ * 状态列表
+ */
+export interface History {
+    /**
+     * 评论
+     */
+    comment: string;
+    /**
+     * 操作日期，yyyy-MM-dd HH:mm:ss
+     */
+    operateTime: string;
+    /**
+     * 操作名称
+     */
+    operation: string;
+    /**
+     * 操作人
+     */
+    operator: string;
+    /**
+     * 是否通过
+     */
+    pass: boolean;
+    /**
+     * 得分
+     */
+    score: number;
 }
 
 export interface ProcessList {
@@ -149,6 +195,7 @@ export interface GetStudentInfoRes {
     userId: string;
 }
 
+
 /**
  * 流程详情
  */
@@ -193,4 +240,8 @@ export interface AssignAuditRes {
      * 提示信息
      */
     message: string;
+}
+
+export interface GetDefenceGroupsRes {
+    defenceGroups: DefenceInfo[];
 }

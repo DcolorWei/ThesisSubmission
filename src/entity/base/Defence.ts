@@ -10,12 +10,12 @@ export interface DefenceInfo {
     /**
      * 答辩地点
      */
-    defencePlace: string;
+    defencePlace?: string;
     /**
      * 答辩时间，yyyy-MM-dd HH:mm:ss
      */
     defenceTime: string;
-    id: string;
-    nowcapacity: number;
+    id?: string;
+    nowcapacity?: number;
     secretary: TeacherInfo;
 }
