@@ -7,7 +7,7 @@ import "element-plus/theme-chalk/src/message.scss"
 import { router } from "./route";
 
 import axios from 'axios'
-axios.defaults.baseURL = 'http://127.0.0.1:4523/m1/2476106-0-default'
+axios.defaults.baseURL = 'http://home.viger.xyz:9511'
 
 const app = createApp(App);
 app.use(router).mount("#app");
