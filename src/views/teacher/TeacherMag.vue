@@ -40,14 +40,14 @@
             <el-table-column prop="name" label="姓名" width="130" />
             <el-table-column prop="identify" label="身份" width="100">
                 <template #default="{ row }">
-                    {{ row.identify.join(',')
+                    {{ row.identify && row.identify.join(',')
                         .replace('1', '学生')
                         .replace('2', '老师')
                         .replace('3', '导师') }}
                 </template>
             </el-table-column>
-            <el-table-column prop="college" label="学院" width="130" />
-            <el-table-column prop="class" label="班级" width="170" />
+            <el-table-column prop="schoolName" label="学校" width="170" />
+            <el-table-column prop="departmentName" label="学院" width="130" />
             <el-table-column label="操作" width="180">
                 <template #default="scope">
                     <el-button type="warning" :icon="Edit" size="small" plain @click="() => edit(scope.row)">编辑</el-button>
@@ -62,7 +62,32 @@
 
 
     <!-- 人员信息表单 -->
-    <el-dialog v-model="dialogVisible" title="人员信息" width="30%" align-center>
+    <el-dialog v-model="dialogVisible" title="学生信息" width="30%" align-center>
+        <div class="form">
+            <div class="form-item"><el-input v-model="personInfo.id" placeholder="学号" /></div>
+            <div class="form-item"><el-input v-model="personInfo.name" placeholder="姓名" /></div>
+            <div>
+                <el-select v-model="personInfo.identify" multiple placeholder="身份" style="width: 80%;">
+                    <el-option
+                        v-for="item in [{ value: 1, label: '学生' }, { value: 2, label: '老师' }, { value: 3, label: '导师' }]"
+                        :key="item.value" :label="item.label" :value="item.value" />
+                </el-select>
+            </div>
+            <div class="form-item"><el-input v-model="personInfo.college" placeholder="学院" /></div>
+            <div class="form-item"><el-input v-model="personInfo.class" placeholder="班级" /></div>
+        </div>
+
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @click="() => dialogVisible = false">Cancel</el-button>
+                <el-button type="primary" @click="() => save()">
+                    Confirm
+                </el-button>
+            </span>
+        </template>
+    </el-dialog>
+
+    <el-dialog v-model="dialogVisible" title="教师信息" width="30%" align-center>
         <div class="form">
             <div class="form-item"><el-input v-model="personInfo.id" placeholder="学号/工号" /></div>
             <div class="form-item"><el-input v-model="personInfo.name" placeholder="姓名" /></div>
@@ -92,6 +117,8 @@
 import { Edit, Search } from '@element-plus/icons-vue'
 import axios from 'axios';
 import { reactive, Ref, ref } from 'vue';
+import { UpdateTeacherReq } from '~/util/webReq';
+import { UsualRes } from '~/util/webRes';
 
 //表单筛选
 const filter = ref({
@@ -100,8 +127,8 @@ const filter = ref({
 
 //表单数据
 const tableData: Ref<any[]> = ref([])
-axios.get('/teacher/getPersonInfo').then(({ data }) => {
-    tableData.value.push(...data)
+axios.get('/getPersonInfo').then(({ data }) => {
+    tableData.value.push(...data.data)
 })
 const pageIndex = ref(0)
 const changePage = (e: number) => pageIndex.value = e - 1
@@ -116,6 +143,8 @@ const personInfo: any = ref({
     college: '',
     class: ''
 })
+
+const mode = ref('edit')
 const add = () => {
     personInfo.value = {
         id: '',
@@ -126,7 +155,8 @@ const add = () => {
     };
     dialogVisible.value = true
 }
-const edit = (e:unknown) => {
+
+const edit = (e: unknown) => {
     personInfo.value = e
     console.log(e, personInfo.value)
     dialogVisible.value = true
@@ -139,6 +169,20 @@ const save = () => {
     } else {
         Object.keys(exist).forEach(key => exist[key] = personInfo.value[key])
     }
+    axios<UpdateTeacherReq, UsualRes>({
+        method: 'post',
+        data: {
+            name: "测试A",
+            schoolName: "大连海事",
+            departmentName: "航海学院",
+            title: "    PROFESSOR",
+            userId: "27",
+            phoneNumber: "86",
+            teacherID: "81",
+            emailAddress: "u.xyttt@qq.com",
+            role: null
+        }
+    })
     dialogVisible.value = false
 }
 </script>
