@@ -22,7 +22,7 @@
     <h3 style="color:#606266;width: 90%;margin-top: 20px;text-align: left">学生信息</h3>
     <el-card body-style="width:85vw">
         <el-table
-            :data="[{ id: student.data.studentId, name: student.data.name, phone: student.data.phoneNumber, email: student.data.emailAddress }]"
+            :data="[{ id: student.studentId, name: student.name, phone: student.phoneNumber, email: student.emailAddress }]"
             style="width: 90vw">
             <el-table-column prop="id" label="学号" width="200" />
             <el-table-column prop="name" label="姓名" width="200" />
@@ -32,8 +32,6 @@
         </el-table>
 
         <el-table style="width: 90vw">
-            <!-- <el-table-column prop="thesisNo" label="论文号" width="200" />
-            <el-table-column prop="thesisName" label="论文名称" :width="process.thesisName.length * 20" /> -->
             <el-table-column>
                 <template #default>
                     <el-tag type="warning" round>{{ status.status }}</el-tag>
@@ -44,7 +42,7 @@
 
     <h3 style="color:#606266;width: 90%;margin-top: 20px;text-align: left">关联教师</h3>
     <el-card body-style="width:85vw">
-        <el-table :data="[status.verifier, status.innerAuditor, status.outerAuditor]" style="width: 90vw">
+        <el-table :data="[status.verifier, status.innerAuditor, status.outerAuditor1,status.outerAuditor2]" style="width: 90vw">
             <el-table-column prop="name" label="教师姓名" width="150" />
             <el-table-column label="身份" width="150">
                 <template #default="{ $index }">
@@ -94,19 +92,19 @@
 import axios from 'axios';
 import { Ref, ref, reactive } from 'vue'
 import { ProcessDetail } from '~/entity/base/Process';
+import webApi from '~/util/webApi';
 import { ProcessStatusRes, StudentInfoRes } from '~/util/webRes';
 
 
-const student: any = reactive({})
-axios.post('/getStudentInfoBy').then(({ data }) => {
-    Object.keys(data[0]).forEach((k: any) => student[k] = data[0][k])
+const student: any = ref({})
+webApi.post<StudentInfoRes>('/getStudentInfoBy', {}).then((data) => {
+    student.value = data[0]
+    console.log(student.value)
 })
 const status: any = reactive({})
 axios.post('/getFlowInfo').then(({ data }) => {
     Object.keys(data[0]).forEach((k: any) => status[k] = data[0][k])
 })
-
-console.log(student, status)
 
 
 </script>

@@ -1,112 +1,139 @@
 <template>
-    <div style="margin: 10px;"></div>
-    <div style="z-index:0">
-        <el-table :data="tableData.slice(pageIndex * 10, pageIndex * 10 + 10)" border>
-            <el-table-column prop="id" label="学号/工号" width="150" />
-            <el-table-column prop="name" label="姓名" width="130" />
-            <el-table-column prop="identify" label="身份" width="100">
-                <template #default="{ row }">
-                    {{ row.identify.join(',')
-                        .replace('1', '学生')
-                        .replace('2', '老师')
-                        .replace('3', '导师') }}
-                </template>
-            </el-table-column>
-            <el-table-column prop="college" label="学院" width="130" />
-            <el-table-column prop="class" label="班级" width="170" />
-            <el-table-column label="操作" width="180">
-                <template #default="scope">
-                    <el-button type="warning" :icon="Edit" size="small" plain @click="() => edit(scope.row)">编辑</el-button>
-                    <el-button type="primary" :icon="Search" size="small" plain>查看</el-button>
-                </template>
-            </el-table-column>
-        </el-table>
-        <div style="display:flex;justify-content: center;margin: 20px auto;">
-            <el-pagination layout="prev, pager, next" :total="tableData.length" @current-change="(e) => changePage(e)" />
-        </div>
+    <div style="margin-top: 20px;"></div>
+    <div style="width: 90%;display: flex; align-items:flex-end;">
+        <h2 style="color:#606266">内外审分配</h2>
     </div>
-
-
-    <!-- 人员信息表单 -->
-    <el-dialog v-model="dialogVisible" title="人员信息" width="30%" align-center>
-        <div class="form">
-            <div class="form-item"><el-input v-model="personInfo.id" placeholder="学号/工号" /></div>
-            <div class="form-item"><el-input v-model="personInfo.name" placeholder="姓名" /></div>
-            <div>
-                <el-select v-model="personInfo.identify" multiple placeholder="身份" style="width: 80%;">
-                    <el-option
-                        v-for="item in [{ value: 1, label: '学生' }, { value: 2, label: '老师' }, { value: 3, label: '导师' }]"
-                        :key="item.value" :label="item.label" :value="item.value" />
-                </el-select>
+    <el-row :gutter="20" style="width: 80vw;">
+        <el-col :span="7">
+            <div style="height: 70vh; border:1px solid #9f9f9f;border-radius: 8px;">
+                <div v-for="teacher, idx in innerTeacherInfos" :key="idx" style="margin: 12px;">
+                    <el-card>
+                        <el-descriptions class="margin-top" :title="teacher.teacherID + ' ' + teacher.name" :column="3"
+                            size="small" border>
+                            <el-descriptions-item>
+                                <template #label>
+                                    <div class="cell-item">
+                                        内审
+                                    </div>
+                                </template>
+                                {{ teacher.innerProcessNum }}
+                            </el-descriptions-item>
+                            <el-descriptions-item>
+                                <template #label>
+                                    <div class="cell-item">
+                                        外审
+                                    </div>
+                                </template>
+                                {{ teacher.outerProcessNum }}
+                            </el-descriptions-item>
+                        </el-descriptions>
+                        <el-checkbox @change="(e) => chooseTeacher(e, teacher.teacherID!, 'i')" />
+                    </el-card>
+                </div>
             </div>
-            <div class="form-item"><el-input v-model="personInfo.college" placeholder="学院" /></div>
-            <div class="form-item"><el-input v-model="personInfo.class" placeholder="班级" /></div>
-        </div>
-
-        <template #footer>
-            <span class="dialog-footer">
-                <el-button @click="() => dialogVisible = false">Cancel</el-button>
-                <el-button type="primary" @click="() => save()">
-                    Confirm
-                </el-button>
-            </span>
-        </template>
-    </el-dialog>
+        </el-col>
+        <el-col :span="7">
+            <div style="height: 70vh; border:1px solid #9f9f9f;border-radius: 8px;">
+                <div v-for="teacher, idx in outerTeacherInfos" :key="idx" style="margin: 12px;">
+                    <el-card>
+                        <el-descriptions class="margin-top" :title="teacher.teacherID + ' ' + teacher.name" :column="3"
+                            size="small" border>
+                            <el-descriptions-item>
+                                <template #label>
+                                    <div class="cell-item">
+                                        内审
+                                    </div>
+                                </template>
+                                {{ teacher.innerProcessNum }}
+                            </el-descriptions-item>
+                            <el-descriptions-item>
+                                <template #label>
+                                    <div class="cell-item">
+                                        外审
+                                    </div>
+                                </template>
+                                {{ teacher.outerProcessNum }}
+                            </el-descriptions-item>
+                        </el-descriptions>
+                        <el-checkbox label="选入" @change="(e) => chooseTeacher(e, teacher.teacherID!, 'o')" />
+                    </el-card>
+                </div>
+            </div>
+        </el-col>
+        <el-col :span="10">
+            <div style="height: 70vh; border:1px solid #9f9f9f;border-radius: 8px;">
+                <div v-for="flow, idx in flowInfos" :key="idx" style="margin: 12px;">
+                    <el-card>
+                        <el-descriptions class="margin-top" :title="'' + flow.studentId" :column="3" size="small" border>
+                            <el-descriptions-item>
+                                <template #label>
+                                    <div class="cell-item">
+                                        状态
+                                    </div>
+                                </template>
+                                {{ flow.status }}
+                            </el-descriptions-item>
+                        </el-descriptions>
+                        <el-checkbox label="选入" @change="(e) => chooseStudent(e, flow.id!)" />
+                    </el-card>
+                </div>
+            </div>
+        </el-col>
+    </el-row>
+    <el-row>
+        <el-button type="primary" style="margin: 10px auto; ">预览分配</el-button>
+    </el-row>
 </template>
   
 <script lang="ts" setup>
-import { Edit, Search } from '@element-plus/icons-vue'
-import axios from 'axios';
 import { reactive, Ref, ref } from 'vue';
+import { ProcessDetail, Status } from '~/entity/base/Process';
+import { TeacherInfo } from '~/entity/base/Teacher';
+import webApi from '~/util/webApi';
+import { GetFlowDetailRes, GetTeacherInfoRes } from '~/util/webRes';
 
-//表单筛选
-const filter = ref({
-    identify: ''
+const innerTeacherInfos: Ref<TeacherInfo[]> = ref([]);
+webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', {}).then(res => {
+    innerTeacherInfos.value = res.data;
+});
+
+const outerTeacherInfos: Ref<TeacherInfo[]> = ref([]);
+webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', {}).then(res => {
+    outerTeacherInfos.value = res.data;
+});
+
+const flowInfos: Ref<ProcessDetail[]> = ref([]);
+webApi.post<GetFlowDetailRes, { status: Status }>('/getFlowInfo', { status: "TEACHER_CONFIRMED" }).then(res => {
+    flowInfos.value = res.data;
+});
+
+const submitForm: any = reactive({
+    innerTeachers: [],
+    outerTeachers: [],
+    flows: []
 })
 
-//表单数据
-const tableData: Ref<any[]> = ref([])
-axios.get('/teacher/getPersonInfo').then(({ data }) => {
-    tableData.value.push(...data)
-})
-const pageIndex = ref(0)
-const changePage = (e: number) => pageIndex.value = e - 1
-
-//编辑页可见
-const dialogVisible = ref(false)
-//编辑页信息
-const personInfo: any = ref({
-    id: '',
-    name: '',
-    identify: [],
-    college: '',
-    class: ''
-})
-const add = () => {
-    personInfo.value = {
-        id: '',
-        name: '',
-        identify: [],
-        college: '',
-        class: ''
-    };
-    dialogVisible.value = true
-}
-const edit = (e:unknown) => {
-    personInfo.value = e
-    console.log(e, personInfo.value)
-    dialogVisible.value = true
-}
-
-const save = () => {
-    const exist = tableData.value.find(i => i.id == personInfo.value.id)
-    if (!exist) {
-        tableData.value.unshift(personInfo.value)
+const chooseTeacher = (e: any, teacherID: string | number, type: 'i' | 'o') => {
+    if (e) {
+        if (type === 'i') submitForm.innerTeachers.push(teacherID);
+        else submitForm.outerTeachers.push(teacherID);
     } else {
-        Object.keys(exist).forEach(key => exist[key] = personInfo.value[key])
+        if (type == 'i')
+            submitForm.innerTeachers = submitForm.innerTeachers.filter((id: number | string) => id !== teacherID);
+        else
+            submitForm.outerTeachers = submitForm.outerTeachers.filter((id: number | string) => id !== teacherID);
     }
-    dialogVisible.value = false
 }
+const chooseStudent = (e: any, studentID: string | number) => {
+    if (e) {
+        submitForm.flows.push(studentID);
+    } else {
+        submitForm.flows = submitForm.flows.filter((id: number | string) => id !== studentID);
+    }
+}
+
+webApi.post('/assignAudit', submitForm);
+
 </script>
 <style>
 .ep-row {
