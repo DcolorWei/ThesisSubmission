@@ -70,7 +70,6 @@
 </template>
 
 <script lang="ts" setup>
-import { it } from 'node:test';
 import { reactive, ref } from 'vue'
 import { ProcessDetail } from '~/entity/base/Process';
 import { ProcessStatusRes, StudentInfoRes } from '~/util/webRes';
@@ -163,7 +162,7 @@ const statusList = reactive([
         typeName: "请求发起阶段",
         passed: false,
         statusList: [
-            { statusId: 1, statusName: "评审请求发起" },
+            { statusId: 1, statusName: "评审请求发起", updateTime: '', describe: '', hander: '' },
             { statusId: 2, statusName: "指导老师已确认" },
             { statusId: 3, statusName: "等待送审审批" },
         ]
