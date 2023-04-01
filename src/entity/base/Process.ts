@@ -1,3 +1,4 @@
+import { FlowStatus } from "../enum/Flow";
 import { DefenceInfo } from "./Defence";
 import { TeacherInfo } from "./Teacher";
 
@@ -5,6 +6,7 @@ import { TeacherInfo } from "./Teacher";
  * 流程详情
  */
 export interface ProcessDetail {
+    innerTeacher: any;
     /**
      * 答辩组
      */
@@ -20,11 +22,14 @@ export interface ProcessDetail {
     /**
      * 外审教师
      */
-    outerAuditor?: null | TeacherInfo;
+    outerAuditor1: null | TeacherInfo;
+
+    outerAuditor2: null | TeacherInfo;
+
     /**
      * 流程状态
      */
-    status: Status;
+    status: FlowStatus;
     /**
      * 归属学生id
      */
@@ -38,10 +43,3 @@ export interface ProcessDetail {
      */
     verifier?: null | TeacherInfo;
 }
-
-/**
- * 流程状态
- */
-export type Status = "FLOW_START" | "TEACHER_CONFIRMED" | "WAIT_AUDIT_SUMMIT" | "THESIS_AUDIT" | "AUDIT_PASSED" | "AUDIT_FAILED" | "WAIT_STUDENT_CONFIRM_ORAL_DEFENSE" | "WAIT_DISTRIBUTE_ORAL_DEFENSE" | "WAIT_ORAL_DEFENSE" | "ORAL_DEFENSE_PASSED" | "THESIS_WAIT_FOR_DUPLICATE_CHECK" | "DUPLICATE_CHECKING" | "DUPLICATE_CHECK_PASSED" | "THESIS_PASSED" | "PROCESS_END";
-
-export type Role = "ACADEMIC_REGISTRY" | "ACADEMIC_TUTOR" | "NOMINAL_TUTOR" | "STUDENT" | "INNER_AUDITOR" | "OUTER_AUDITOR" | "DEFENCE_GROUP_TEACHER";
