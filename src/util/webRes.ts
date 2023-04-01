@@ -1,5 +1,5 @@
 import { TeacherInfo, Title } from "../entity/base/Teacher";
-import { CapacityStatus } from "../entity/enum/capacity";
+import { CapacityStatus } from "../entity/enum/Flow";
 import { StudentInfo } from "../entity/base/Student";
 import { Capacity } from "~/entity/base/Capacity";
 import { DefenceInfo } from "~/entity/base/Defence";
@@ -119,7 +119,13 @@ export interface UsualRes {
 export interface GetTeacherInfoRes {
     code: number;
     message: string;
-    data: TeacherInfo[];
+    data: {
+        data: TeacherInfo[];
+        page: number;
+        size: number;
+        success: boolean;
+        total: number;
+    };
 };
 
 /**
@@ -128,7 +134,13 @@ export interface GetTeacherInfoRes {
 export interface GetStudentInfoRes {
     code: number;
     message: string;
-    data: StudentInfo[];
+    data: {
+        data: StudentInfo[];
+        page: number;
+        size: number;
+        success: boolean;
+        total: number;
+    };
 };
 
 /**
@@ -137,12 +149,19 @@ export interface GetStudentInfoRes {
 export interface GetFlowDetailRes {
     code: number;
     message: string;
-    data: ProcessDetail[];
+    data: {
+        data: ProcessDetail[];
+        page: number;
+        size: number;
+        success: boolean;
+        total: number;
+    };
 };
 
 
 export interface AssignAuditRes {
-    flows: Capacity[];
+    code: number;
+    data: ProcessDetail[];
     /**
      * 提示信息
      */
@@ -150,5 +169,13 @@ export interface AssignAuditRes {
 }
 
 export interface GetDefenceGroupsRes {
-    defenceGroups: DefenceInfo[];
+    code: number;
+    data: {
+        data: DefenceInfo[];
+        page: number;
+        size: number;
+        success: boolean;
+        total: number;
+    };
+    message: string;
 }

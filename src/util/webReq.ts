@@ -2,39 +2,55 @@ import { Title } from "~/entity/base/Teacher";
 
 //通过...获取老师信息
 export interface GetTeacherInfoReq {
+    academicTutorId: null | string;
+    current: number;
+    flowId: null | string;
+    flowStatus: null | string;
+    name: string;
+    nominalTutorId: null | string;
+    pageSize: number;
+    /**
+     * 学号
+     */
+    studentId: null | string;
+}
+
+//通过...获取学生信息
+export interface GetStudentInfoReq {
+    current: number;
     departmentName: null | string;
     /**
-     * userid
+     * 姓名
      */
-    id: null | string;
+    name: string;
+    pageSize: number;
     /**
      * 角色
      */
     role: null | string;
     schoolName: null | string;
     /**
+     * 学工号
+     */
+    teacherId: null | string;
+    /**
      * 职称
      */
     title: null | string;
 }
 
-//通过...获取学生信息
-export interface GetStudentInfoReq {
-    academicTutorId: null | string;
-    flowId: null | string;
-    flowStatus: null | string;
-    id: null | string;
-    nominalTutorId: null | string;
-}
 
 //获得流程信息
-export interface GetCapacityStatusReq {
-    id: string;
-    innerAuditorId: string;
-    outerAuditorId: string;
-    status: string;
-    studentId: string;
+export interface GetFlowStatusReq {
+    current: number;
+    id: null | string;
+    innerAuditorId: null | string;
+    outerAuditorId: null | string;
+    pageSize: number;
+    status: null | string;
+    studentId: null | string;
 }
+
 
 //分配流程池
 export interface AssignAuditReq {
@@ -55,11 +71,11 @@ export interface UpdateTeacherReq {
     /**
      * 学院名称
      */
-    departmentName: null | string;
+    departmentName: string;
     /**
      * 邮箱地址
      */
-    emailAddress: null | string;
+    emailAddress: string;
     /**
      * 唯一用户id
      */
@@ -71,7 +87,7 @@ export interface UpdateTeacherReq {
     /**
      * 联系电话
      */
-    phoneNumber: null | string;
+    phoneNumber: string;
     /**
      * 角色列表
      */
@@ -79,11 +95,11 @@ export interface UpdateTeacherReq {
     /**
      * 学校名称
      */
-    schoolName: null | string;
+    schoolName: string;
     /**
      * 教师工号
      */
-    teacherID: null | string;
+    teacherId: string;
     /**
      * 职称
      */

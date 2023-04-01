@@ -12,7 +12,7 @@ const get = async <T>(url: string, params: Params<Object>): Promise<T> => {
     })
 }
 
-const post = async <T, K = any>(url: string, data: Params<K>): Promise<T> => {
+const post = async <T, K = Params<any>>(url: string, data: K): Promise<T> => {
     return new Promise<T>(r => {
         axios({
             url: url,
