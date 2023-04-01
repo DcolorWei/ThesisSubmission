@@ -1,0 +1,8 @@
+/**
+ * 职称
+ */
+export enum Title {
+    PROFESSOR = "PROFESSOR",
+    ASSOCIATE_PROFESSOR = "ASSOCIATE_PROFESSOR",
+    LECTURER = "LECTURER",
+}

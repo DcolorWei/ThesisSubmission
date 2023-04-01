@@ -1,3 +1,5 @@
+import { Title } from "../enum/Title";
+
 /**
  * 教师信息
  */
@@ -45,7 +47,7 @@ export interface TeacherInfo {
     /**
      * 教师工号
      */
-    teacherID: null | string;
+    teacherId: null | string;
     /**
      * 职称
      */
@@ -55,8 +57,3 @@ export interface TeacherInfo {
      */
     userId: string;
 }
-
-/**
- * 职称
- */
-export type Title = "PROFESSOR" | "ASSOCIATE_PROFESSOR" | "LECTURER";
