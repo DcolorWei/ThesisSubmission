@@ -1,7 +1,7 @@
 <template>
     <div style="margin: 10px;"></div>
-    <div style="margin-top: 10px;width: 860px;">
-        <el-row :gutter="20">
+    <div style="margin-top: 10px;width: 960px;">
+        <el-row :gutter="5">
             <el-col :span="4">
                 <el-select v-model="filter.identify" class="m-2" placeholder="身份">
                 </el-select>
@@ -21,13 +21,16 @@
             </el-col>
         </el-row>
     </div>
-    <div style="margin-bottom: 10px;width: 860px;">
-        <el-row :gutter="20">
-            <el-col :span="16">
+    <div style="margin-bottom: 10px;width: 930px;">
+        <el-row :gutter="5">
+            <el-col :span="10">
                 <div class="grid-content ep-bg-purple" />
             </el-col>
-            <el-col :span="4">
-                <el-button @click="() => add()">新增</el-button>
+            <el-col :span="5">
+                <el-button @click="() => add('t')">新增教师</el-button>
+            </el-col>
+            <el-col :span="5">
+                <el-button @click="() => add('s')">新增学生</el-button>
             </el-col>
             <el-col :span="4">
                 <el-button type="warning" plain>导入</el-button>
@@ -38,20 +41,21 @@
         <el-table :data="tableData.slice(pageIndex * 10, pageIndex * 10 + 10)" border>
             <el-table-column label="学号/工号" width="100">
                 <template #default="{ row }">
-                    {{ row.studentId ? row.studentId : '' + row.teacherId ? row.teacherId : '' }}
+                    {{ row.studentID ? row.studentID : '' + row.teacherId ? row.teacherId : '' }}
                 </template>
             </el-table-column>
             <el-table-column prop="name" label="姓名" width="130" />
             <el-table-column prop="role" label="身份" width="200">
                 <template #default="{ row }">
-                    {{ row.role.join() }}
+                    {{ row.role && row.role.join() }}
                 </template>
             </el-table-column>
-            <el-table-column prop="schoolName" label="学校" width="170" />
-            <el-table-column prop="departmentName" label="学院" width="130" />
+            <el-table-column prop="emailAddress" label="邮箱" width="170" />
+            <el-table-column prop="phoneNumber" label="电话" width="130" />
             <el-table-column label="操作" width="180">
-                <template #default="scope">
-                    <el-button type="warning" :icon="Edit" size="small" plain @click="() => edit(scope.row)">编辑</el-button>
+                <template #default="{ row }">
+                    <el-button type="warning" :icon="Edit" size="small" plain
+                        @click="() => edit(row, row.role == 'STUDENT' ? 's' : 't')">编辑</el-button>
                     <el-button type="primary" :icon="Search" size="small" plain>查看</el-button>
                 </template>
             </el-table-column>
@@ -61,76 +65,56 @@
         </div>
     </div>
 
-
     <!-- 人员信息表单 -->
-    <el-dialog v-model="dialogVisible" title="学生信息" width="30%" align-center>
+    <el-dialog v-model="dialogStudent" title="学生信息" width="30%" align-center>
         <div class="form">
-            <div class="form-item"><el-input v-model="personInfo.id" placeholder="学号" /></div>
-            <div class="form-item"><el-input v-model="personInfo.name" placeholder="姓名" /></div>
-            <div>
-                <el-select v-model="personInfo.rule" multiple placeholder="身份" style="width: 80%;">
-                    <el-option
-                        v-for="item in [{ value: 1, label: '学生' }, { value: 2, label: '老师' }, { value: 3, label: '导师' }]"
-                        :key="item.value" :label="item.label" :value="item.value" />
+            <div class="form-item"><el-input v-model="studentInfo.studentId" placeholder="学号" />
+            </div>
+            <div class="form-item"><el-input v-model="studentInfo.name" placeholder="姓名" /></div>
+            <div style="margin: 5px 0;">
+                <el-select v-model="teacherInfo.role" multiple placeholder="身份" style="width: 80%;">
+                    <el-option v-for="item in ['STUDENT']" :key="item" :label="item" :value="item" />
                 </el-select>
             </div>
-            <div class="form-item"><el-input v-model="personInfo.schoolName" placeholder="班级" /></div>
-            <div class="form-item"><el-input v-model="personInfo.departmentName" placeholder="学院" /></div>
+            <div class="form-item"><el-input v-model="studentInfo.emailAddress" placeholder="邮箱" /></div>
+            <div class="form-item"><el-input v-model="studentInfo.phoneNumber" placeholder="电话" /></div>
         </div>
 
         <template #footer>
             <span class="dialog-footer">
-                <el-button @click="() => dialogVisible = false">Cancel</el-button>
-                <el-button type="primary" @click="() => save()">
+                <el-button @click="() => dialogStudent = false">Cancel</el-button>
+                <el-button type="primary" @click="() => save('s')">
                     Confirm
                 </el-button>
             </span>
         </template>
     </el-dialog>
 
-    <!-- 人员信息表单 -->
-    <el-dialog v-model="dialogVisible" title="学生信息" width="30%" align-center>
+    <el-dialog v-model="dialogTeacher" title="教师信息" width="30%" align-center>
         <div class="form">
-            <div class="form-item"><el-input v-model="personInfo.id" placeholder="学号" /></div>
-            <div class="form-item"><el-input v-model="personInfo.name" placeholder="姓名" /></div>
-            <div>
-                <el-select v-model="personInfo.title" multiple placeholder="职称" style="width: 80%;">
-                    <el-option
-                        v-for="item in [{ value: 1, label: '学生' }, { value: 2, label: '老师' }, { value: 3, label: '导师' }]"
-                        :key="item.value" :label="item.label" :value="item.value" />
+            <div class="form-item"><el-input v-model="teacherInfo.teacherId" placeholder="工号" />
+            </div>
+            <div class="form-item"><el-input v-model="teacherInfo.name" placeholder="姓名" /></div>
+            <div style="margin: 5px 0;">
+                <el-select v-model="teacherInfo.role" multiple placeholder="身份" style="width: 80%;">
+                    <el-option v-for="item in Object.entries(Role)" :key="item[0]" :label="item[0]" :value="item[0]" />
                 </el-select>
             </div>
-            <div class="form-item"><el-input v-model="personInfo.departmentName" placeholder="学院" /></div>
+            <div style="margin: 5px 0;">
+                <el-select v-model="teacherInfo.title" placeholder="职称" style="width: 80%;">
+                    <el-option v-for="item in Object.entries(Title)" :key="item[0]" :label="item[0]" :value="item[0]" />
+                </el-select>
+            </div>
+            <div class="form-item"><el-input v-model="teacherInfo.schoolName" placeholder="学校" /></div>
+            <div class="form-item"><el-input v-model="teacherInfo.departmentName" placeholder="学院" /></div>
+            <div class="form-item"><el-input v-model="teacherInfo.emailAddress" placeholder="邮箱" /></div>
+            <div class="form-item"><el-input v-model="teacherInfo.phoneNumber" placeholder="电话" /></div>
         </div>
 
         <template #footer>
             <span class="dialog-footer">
-                <el-button @click="() => dialogVisible = false">Cancel</el-button>
-                <el-button type="primary" @click="() => save()">
-                    Confirm
-                </el-button>
-            </span>
-        </template>
-    </el-dialog>
-
-    <el-dialog v-model="dialogVisible" title="教师信息" width="30%" align-center>
-        <div class="form">
-            <div class="form-item"><el-input v-model="personInfo.id" placeholder="学号/工号" /></div>
-            <div class="form-item"><el-input v-model="personInfo.name" placeholder="姓名" /></div>
-            <div>
-                <el-select v-model="personInfo.title" multiple placeholder="职称" style="width: 80%;">
-                    <el-option
-                        v-for="item in [{ value: 1, label: '学生' }, { value: 2, label: '老师' }, { value: 3, label: '导师' }]"
-                        :key="item.value" :label="item.label" :value="item.value" />
-                </el-select>
-            </div>
-            <div class="form-item"><el-input v-model="personInfo.departmentName" placeholder="学院" /></div>
-        </div>
-
-        <template #footer>
-            <span class="dialog-footer">
-                <el-button @click="() => dialogVisible = false">Cancel</el-button>
-                <el-button type="primary" @click="() => save()">
+                <el-button @click="() => dialogTeacher = false">Cancel</el-button>
+                <el-button type="primary" @click="() => save('t')">
                     Confirm
                 </el-button>
             </span>
@@ -140,80 +124,151 @@
   
 <script lang="ts" setup>
 import { Edit, Search } from '@element-plus/icons-vue'
-import axios from 'axios';
 import { Ref, ref } from 'vue';
+import { Title } from '~/entity/enum/Title'
+import { Role } from '~/entity/enum/Role'
 import webApi from '~/util/webApi';
-import { UpdateTeacherReq } from '~/util/webReq';
-import { UsualRes } from '~/util/webRes';
+import { GetStudentInfoRes, GetTeacherInfoRes, UsualRes } from '~/util/webRes';
 
 //表单筛选
 const filter = ref({
     identify: ''
 })
-console.log('aa')
 //表单数据
-const tableData: Ref<any[]> = ref([])
-webApi.get<any>('/getPersonInfo', {}).then(res => {
-    tableData.value.push(...res.data)
-})
+const tableData: Ref<Array<any>> = ref([])
+//获取教师信息
+function getTeacherInfo(pageIndex = 1) {
+    webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, {}).then(res => {
+        tableData.value.push(...res.data.data)
+        const { page, size, total } = res.data
+        if (page * size < total) return getTeacherInfo(pageIndex + 1)
+    })
+}
+//获取学生信息
+function getStudentInfo(pageIndex = 1) {
+    webApi.post<GetStudentInfoRes>(`/getStudentInfoBy?current= ${pageIndex}`, {}).then(res => {
+        tableData.value.push(...res.data.data)
+        const { page, size, total } = res.data
+        if (page * size < total) return getStudentInfo(pageIndex + 1)
+    })
+}
+
+getTeacherInfo()
+getStudentInfo()
+
 const pageIndex = ref(0)
 const changePage = (e: number) => pageIndex.value = e - 1
 
 //编辑页可见
-const dialogVisible = ref(false)
+const dialogTeacher = ref(false)
+const dialogStudent = ref(false)
 //编辑页信息
-const personInfo: any = ref({
+const teacherInfo = ref({
+    departmentName: '',
+    emailAddress: '',
     id: '',
     name: '',
-    identify: [],
-    college: '',
-    class: ''
+    phoneNumber: '',
+    role: [],
+    schoolName: '',
+    teacherId: '',
+    title: '',
+    userId: ''
+})
+
+const studentInfo = ref({
+    academicTutorId: '',
+    emailAddress: '',
+    id: '',
+    name: '',
+    nominalTutorId: '',
+    phoneNumber: '',
+    role: [],
+    studentId: '',
+    userId: ''
 })
 
 const mode = ref('edit')
-const add = () => {
-    personInfo.value = {
-        name: "测试A",
-        schoolName: "大连海事",
-        departmentName: "航海学院",
-        title: "PROFESSOR",
-        userId: "27",
-        phoneNumber: "86",
-        teacherID: "81",
-        emailAddress: "u.xyttt@qq.com",
-        role: null
-    };
-    dialogVisible.value = true
-}
-
-const edit = (e: unknown) => {
-    personInfo.value = e
-    console.log(e, personInfo.value)
-    dialogVisible.value = true
-}
-
-const save = () => {
-    const exist = tableData.value.find(i => i.id == personInfo.value.id)
-    if (!exist) {
-        tableData.value.unshift(personInfo.value)
-    } else {
-        Object.keys(exist).forEach(key => exist[key] = personInfo.value[key])
-    }
-    axios<UpdateTeacherReq, UsualRes>({
-        method: 'post',
-        data: {
-            name: "测试A",
-            schoolName: "大连海事",
-            departmentName: "航海学院",
-            title: "    PROFESSOR",
-            userId: "27",
-            phoneNumber: "86",
-            teacherID: "81",
-            emailAddress: "u.xyttt@qq.com",
-            role: null
+const add = (identify: 's' | 't') => {
+    if (identify == 's') {
+        //清空studentInfo的值
+        studentInfo.value = {
+            academicTutorId: '',
+            emailAddress: '',
+            id: '',
+            name: '',
+            nominalTutorId: '',
+            phoneNumber: '',
+            role: [],
+            studentId: '',
+            userId: ''
         }
-    })
-    dialogVisible.value = false
+        dialogStudent.value = true
+    } else {
+        teacherInfo.value = {
+            departmentName: '',
+            emailAddress: '',
+            id: '',
+            name: '',
+            phoneNumber: '',
+            role: [],
+            schoolName: '',
+            teacherId: '',
+            title: '',
+            userId: ''
+        }
+        dialogTeacher.value = true
+    }
+}
+
+const edit = (e: any, identify: 's' | 't') => {
+    if (identify == 's') {
+        studentInfo.value = e
+        dialogStudent.value = true
+    } else {
+        teacherInfo.value = e
+        dialogTeacher.value = true
+    }
+}
+
+const save = (identify: 's' | 't') => {
+    //身份为student
+    if (identify == 's') {
+        const exist = tableData.value.find(i => i.studentId == studentInfo.value.studentId)
+        if (!exist) {
+            tableData.value.unshift(studentInfo.value)
+            webApi.post<UsualRes>('/createStudentInfo', studentInfo.value).then(res => {
+                console.log(res)
+            })
+        } else {
+            Object.keys(exist).forEach(key => exist[key] = studentInfo.value[key])
+            webApi.post<UsualRes>('/updateStudentInfo', studentInfo.value).then(res => {
+                console.log(res)
+            })
+        }
+
+        //隐藏dialog
+        dialogStudent.value = false
+    }
+    //身份为teacher
+    else {
+        const exist = tableData.value.find(i => i.teacherId == teacherInfo.value.teacherId)
+        if (!exist) {
+            tableData.value.unshift(teacherInfo.value)
+            webApi.post<UsualRes>('/createTeacherInfo', teacherInfo.value).then(res => {
+                console.log(res)
+            })
+        } else {
+            Object.keys(exist).forEach(key => exist[key] = teacherInfo.value[key])
+            webApi.post<UsualRes>('/updateTeacherInfo', teacherInfo.value).then(res => {
+                console.log(res)
+            })
+        }
+
+        //隐藏dialog
+        dialogTeacher.value = false
+
+    }
 }
 </script>
 <style>
