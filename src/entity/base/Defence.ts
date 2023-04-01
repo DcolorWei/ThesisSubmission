@@ -16,6 +16,6 @@ export interface DefenceInfo {
      */
     defenceTime: string;
     id?: string;
-    nowcapacity?: number;
+    nowCapacity?: number;
     secretary: TeacherInfo;
 }
