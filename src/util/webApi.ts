@@ -7,7 +7,10 @@ const get = async <T>(url: string, params: Params<Object>): Promise<T> => {
         axios({
             url: url,
             method: 'get',
-            params: params
+            params: params,
+            headers: {
+                token: 'oo778'
+            }
         }).then(res => r(res.data as T)).catch(() => r(null as T))
     })
 }

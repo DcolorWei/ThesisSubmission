@@ -6,7 +6,6 @@ import { TeacherInfo } from "./Teacher";
  * 流程详情
  */
 export interface ProcessDetail {
-    innerTeacher: any;
     /**
      * 答辩组
      */
@@ -33,7 +32,7 @@ export interface ProcessDetail {
     /**
      * 归属学生id
      */
-    studentId: number;
+    studentId: number | null;
     /**
      * 归属学生姓名
      */
