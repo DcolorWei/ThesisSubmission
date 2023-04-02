@@ -41,7 +41,7 @@
         <el-table :data="tableData.slice(pageIndex * 10, pageIndex * 10 + 10)" border>
             <el-table-column label="学号/工号" width="100">
                 <template #default="{ row }">
-                    {{ row.studentID ? row.studentID : '' + row.teacherId ? row.teacherId : '' }}
+                    {{ row.studentId ? row.studentId : '' + row.teacherId ? row.teacherId : '' }}
                 </template>
             </el-table-column>
             <el-table-column prop="name" label="姓名" width="130" />
