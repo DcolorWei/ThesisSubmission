@@ -6,7 +6,7 @@
     <el-row :gutter="20" style="width: 80vw;">
         <el-col :span="7">
             <div class="sabar-list-item">
-                <div v-for="teacher, idx in innerTeacherInfos" :key="idx" style="margin: 12px;">
+                <div v-for="teacher, idx in innerAuditorInfos" :key="idx" style="margin: 12px;">
                     <el-card>
                         <el-descriptions class="margin-top" :title="teacher.teacherId + ' ' + teacher.name" :column="3"
                             size="small" border>
@@ -34,7 +34,7 @@
         </el-col>
         <el-col :span="7">
             <div class="sabar-list-item">
-                <div v-for="teacher, idx in outerTeacherInfos" :key="idx" style="margin: 12px;">
+                <div v-for="teacher, idx in outerAuditorInfos" :key="idx" style="margin: 12px;">
                     <el-card>
                         <el-descriptions class="margin-top" :title="teacher.teacherId + ' ' + teacher.name" :column="3"
                             size="small" border>
@@ -134,14 +134,14 @@ import { Role } from '~/entity/enum/Role';
 import webApi from '~/util/webApi';
 import { GetFlowDetailRes, GetTeacherInfoRes, AssignAuditRes } from '~/util/webRes';
 
-const innerTeacherInfos: Ref<TeacherInfo[]> = ref([]);
+const innerAuditorInfos: Ref<TeacherInfo[]> = ref([]);
 webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
-    innerTeacherInfos.value = res.data.data;
+    innerAuditorInfos.value = res.data.data;
 });
 
-const outerTeacherInfos: Ref<TeacherInfo[]> = ref([]);
+const outerAuditorInfos: Ref<TeacherInfo[]> = ref([]);
 webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.OUTER_AUDITOR] }).then(res => {
-    outerTeacherInfos.value = res.data.data;
+    outerAuditorInfos.value = res.data.data;
 });
 
 const flowInfos: Ref<ProcessDetail[]> = ref([]);
@@ -157,15 +157,15 @@ const submitForm: any = reactive({
     flows: []
 })
 
-const chooseTeacher = (e: any, teacherId: string | number, type: 'i' | 'o') => {
+const chooseTeacher = (e: any, id: string | number, type: 'i' | 'o') => {
     if (e) {
-        if (type === 'i') submitForm.innerTeachers.push(teacherId);
-        else submitForm.outerTeachers.push(teacherId);
+        if (type === 'i') submitForm.innerTeachers.push(id);
+        else submitForm.outerTeachers.push(id);
     } else {
         if (type == 'i')
-            submitForm.innerTeachers = submitForm.innerTeachers.filter((id: number | string) => id !== teacherId);
+            submitForm.innerTeachers = submitForm.innerTeachers.filter((id: number | string) => id !== id);
         else
-            submitForm.outerTeachers = submitForm.outerTeachers.filter((id: number | string) => id !== teacherId);
+            submitForm.outerTeachers = submitForm.outerTeachers.filter((id: number | string) => id !== id);
     }
 }
 const chooseStudent = (e: any, flowId: string | number) => {
@@ -191,39 +191,41 @@ const assignAudit = () => {
     }
     webApi.post<AssignAuditRes>('/assignAudit', submitForm).then(res => {
         //删除未被选择的教师项和Flow项
-        innerTeacherInfos.value = innerTeacherInfos.value.filter(teacher => submitForm.innerTeachers.includes(teacher.id));
-        outerTeacherInfos.value = outerTeacherInfos.value.filter(teacher => submitForm.outerTeachers.includes(teacher.id));
+        innerAuditorInfos.value = innerAuditorInfos.value.filter(teacher => submitForm.innerTeachers.includes(teacher.id));
+        outerAuditorInfos.value = outerAuditorInfos.value.filter(teacher => submitForm.outerTeachers.includes(teacher.id));
         flowInfos.value = flowInfos.value.filter(flow => submitForm.flows.includes(flow.id));
         //遍历返回结果，补充对应的flow信息
         res.data.forEach((item: any) => {
-            const flow = flowInfos.value.find(flow => true);
+            const flow = flowInfos.value.find(flow => flow.id === item.id);
             if (flow) {
-                flow.innerTeacher = item.innerTeacher;
-                flow.outerTeacher1 = item.outerTeacher1;
+                flow.innerAuditor = item.innerAuditor;
+                flow.outerAuditor1 = item.outerAuditor1;
                 flow.outerAuditor2 = item.outerAuditor2;
             }
+            console.log('flow', flow)
         });
     });
 }
 
 const savePlan = () => {
     //保存分配方案，向服务器提交，成功后重新请求学生和教师的数据
-    flowInfos.value.forEach(flow => {
-        webApi.post('/savePlan', {
+    flowInfos.value.forEach(async (flow) => {
+        await webApi.post('/reassignFlow', {
             id: flow.id,
-            innerTeacherId: flow.innerTeacher?.teacherId,
-            outerAuditorId1: flow.outerAuditor1?.teacherId,
-            outerAuditorId2: flow.outerAuditor2?.teacherId
+            innerAuditorId: flow.innerAuditor?.id,
+            outerAuditorId1: flow.outerAuditor1?.id,
+            outerAuditorId2: flow.outerAuditor2?.id
         })
     })
-    //重新请求学生、教师以及flow数据
-    webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: Role.INNER_AUDITOR }).then(res => {
-        innerTeacherInfos.value = res.data.data;
-    });
-    webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: Role.OUTER_AUDITOR }).then(res => {
-        outerTeacherInfos.value = res.data.data;
+    // 重新请求学生、教师以及flow数据
+    webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
+        innerAuditorInfos.value = res.data.data;
+    })
+    webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.OUTER_AUDITOR] }).then(res => {
+        outerAuditorInfos.value = res.data.data;
     });
     webApi.post<GetFlowDetailRes, { status: FlowStatus }>('/getFlowInfo', { status: FlowStatus.TEACHER_CONFIRMED }).then(res => {
+        console.log(res)
         flowInfos.value = res.data.data;
     });
 }
