@@ -26,12 +26,16 @@
         <el-row :gutter="10" style="margin: 20px auto;">
             <el-col :span="24">
                 <el-upload v-model:file-list="fileList" class="upload-demo"
-                    :action="webApi.axios.defaults.baseURL + '/upload/thesis'" multiple :limit="1">
+                    :action="webApi.axios.defaults.baseURL + '/student/upload/thesis'" multiple :limit="2">
                     <el-button :icon="Upload">上传论文</el-button>
+                </el-upload>
+                <el-upload v-model:file-list="fileList" class="upload-demo"
+                    :action="webApi.axios.defaults.baseURL + '/student/upload/thesis'" multiple :limit="2">
+                    <el-button :icon="Upload">上传匿名论文</el-button>
                 </el-upload>
             </el-col>
         </el-row>
-        <el-button @click="orderFlow()">提交</el-button>
+        <el-button @click="() => orderFlow()">提交</el-button>
     </el-card>
 </template>
 
