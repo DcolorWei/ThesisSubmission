@@ -36,10 +36,7 @@
         <el-text size="large" tag="b">论文流程</el-text>
     </div>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
-        <el-button @click="() => toPage('submitthesis')">
-            发起评审
-        </el-button>
-
+        <el-button @click="() => toPage('submitthesis')"> 发起评审 </el-button>
     </el-card>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
         <el-collapse class="collapse" v-model="index" accordion>
@@ -58,12 +55,14 @@
                                         </el-text>
                                         <el-text size="default" tag="b"> 操作人：{{ history.operator }}</el-text>
                                     </div>
+                                    <div>
+                                        <el-text size="default" tag="b"> {{
+                                            history.comment ? '评语：' + history.comment : ''
+                                        }}</el-text>
+                                    </div>
                                 </div>
                                 <div>
-                                    <!-- 操作按钮 -->
-                                    <el-button plain>
-                                        查看
-                                    </el-button>
+                                    <el-button plain> 查看 </el-button>
                                 </div>
                             </div>
                         </el-card>
@@ -77,15 +76,40 @@
         <el-text size="large" tag="b">可用操作</el-text>
     </div>
     <el-card body-style="width:85vw" style="margin: 10px 0;">
-
+        <!-- 可用操作按钮 -->
+        <el-button type="primary" @click="() => joinDefence()"> 确认参加答辩 </el-button>
+        <el-button type="warning" @click="() => showDefenceGroupDialog = true"> 选择答辩组 </el-button>
+        <el-button type="warning" @click="() => readyDuplicate()"> 查重准备就绪 </el-button>
     </el-card>
+
+    <!-- 弹窗，用于更换答辩组 -->
+    <el-dialog title="选择答辩组" v-model="showDefenceGroupDialog" style="width: 80vw;">
+        <el-table :data="defenceGroupInfos" style="width: 90vw">
+            <el-table-column prop="chairman.name" label="主席" width="150" />
+            <el-table-column prop="secretary.name" label="秘书" width="150" />
+            <el-table-column prop="defencePlace" label="答辩地点" width="150" />
+            <el-table-column prop="defenceTime" label="答辩时间" width="150" />
+            <el-table-column width="150">
+                <template #default="{ row }">
+                    {{ row.nowCapacity }}/{{ row.capacity }}
+                </template>
+            </el-table-column>
+            <el-table-column width="80">
+                <template #default="{ row }">
+                    <el-button type="warning" plain round size="small"
+                        @click="() => chooseDefenceGroup(row.id)">指定</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-dialog>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from 'vue'
+import { reactive, Ref, ref } from 'vue'
+import { DefenceInfo } from '~/entity/base/Defence';
 import { StudentInfo } from '~/entity/base/Student';
 import webApi from '~/util/webApi';
-import { FlowHistoryRes, History, StudentInfoRes } from '~/util/webRes';
+import { FlowHistoryRes, GetDefenceGroupsRes, History, StudentInfoRes } from '~/util/webRes';
 import { router } from "../../route"
 
 const index = ref(['1'])
@@ -93,6 +117,7 @@ const index = ref(['1'])
 const toPage = (path: string = 'home') => {
     router.push(path)
 }
+
 
 const student: StudentInfo = reactive(
     //初始空白数据
@@ -129,6 +154,26 @@ webApi.get<FlowHistoryRes>('/student/getFlowHistory', {}).then(res => {
     flowHistories.push(...res.data.histories)
     console.log(flowHistories)
 })
+
+const joinDefence = () => {
+    webApi.get('/student/readyForDefence', {})
+}
+
+const showDefenceGroupDialog = ref(false);
+const defenceGroupInfos: Ref<DefenceInfo[]> = ref([]);
+webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
+    defenceGroupInfos.value = res.data.data;
+});
+const chooseDefenceGroup = (defenceGroupId: number) => {
+    webApi.post(`/student/chooseDefenceGroup?defenceGroupId=${defenceGroupId}`, {})
+    showDefenceGroupDialog.value = false
+}
+
+const readyDuplicate = () => {
+    webApi.get('/student/readyForDuplicate', {})
+}
+
+
 </script>
 <style>
 .thesis {
