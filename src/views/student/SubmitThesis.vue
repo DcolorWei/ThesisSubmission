@@ -4,29 +4,82 @@
         <el-text size="large" tag="b">学生信息</el-text>
     </div>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
-        <el-table :data="[{ id: '2220200267', name: '韦定彩', class: '航海技术2020-4' }]" style="width: 90vw">
-            <el-table-column prop="id" label="学号" width="110" />
-            <el-table-column prop="name" label="姓名" width="100" />
-            <el-table-column prop="class" label="专业班级" />
+        <el-table :data="[student]" style="width: 90vw">
+            <el-table-column prop="studentId" label="学号" width="200" />
+            <el-table-column prop="name" label="姓名" width="200" />
+            <el-table-column prop="phoneNumber" label="电话" width="200" />
+            <el-table-column prop="emailAddress" label="邮箱" />
+        </el-table>
+        <el-table :data="[{
+            nominalTutorId: student.nominalTutor?.id,
+            nominalTutorName: student.nominalTutor?.name,
+            academicTutorId: student.academicTutor?.id,
+            academicTutorName: student.academicTutor?.name,
+        }]" v-if="student.studentId" style="width: 90vw">
+            <el-table-column prop="nominalTutorId" label="挂名导师工号" width="200" />
+            <el-table-column prop="nominalTutorName" label="挂名导师姓名" width="200" />
+            <el-table-column prop="academicTutorId" label="学业导师工号" width="200" />
+            <el-table-column prop="academicTutorName" label="学业导师姓名" />
         </el-table>
     </el-card>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
-        <el-row :gutter="10">
-            <el-col :span="12">
-                <el-button :icon="Upload">上传论文</el-button>
-            </el-col>
-            <el-col :span="12">
-                <el-select class="m-2" placeholder="指导老师"> </el-select>
+        <el-row :gutter="10" style="margin: 20px auto;">
+            <el-col :span="24">
+                <el-upload v-model:file-list="fileList" class="upload-demo"
+                    :action="webApi.axios.defaults.baseURL + '/upload/thesis'" multiple :limit="1">
+                    <el-button :icon="Upload">上传论文</el-button>
+                </el-upload>
             </el-col>
         </el-row>
-        <el-button>提交</el-button>
+        <el-button @click="orderFlow()">提交</el-button>
     </el-card>
 </template>
 
 <script lang="ts" setup>
-import { Upload } from  '@element-plus/icons-vue';
-import { ref } from 'vue'
+import { Upload } from '@element-plus/icons-vue';
+import { reactive, ref } from 'vue'
+import { StudentInfo } from '~/entity/base/Student';
+import webApi from '~/util/webApi';
+import { StudentInfoRes } from '~/util/webRes';
 
+//el-upload基础数据
+const fileList = ref([])
+
+const student: StudentInfo = reactive(
+    //初始空白数据
+    {
+        id: 0,
+        userId: '',
+        studentId: '',
+        name: "",
+        phoneNumber: "",
+        emailAddress: "",
+        flow: null,
+        academicTutor: null,
+        nominalTutor: null,
+        role: [],
+    }
+)
+webApi.get<StudentInfoRes>('/student/getStudentInfo', {}).then(res => {
+    const data = res.data
+    console.log(data)
+    student.id = data.id
+    student.userId = data.userId
+    student.studentId = data.studentId
+    student.name = data.name
+    student.phoneNumber = data.phoneNumber
+    student.emailAddress = data.emailAddress
+    student.flow = data.flow
+    student.academicTutor = data.academicTutor
+    student.nominalTutor = data.nominalTutor
+    student.role = data.role
+})
+
+const orderFlow = () => {
+    webApi.post('/student/request', {}).then(res => {
+        console.log(res)
+    })
+}
 </script>
 <style>
 .thesis {
