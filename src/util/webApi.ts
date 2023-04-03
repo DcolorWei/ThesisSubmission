@@ -9,7 +9,7 @@ const get = async <T>(url: string, params: Params<Object>): Promise<T> => {
             method: 'get',
             params: params,
             headers: {
-                token: 'oo778'
+                token: 'oo777'
             }
         }).then(res => r(res.data as T)).catch(() => r(null as T))
     })
@@ -22,7 +22,8 @@ const post = async <T, K = Params<any>>(url: string, data: K): Promise<T> => {
             method: 'post',
             data: data,
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                token: 'oo777'
             }
         })
             .then(res => r(res.data as T))
@@ -33,5 +34,5 @@ const post = async <T, K = Params<any>>(url: string, data: K): Promise<T> => {
 
 
 export default {
-    get, post
+    get, post, axios
 }
