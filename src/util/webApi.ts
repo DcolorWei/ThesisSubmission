@@ -1,21 +1,25 @@
 import axios from 'axios'
+import { useAuthStore } from '~/store/authStore'
 import { Params } from './type'
 
-axios.defaults.baseURL = 'http://home.viger.xyz:9511'
-const get = async <T>(url: string, params: Params<Object>): Promise<T> => {
+axios.defaults.baseURL = 'http://home.viger.xyz:9512'
+const get = async <T>(url: string, params?: Params<Object>): Promise<T> => {
+    if (useAuthStore().token == '') return null as T
     return new Promise<T>(r => {
+        let token = useAuthStore().token
         axios({
             url: url,
             method: 'get',
             params: params,
             headers: {
-                token: 'oo777'
+                token: token
             }
         }).then(res => r(res.data as T)).catch(() => r(null as T))
     })
 }
 
-const post = async <T, K = Params<any>>(url: string, data: K): Promise<T> => {
+const post = async <T, K = Params<any>>(url: string, data?: K): Promise<T> => {
+    if (useAuthStore().token == '') return null as T
     return new Promise<T>(r => {
         axios({
             url: url,
@@ -23,7 +27,7 @@ const post = async <T, K = Params<any>>(url: string, data: K): Promise<T> => {
             data: data,
             headers: {
                 "Content-Type": "application/json",
-                token: 'oo777'
+                token: useAuthStore().token
             }
         })
             .then(res => r(res.data as T))
