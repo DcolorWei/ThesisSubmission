@@ -67,18 +67,37 @@
 
     <!-- 人员信息表单 -->
     <el-dialog v-model="dialogStudent" title="学生信息" width="30%" align-center>
-        <div class="form">
-            <div class="form-item"><el-input v-model="studentInfo.studentId" placeholder="学号" />
-            </div>
-            <div class="form-item"><el-input v-model="studentInfo.name" placeholder="姓名" /></div>
-            <div style="margin: 5px 0;">
-                <el-select v-model="teacherInfo.role" multiple placeholder="身份" style="width: 80%;">
+        <el-form :model="studentInfo" label-width="80px">
+            <el-form-item label="学号">
+                <el-input v-model="studentInfo.studentId" placeholder="请输入" />
+            </el-form-item>
+            <el-form-item label="姓名">
+                <el-input v-model="studentInfo.studentId" placeholder="请输入" />
+            </el-form-item>
+            <el-form-item label="身份">
+                <el-select v-model="studentInfo.role" multiple style="width: 80%;">
                     <el-option v-for="item in ['STUDENT']" :key="item" :label="item" :value="item" />
                 </el-select>
-            </div>
-            <div class="form-item"><el-input v-model="studentInfo.emailAddress" placeholder="邮箱" /></div>
-            <div class="form-item"><el-input v-model="studentInfo.phoneNumber" placeholder="电话" /></div>
-        </div>
+            </el-form-item>
+            <el-form-item label="邮箱">
+                <el-input v-model="studentInfo.emailAddress" placeholder="请输入" />
+            </el-form-item>
+            <el-form-item label="电话">
+                <el-input v-model="studentInfo.phoneNumber" placeholder="请输入" />
+            </el-form-item>
+            <el-form-item label="挂名导师">
+                <el-select v-model="studentInfo.nominalTutorId" filterable placeholder="请选择" style="width: 80%;">
+                    <el-option style="width: 100%;" v-for="item in tableData.filter(i => i.teacherId)" :key="item.id"
+                        :label="item.name + ' ' + item.teacherId" :value="item.id"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="学术导师">
+                <el-select v-model="studentInfo.academicTutorId" filterable placeholder="请选择" style="width: 80%;">
+                    <el-option style="width: 100%;" v-for="item in tableData.filter(i => i.teacherId)" :key="item.id"
+                        :label="item.name + ' ' + item.teacherId" :value="item.id"></el-option>
+                </el-select>
+            </el-form-item>
+        </el-form>
 
         <template #footer>
             <span class="dialog-footer">
@@ -136,6 +155,7 @@ const filter = ref({
 })
 //表单数据
 const tableData: Ref<Array<any>> = ref([])
+
 //获取教师信息
 function getTeacherInfo(pageIndex = 1) {
     webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, {}).then(res => {
@@ -178,17 +198,16 @@ const teacherInfo = ref({
 
 const studentInfo = ref({
     academicTutorId: '',
+    nominalTutorId: '',
     emailAddress: '',
     id: '',
     name: '',
-    nominalTutorId: '',
     phoneNumber: '',
     role: [],
     studentId: '',
     userId: ''
 })
 
-const mode = ref('edit')
 const add = (identify: 's' | 't') => {
     if (identify == 's') {
         //清空studentInfo的值
@@ -235,12 +254,13 @@ const save = (identify: 's' | 't') => {
     //身份为student
     if (identify == 's') {
         const exist = tableData.value.find(i => i.studentId == studentInfo.value.studentId)
-        if (!exist) {
+        if (!exist || studentInfo.value.studentId == '') {
             tableData.value.unshift(studentInfo.value)
             webApi.post<UsualRes>('/createStudentInfo', studentInfo.value).then(res => {
                 console.log(res)
             })
         } else {
+            //@ts-ignore
             Object.keys(exist).forEach(key => exist[key] = studentInfo.value[key])
             webApi.post<UsualRes>('/updateStudentInfo', studentInfo.value).then(res => {
                 console.log(res)
@@ -259,6 +279,7 @@ const save = (identify: 's' | 't') => {
                 console.log(res)
             })
         } else {
+            //@ts-ignore
             Object.keys(exist).forEach(key => exist[key] = teacherInfo.value[key])
             webApi.post<UsualRes>('/updateTeacherInfo', teacherInfo.value).then(res => {
                 console.log(res)
