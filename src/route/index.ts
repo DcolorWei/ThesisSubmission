@@ -1,26 +1,17 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
-import ThesisStatus from '../views/student/ThesisStatus.vue'
-import SubmitThesis from '../views/student/SubmitThesis.vue'
-import ProcessMag from '~/views/teacher/ProcessMag.vue'
-import PersonMag from '../views/teacher/PersonMag.vue'
-import InnerOuterAudit from '~/views/teacher/InnerOuterAudit.vue'
-import DefenceMag from '../views/teacher/DefenceMag.vue'
-
 const routes = [
-    { path: '/thesisstatus', component: ThesisStatus },
-    { path: '/processmag', component: ProcessMag },
-    { path: '/submitthesis', component: SubmitThesis },
-    { path: '/personmag', component: PersonMag },
+    { path: '/thesisstatus', component: () => import('../views/student/ThesisStatus.vue') },
+    { path: '/processmag', component:()=>import('../views/teacher/ProcessMag.vue') },
+    { path: '/uploadthesis', component: () => import('../views/student/UploadThesis.vue')  },
+    { path: '/personmag', component:()=>import('../views/teacher/PersonMag.vue')},
 
-    { path: '/innerouteraudit', component: InnerOuterAudit },
-    { path: '/defencemag', component: DefenceMag },
-
+    { path: '/innerouteraudit', component: () => import('../views/teacher/InnerOuterAudit.vue') },
+    { path: '/defencemag', component: () => import('../views/teacher/DefenceMag.vue') },
 ]
 
-// 3. 创建路由实例并传递 `routes` 配置
-// 你可以在这里输入更多的配置B，但我们在这里
-// 暂时保持简单
+//路由导航守卫
+
 export const router = createRouter({
     history: createWebHashHistory(),
     routes

@@ -7,6 +7,10 @@
   </el-config-provider>
 </template>
 
+<script lang="ts" setup>
+import { useAuthStore } from './store/authStore';
+useAuthStore().login()
+</script>
 <style>
 #app {
   text-align: center;
