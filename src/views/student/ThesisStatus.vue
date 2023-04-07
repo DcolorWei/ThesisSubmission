@@ -24,25 +24,33 @@
             <el-table-column prop="academicTutorName" label="学业导师姓名" />
         </el-table>
         <el-table v-if="student.studentId" :data="[{}]" style="width: 90vw">
-            <el-table-column label="论文流程状态">
+            <el-table-column label="答辩组信息">
                 <template #default>
-                    <el-tag type="warning" round>{{ student.flow?.status }}</el-tag>
+                    <el-tag type="warning" round>未进入答辩流程</el-tag>
+                </template>
+            </el-table-column>
+        </el-table>
+        <!-- 若存在defence信息，则显示 -->
+        <el-table v-if="student.flow?.defenceGroup" :data="[{}]" style="width: 90vw">
+            <el-table-column label="答辩组信息">
+                <template #default>
+                    <el-tag type="warning" round>{{ student.flow?.defenceGroup?.chairman?.name }}</el-tag>
+                    <el-tag type="warning" round>{{ student.flow?.defenceGroup?.secretary?.name }}</el-tag>
+                    <el-tag type="warning" round>{{ student.flow?.defenceGroup?.defencePlace }}</el-tag>
+                    <el-tag type="warning" round>{{ student.flow?.defenceGroup?.defenceTime }}</el-tag>
                 </template>
             </el-table-column>
         </el-table>
     </el-card>
     <div style="margin-top: 20px;"></div>
-    <div style="width: 90%;display: flex; align-items:flex-end;">
-        <el-text size="large" tag="b">论文流程</el-text>
-    </div>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
-        <el-button @click="() => toPage('submitthesis')"> 发起评审 </el-button>
+        <el-button @click="() => requestAudit()"> 发起评审 </el-button>
     </el-card>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
         <el-collapse class="collapse" v-model="index" accordion>
             <el-collapse-item name="1">
                 <el-timeline class="timeline">
-                    <el-timeline-item center v-for="history, index in flowHistories.filter(i => i.pass)" :key="index"
+                    <el-timeline-item center v-for="history, index in flowHistories" :key="index"
                         :timestamp="history.operateTime">
                         <el-card shadow="always" body-style="padding:10px 20px">
                             <!-- 显示历史记录里的操作，操作人 -->
@@ -50,19 +58,13 @@
                                 <div style="width:400px">
                                     <el-text size="large" tag="b">{{ history.operation }}</el-text>
                                     <div>
-                                        <el-text size="default" v-if="history.score" tag="b" style="margin-right: 20px;">
-                                            评分: {{ history.score }}
-                                        </el-text>
-                                        <el-text size="default" tag="b"> 操作人：{{ history.operator }}</el-text>
-                                    </div>
-                                    <div>
                                         <el-text size="default" tag="b"> {{
                                             history.comment ? '评语：' + history.comment : ''
                                         }}</el-text>
                                     </div>
                                 </div>
                                 <div>
-                                    <el-button plain> 查看 </el-button>
+                                    <el-button plain disabled> 查看 </el-button>
                                 </div>
                             </div>
                         </el-card>
@@ -75,21 +77,21 @@
     <div style="width: 90%;display: flex; align-items:flex-end;">
         <el-text size="large" tag="b">可用操作</el-text>
     </div>
+
     <el-card body-style="width:85vw" style="margin: 10px 0;">
-        <!-- 可用操作按钮 -->
-        <el-button type="primary" @click="() => joinDefence()"> 确认参加答辩 </el-button>
-        <el-button type="warning" @click="() => showDefenceGroupDialog = true"> 选择答辩组 </el-button>
-        <el-button type="warning" @click="() => readyDuplicate()"> 查重准备就绪 </el-button>
+        <el-button type="primary" @click="() => joinDefence()" disabled> 确认参加答辩 </el-button>
+        <el-button type="warning" @click="() => showDefenceGroupDialog = true" disabled> 选择答辩组 </el-button>
+        <el-button type="warning" @click="() => readyDuplicate()" disabled> 查重准备就绪 </el-button>
     </el-card>
 
     <!-- 弹窗，用于更换答辩组 -->
-    <el-dialog title="选择答辩组" v-model="showDefenceGroupDialog" style="width: 80vw;">
+    <!-- <el-dialog title="选择答辩组" v-model="showDefenceGroupDialog" style="width: 80vw;">
         <el-table :data="defenceGroupInfos" style="width: 90vw">
             <el-table-column prop="chairman.name" label="主席" width="150" />
             <el-table-column prop="secretary.name" label="秘书" width="150" />
             <el-table-column prop="defencePlace" label="答辩地点" width="150" />
-            <el-table-column prop="defenceTime" label="答辩时间" width="150" />
-            <el-table-column width="150">
+            <el-table-column prop="defenceTime" label="答辩时间" />
+            <el-table-column width="150" label="容量">
                 <template #default="{ row }">
                     {{ row.nowCapacity }}/{{ row.capacity }}
                 </template>
@@ -101,10 +103,11 @@
                 </template>
             </el-table-column>
         </el-table>
-    </el-dialog>
+    </el-dialog> -->
 </template>
 
 <script lang="ts" setup>
+import { ElMessage } from 'element-plus';
 import { reactive, Ref, ref } from 'vue'
 import { DefenceInfo } from '~/entity/base/Defence';
 import { StudentInfo } from '~/entity/base/Student';
@@ -117,7 +120,6 @@ const index = ref(['1'])
 const toPage = (path: string = 'home') => {
     router.push(path)
 }
-
 
 const student: StudentInfo = reactive(
     //初始空白数据
@@ -134,9 +136,9 @@ const student: StudentInfo = reactive(
         role: [],
     }
 )
+
 webApi.get<StudentInfoRes>('/student/getStudentInfo', {}).then(res => {
     const data = res.data
-    console.log(data)
     student.id = data.id
     student.userId = data.userId
     student.studentId = data.studentId
@@ -155,19 +157,30 @@ webApi.get<FlowHistoryRes>('/student/getFlowHistory', {}).then(res => {
     console.log(flowHistories)
 })
 
-const joinDefence = () => {
-    webApi.get('/student/readyForDefence', {})
+const requestAudit = () => {
+    webApi.post('/student/request', {}).then(() => {
+        toPage('uploadthesis')
+        ElMessage({
+            message: '发起评审成功',
+            type: 'success'
+        })
+    })
+
 }
 
-const showDefenceGroupDialog = ref(false);
-const defenceGroupInfos: Ref<DefenceInfo[]> = ref([]);
-webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
-    defenceGroupInfos.value = res.data.data;
-});
-const chooseDefenceGroup = (defenceGroupId: number) => {
-    webApi.post(`/student/chooseDefenceGroup?defenceGroupId=${defenceGroupId}`, {})
-    showDefenceGroupDialog.value = false
-}
+// const joinDefence = () => {
+//     webApi.get('/student/readyForDefence', {})
+// }
+
+// const showDefenceGroupDialog = ref(false);
+// const defenceGroupInfos: Ref<DefenceInfo[]> = ref([]);
+// webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
+//     defenceGroupInfos.value = res.data.data;
+// });
+// const chooseDefenceGroup = (defenceGroupId: number) => {
+//     webApi.post(`/student/chooseDefenceGroup?defenceGroupId=${defenceGroupId}`, {})
+//     showDefenceGroupDialog.value = false
+// }
 
 const readyDuplicate = () => {
     webApi.get('/student/readyForDuplicate', {})

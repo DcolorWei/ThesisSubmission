@@ -24,18 +24,22 @@
     </el-card>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
         <el-row :gutter="10" style="margin: 20px auto;">
-            <el-col :span="24">
-                <el-upload v-model:file-list="fileList" class="upload-demo"
-                    :action="webApi.axios.defaults.baseURL + '/student/upload/thesis'" multiple :limit="2">
+            <el-col :span="12">
+                <el-upload v-model:file-list="file1" class="upload-demo"
+                    :action="`${webApi.axios.defaults.baseURL}/student/upload/thesis?anonymous=false`"
+                    :headers="{ 'token': useAuthStore().token }" multiple :limit="1">
                     <el-button :icon="Upload">上传论文</el-button>
                 </el-upload>
-                <el-upload v-model:file-list="fileList" class="upload-demo"
-                    :action="webApi.axios.defaults.baseURL + '/student/upload/thesis'" multiple :limit="2">
+            </el-col>
+            <el-col :span="12">
+                <el-upload v-model:file-list="file2" class="upload-demo"
+                    :action="`${webApi.axios.defaults.baseURL}/student/upload/thesis?anonymous=true`"
+                    :headers="{ 'token': useAuthStore().token }" multiple :limit="1">
                     <el-button :icon="Upload">上传匿名论文</el-button>
                 </el-upload>
             </el-col>
         </el-row>
-        <el-button @click="() => orderFlow()">提交</el-button>
+        <el-button @click="() => toBack()">返回</el-button>
     </el-card>
 </template>
 
@@ -43,11 +47,13 @@
 import { Upload } from '@element-plus/icons-vue';
 import { reactive, ref } from 'vue'
 import { StudentInfo } from '~/entity/base/Student';
+import { router } from '~/route';
 import webApi from '~/util/webApi';
 import { StudentInfoRes } from '~/util/webRes';
+import { useAuthStore } from '~/store/authStore';
 
-//el-upload基础数据
-const fileList = ref([])
+const file1 = ref([])
+const file2 = ref([])
 
 const student: StudentInfo = reactive(
     //初始空白数据
@@ -79,10 +85,8 @@ webApi.get<StudentInfoRes>('/student/getStudentInfo', {}).then(res => {
     student.role = data.role
 })
 
-const orderFlow = () => {
-    webApi.post('/student/request', {}).then(res => {
-        console.log(res)
-    })
+const toBack=()=>{
+    router.push({ path: '/thesisstatus' })
 }
 </script>
 <style>
