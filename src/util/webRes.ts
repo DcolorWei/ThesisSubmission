@@ -41,6 +41,16 @@ export interface UsualRes {
 /**
  * 教师使用的接口
  */
+
+//获得老师信息
+export interface TeacherInfoRes {
+    code: number;
+    data: TeacherInfo;
+    message: string;
+}
+/**
+ * 教务教师使用的接口
+ */
 /**
  * 教师信息
  */

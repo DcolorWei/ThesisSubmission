@@ -37,6 +37,13 @@ export interface ProcessDetail {
      * 归属学生姓名
      */
     studentName: string;
+
+    /**
+     * 论文名称
+     * 
+     */
+    thesisName: string;
+
     /**
      * 确认老师
      */

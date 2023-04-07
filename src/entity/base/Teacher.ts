@@ -57,3 +57,5 @@ export interface TeacherInfo {
      */
     userId: string;
 }
+
+export { Title };
