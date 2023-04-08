@@ -145,7 +145,7 @@ webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.OUTER_AUDITOR]
 });
 
 const flowInfos: Ref<ProcessDetail[]> = ref([]);
-webApi.post<GetFlowDetailRes, { status: FlowStatus }>('/getFlowInfo', { status: FlowStatus.TEACHER_CONFIRMED }).then(res => {
+webApi.post<GetFlowDetailRes, { flowStatus: FlowStatus }>('/getFlowInfo', { flowStatus: FlowStatus.TEACHER_CONFIRMED }).then(res => {
     console.log(res)
     flowInfos.value = res.data.data;
 });
@@ -224,9 +224,9 @@ const savePlan = () => {
     webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.OUTER_AUDITOR] }).then(res => {
         outerAuditorInfos.value = res.data.data;
     });
-    webApi.post<GetFlowDetailRes, { status: FlowStatus }>('/getFlowInfo', { status: FlowStatus.TEACHER_CONFIRMED }).then(res => {
+    webApi.post<GetFlowDetailRes, { status: FlowStatus }>('/getFlowInfo', { flowStatus: FlowStatus.TEACHER_CONFIRMED }).then(res => {
         console.log(res)
-        flowInfos.value = res.data.data;
+        flowInfos.value = res.data.data.filter(i => i.status === FlowStatus.TEACHER_CONFIRMED);
     });
 }
 </script>
