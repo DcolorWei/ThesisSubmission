@@ -25,18 +25,35 @@
         </el-row>
     </div>
     <div style="margin-bottom: 10px;width: 930px;">
-        <el-row :gutter="5">
-            <el-col :span="10">
+        <el-row :gutter="1">
+            <el-col :span="12">
                 <div class="grid-content ep-bg-purple" />
             </el-col>
-            <el-col :span="5">
-                <el-button @click="() => add('t')">新增教师</el-button>
+            <el-col :span="3">
+                <el-button @click="() => add('t')" style="width: 80px;">新增教师</el-button>
             </el-col>
-            <el-col :span="5">
-                <el-button @click="() => add('s')">新增学生</el-button>
+            <el-col :span="3">
+                <el-button @click="() => add('s')" style="width: 80px;">新增学生</el-button>
             </el-col>
-            <el-col :span="4">
-                <el-button type="warning" plain>导入</el-button>
+            <el-col :span="3">
+                <el-upload v-model:file-list="file1" class="upload-demo"
+                    :action="`${webApi.axios.defaults.baseURL}/upload/student`" :headers="{ 'token': useAuthStore().token }"
+                    multiple :limit="1" :show-file-list="false" :on-success="() => {
+                        ElMessage.success('导入成功');
+                        search();
+                    }">
+                    <el-button type="warning" plain style="width: 80px;">导入学生</el-button>
+                </el-upload>
+            </el-col>
+            <el-col :span="3">
+                <el-upload v-model:file-list="file2" class="upload-demo"
+                    :action="`${webApi.axios.defaults.baseURL}/upload/teacher`" :headers="{ 'token': useAuthStore().token }"
+                    multiple :limit="1" :show-file-list="false" :on-success="() => {
+                        ElMessage.success('导入成功');
+                        search();
+                    }">
+                    <el-button type="warning" plain style="width: 80px;">导入教师</el-button>
+                </el-upload>
             </el-col>
         </el-row>
     </div>
@@ -59,7 +76,7 @@
                 <template #default="{ row }">
                     <el-button type="warning" :icon="Edit" size="small" plain
                         @click="() => edit(row, row.role == 'STUDENT' ? 's' : 't')">编辑</el-button>
-                    <el-button type="primary" :icon="Search" size="small" plain>查看</el-button>
+                    <el-button type="primary" :icon="Search" size="small" plain @click="() => viewInfo(row)">查看</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -75,7 +92,7 @@
                 <el-input v-model="studentInfo.studentId" placeholder="请输入" />
             </el-form-item>
             <el-form-item label="姓名">
-                <el-input v-model="studentInfo.studentId" placeholder="请输入" />
+                <el-input v-model="studentInfo.name" placeholder="请输入" />
             </el-form-item>
             <el-form-item label="身份">
                 <el-select v-model="studentInfo.role" multiple style="width: 80%;">
@@ -90,13 +107,13 @@
             </el-form-item>
             <el-form-item label="挂名导师">
                 <el-select v-model="studentInfo.nominalTutorId" filterable placeholder="请选择" style="width: 80%;">
-                    <el-option style="width: 100%;" v-for="item in tableData.filter(i => i.teacherId)" :key="item.id"
+                    <el-option style="width: 100%;" v-for="item in teacherInfosForNA" :key="item.id"
                         :label="item.name + ' ' + item.teacherId" :value="item.id"></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="学术导师">
                 <el-select v-model="studentInfo.academicTutorId" filterable placeholder="请选择" style="width: 80%;">
-                    <el-option style="width: 100%;" v-for="item in tableData.filter(i => i.teacherId)" :key="item.id"
+                    <el-option style="width: 100%;" v-for="item in teacherInfosForNA" :key="item.id"
                         :label="item.name + ' ' + item.teacherId" :value="item.id"></el-option>
                 </el-select>
             </el-form-item>
@@ -226,8 +243,11 @@ function getStudentInfo(pageIndex = 1, content: string = '') {
     })
 }
 
-getTeacherInfo()
-getStudentInfo()
+setTimeout(() => {
+    ElMessage.success('加载完毕');
+    getTeacherInfo()
+    getStudentInfo()
+}, 850)
 
 const pageIndex = ref(0)
 const changePage = (e: number) => pageIndex.value = e - 1
@@ -299,6 +319,7 @@ const add = (identify: 's' | 't') => {
     }
 }
 
+//人员搜索
 const searchContent = ref('')
 const search = (content = '') => {
     while (tableData.value.length) {
