@@ -142,16 +142,47 @@
             </span>
         </template>
     </el-dialog>
+
+    <el-dialog v-model="dialogPerson">
+        <el-descriptions title="人员信息">
+            <el-descriptions-item label="学工号">
+                {{ person.studentId || person.teacherId }}
+            </el-descriptions-item>
+            <el-descriptions-item label="姓名">
+                {{ person.name }}
+            </el-descriptions-item>
+            <el-descriptions-item label="身份">
+                {{ person.role.includes(Role.STUDENT) ? '学生' : '教师' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="邮箱">
+                {{ person.emailAddress }}
+            </el-descriptions-item>
+            <el-descriptions-item label="电话">
+                {{ person.phoneNumber }}
+            </el-descriptions-item>
+            <el-descriptions-item label="职称" v-if="person.title !== ''">
+                {{ person.title }}
+            </el-descriptions-item>
+            <el-descriptions-item label="挂名导师" v-if="person.nominalTutor">
+                {{ person.nominalTutor?.name + ' ' + person.nominalTutor?.teacherId }}
+            </el-descriptions-item>
+            <el-descriptions-item label="学术导师" v-if="person.academicTutor">
+                {{ person.academicTutor?.name + ' ' + person.academicTutor?.teacherId }}
+            </el-descriptions-item>
+        </el-descriptions>
+    </el-dialog>
 </template>
   
 <script lang="ts" setup>
 import { Edit, Search } from '@element-plus/icons-vue'
-import { Ref, ref } from 'vue';
+import { Ref, ref, watch } from 'vue';
 import { Title } from '~/entity/enum/Title'
 import { Role } from '~/entity/enum/Role'
+import { useAuthStore } from '~/store/authStore';
 import webApi from '~/util/webApi';
 import { GetStudentInfoRes, GetTeacherInfoRes, UsualRes } from '~/util/webRes';
 import { ElMessage } from 'element-plus';
+import { TeacherInfo } from '~/entity/base/Teacher';
 
 //表单筛选
 const filter = ref({
@@ -163,20 +194,35 @@ watch(filter, (val) => {
 //表单数据
 const tableData: Ref<Array<any>> = ref([])
 
+const file1 = ref()
+const file2 = ref()
 //获取教师信息
-function getTeacherInfo(pageIndex = 1) {
+const teacherInfosForNA = ref<TeacherInfo[]>([])
+function getTeacherInfo(pageIndex = 1, content: string = '') {
     webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, {}).then(res => {
-        tableData.value.push(...res.data.data)
+        teacherInfosForNA.value.push(...res.data.data)
+        const targets = res.data.data
+            .filter(i =>
+                i.teacherId?.includes(content) || i.name?.includes(content) || i.emailAddress?.includes(content) || i.phoneNumber?.includes(content) ||
+                i.role?.find(i => i == content) || i.title?.includes(content) || i.schoolName?.includes(content) || i.departmentName?.includes(content)
+            )
+        tableData.value.push(...targets)
         const { page, size, total } = res.data
-        if (page * size < total) return getTeacherInfo(pageIndex + 1)
+        if (page * size < total) return getTeacherInfo(pageIndex + 1, content)
     })
 }
+
 //获取学生信息
-function getStudentInfo(pageIndex = 1) {
+function getStudentInfo(pageIndex = 1, content: string = '') {
     webApi.post<GetStudentInfoRes>(`/getStudentInfoBy?current= ${pageIndex}`, {}).then(res => {
-        tableData.value.push(...res.data.data)
+        const targets = res.data.data
+            .filter(i =>
+                i.studentId?.includes(content) || i.name?.includes(content) || i.emailAddress?.includes(content) || i.phoneNumber?.includes(content) ||
+                i.role?.find(i => i == content)
+            )
+        tableData.value.push(...targets)
         const { page, size, total } = res.data
-        if (page * size < total) return getStudentInfo(pageIndex + 1)
+        if (page * size < total) return getStudentInfo(pageIndex + 1, content)
     })
 }
 
@@ -189,6 +235,12 @@ const changePage = (e: number) => pageIndex.value = e - 1
 //编辑页可见
 const dialogTeacher = ref(false)
 const dialogStudent = ref(false)
+
+//个人信息页面
+const dialogPerson = ref(false)
+
+const person = ref<any>({})
+
 //编辑页信息
 const teacherInfo = ref({
     departmentName: '',
@@ -247,9 +299,21 @@ const add = (identify: 's' | 't') => {
     }
 }
 
+const searchContent = ref('')
+const search = (content = '') => {
+    while (tableData.value.length) {
+        tableData.value.pop()
+    }
+    getTeacherInfo(1, content)
+    getStudentInfo(1, content)
+}
+
+
 const edit = (e: any, identify: 's' | 't') => {
     if (identify == 's') {
         studentInfo.value = e
+        studentInfo.value.academicTutorId = e.academicTutor.id
+        studentInfo.value.nominalTutorId = e.nominalTutor.id
         dialogStudent.value = true
     } else {
         teacherInfo.value = e
@@ -257,6 +321,11 @@ const edit = (e: any, identify: 's' | 't') => {
     }
 }
 
+const viewInfo = (e: any) => {
+    //@ts-ignore
+    Object.keys(e).forEach(key => person.value[key] = e[key])
+    dialogPerson.value = true
+}
 const save = (identify: 's' | 't') => {
     //身份为student
     if (identify == 's') {
