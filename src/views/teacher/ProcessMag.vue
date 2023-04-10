@@ -268,6 +268,7 @@ import webApi from '~/util/webApi';
 import { GetDefenceGroupsRes, GetFlowDetailRes, GetTeacherInfoRes } from '~/util/webRes';
 import { Download, Upload } from '@element-plus/icons-vue';
 import { useAuthStore } from '~/store/authStore';
+import { ElMessage } from 'element-plus';
 
 
 const flows: ProcessDetail[] = reactive([])
@@ -375,6 +376,7 @@ const updateFlow = (type: 'i' | 'oa' | 'ob' | 'd', teacherId: string) => {
     }
     webApi.post('/reassignFlow', form).then(res => {
         if (res) {
+            ElMessage(JSON.stringify(res))
             webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
                 innerAuditorInfos.value = res.data.data;
             });
@@ -427,7 +429,8 @@ const verifyForm: any = reactive({
 
 const verify = () => {
     verifyForm.flowId = String(currentFlowId.value);
-    webApi.post('/audit', verifyForm).then(() => {
+    webApi.post('/audit', verifyForm).then((res) => {
+        ElMessage(JSON.stringify(res))
         switch (verifyForm.auditType) {
             case 'inner':
                 search(FlowStatus.THESIS_AUDIT, null, 'inner')

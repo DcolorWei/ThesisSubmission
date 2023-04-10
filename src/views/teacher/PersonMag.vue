@@ -148,6 +148,7 @@ import { Title } from '~/entity/enum/Title'
 import { Role } from '~/entity/enum/Role'
 import webApi from '~/util/webApi';
 import { GetStudentInfoRes, GetTeacherInfoRes, UsualRes } from '~/util/webRes';
+import { ElMessage } from 'element-plus';
 
 //表单筛选
 const filter = ref({
@@ -257,13 +258,13 @@ const save = (identify: 's' | 't') => {
         if (!exist || studentInfo.value.studentId == '') {
             tableData.value.unshift(studentInfo.value)
             webApi.post<UsualRes>('/createStudentInfo', studentInfo.value).then(res => {
-                console.log(res)
+                ElMessage(JSON.stringify(res))
             })
         } else {
             //@ts-ignore
             Object.keys(exist).forEach(key => exist[key] = studentInfo.value[key])
             webApi.post<UsualRes>('/updateStudentInfo', studentInfo.value).then(res => {
-                console.log(res)
+                ElMessage(JSON.stringify(res))
             })
         }
 
@@ -276,13 +277,13 @@ const save = (identify: 's' | 't') => {
         if (!exist) {
             tableData.value.unshift(teacherInfo.value)
             webApi.post<UsualRes>('/createTeacherInfo', teacherInfo.value).then(res => {
-                console.log(res)
+                ElMessage(JSON.stringify(res))
             })
         } else {
             //@ts-ignore
             Object.keys(exist).forEach(key => exist[key] = teacherInfo.value[key])
             webApi.post<UsualRes>('/updateTeacherInfo', teacherInfo.value).then(res => {
-                console.log(res)
+                ElMessage(JSON.stringify(res))
             })
         }
 

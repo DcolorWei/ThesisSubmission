@@ -126,6 +126,7 @@
 </template>
   
 <script lang="ts" setup>
+import { ElMessage } from 'element-plus';
 import { reactive, Ref, ref } from 'vue';
 import { ProcessDetail } from '~/entity/base/Process';
 import { TeacherInfo } from '~/entity/base/Teacher';
@@ -215,6 +216,9 @@ const savePlan = () => {
             innerAuditorId: flow.innerAuditor?.id,
             outerAuditorId1: flow.outerAuditor1?.id,
             outerAuditorId2: flow.outerAuditor2?.id
+        }).then((res) => {
+            ElMessage('保存成功')
+            ElMessage(JSON.stringify(res))
         })
     })
     // 重新请求学生、教师以及flow数据
