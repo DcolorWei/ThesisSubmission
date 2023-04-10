@@ -3,21 +3,24 @@
     <div style="margin-top: 10px;width: 960px;">
         <el-row :gutter="5">
             <el-col :span="4">
-                <el-select v-model="filter.identify" class="m-2" placeholder="身份">
-                </el-select>
-            </el-col>
-            <el-col :span="4">
-                <el-select v-model="filter.identify" class="m-2" placeholder="学院">
+                <el-select v-model="filter.identify" class="m-2" placeholder="身份" clearable>
+                    <el-option label="学生" :value="Role.STUDENT" />
+                    <el-option label="内审教师" :value="Role.INNER_AUDITOR" />
+                    <el-option label="外审教师" :value="Role.OUTER_AUDITOR" />
+                    <el-option label="教务教师" :value="Role.ACADEMIC_REGISTRY" />
+                    <el-option label="答辩组教师" :value="Role.DEFENCE_GROUP_TEACHER" />
+                    <el-option label="学术导师" :value="Role.ACADEMIC_TUTOR" />
+                    <el-option label="挂名导师" :value="Role.NOMINAL_TUTOR" />
                 </el-select>
             </el-col>
             <el-col :span="7">
                 <div class="grid-content ep-bg-purple" />
             </el-col>
             <el-col :span="5">
-                <el-input placeholder=""></el-input>
+                <el-input placeholder="" v-model="searchContent"></el-input>
             </el-col>
             <el-col :span="3">
-                <el-button>搜索</el-button>
+                <el-button @click="() => search(searchContent)">搜索</el-button>
             </el-col>
         </el-row>
     </div>
@@ -154,6 +157,9 @@ import { ElMessage } from 'element-plus';
 const filter = ref({
     identify: ''
 })
+watch(filter, (val) => {
+    search(val.identify)
+}, { deep: true })
 //表单数据
 const tableData: Ref<Array<any>> = ref([])
 
