@@ -11,7 +11,6 @@ export interface StudentInfo {
         /**
          * 流程
          */
-        flow: null | ProcessDetail;
         id: number;
         name: string;
         /**

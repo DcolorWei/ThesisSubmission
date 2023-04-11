@@ -1,3 +1,4 @@
+import { Role } from "../enum/Role";
 import { Title } from "../enum/Title";
 
 /**
@@ -39,7 +40,7 @@ export interface TeacherInfo {
     /**
      * 角色列表
      */
-    role: string[] | null;
+    role: Role[] | null;
     /**
      * 学校名称
      */
