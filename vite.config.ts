@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue'
 
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import legacy from '@vitejs/plugin-legacy'
 
 import Unocss from 'unocss/vite'
 import {
@@ -32,6 +33,9 @@ export default defineConfig({
   },
   plugins: [
     vue(),
+    legacy({
+      targets: ['last 2 versions and not dead, > 0.3%, Firefox ESR', 'not IE 11'],
+    }),
     Components({
       // allow auto load markdown components under `./src/components/`
       extensions: ['vue', 'md'],

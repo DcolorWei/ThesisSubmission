@@ -1,0 +1,50 @@
+{
+  "tenant": "dingone",
+  "app_name": "论文送审",
+  "icon": "https://i01.lw.aliimg.com/media/lADPDf0i7BHNNpjNDCvNDCs_3115_3115.jpg",
+  "app_owner_ids": "[{\"corpId\":\"dinga636c7a8b99cfb07ffe93478753d9884\",\"orgName\":\"萨科王有限公司\",\"name\":\"韦定彩\",\"staffId\":\"01225931146538120821\",\"uid\":2229309945,\"avatarMediaId\":\"@lADPD4d81K4keqPNAWjNAWg\",\"permission\":{\"application\":true,\"developer\":true},\"_persist\":{\"version\":-1,\"rehydrated\":true}}]",
+  "tenant_id": "dinga636c7a8b99cfb07ffe93478753d9884",
+  "app_type": 1,
+  "app_desc": "用于论文送审",
+  "web_app_id": 2463999407,
+  "web_app_info": {
+    "agentId": 2463999407,
+    "appKey": "dinglbfnp4z6bx3do5rc",
+    "appSecret": "EmGtj2D432gfm303s7rJ0eUf7KeIao7TcDAynnpna9OLEkfvMFEWyILMEVa1TgMi",
+    "appStatus": 1,
+    "appType": 1,
+    "canDelete": true,
+    "canUpdate": true,
+    "deleteStatus": 6,
+    "desc": "用于论文送审",
+    "developType": 0,
+    "gmtCreate": 1678364842000,
+    "gmtModified": 1681198770000,
+    "hidden": false,
+    "homepageLink": "http://192.168.1.102:5173/",
+    "icon": "@lADPDf0i7BHNNpjNDCvNDCs",
+    "iconUrl": "https://i01.lw.aliimg.com/media/lADPDf0i7BHNNpjNDCvNDCs_3115_3115.jpg",
+    "id": 2463999407,
+    "ipWhiteList": [],
+    "miniAppOnPc": false,
+    "name": "论文送审",
+    "ompLink": "",
+    "pcHomepageLink": "http://192.168.1.102:5173/",
+    "publishStatus": "0",
+    "robotCode": "dinglbfnp4z6bx3do5rc",
+    "scopeSupportDynamicGroupGray": false,
+    "scopeSupportRoleGray": true,
+    "shortcut": false,
+    "sortOrder": 2200,
+    "sourceLevel": 0,
+    "timeToDel": 0,
+    "unifiedAppId": "41e5aab6-5ec8-4cc3-9186-675901a7a4cd",
+    "visibleScopes": [
+      {
+        "deptId": -1,
+        "name": "萨科王有限公司"
+      }
+    ]
+  },
+  "id": 2528
+}
