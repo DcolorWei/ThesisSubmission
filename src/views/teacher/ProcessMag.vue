@@ -48,11 +48,11 @@
                 </el-table-column>
             </el-table>
             <el-table :data="[{}]" style="width: 90vw">
-                <el-table-column>
+                <!-- <el-table-column>
                     <template #default>
                         <el-button :icon="Download" @click="() => download(flow.id!, false)">下载论文</el-button>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column>
                     <template #default>
                         <el-button :icon="Download" @click="() => download(flow.id!, true)">下载匿名论文</el-button>
@@ -91,9 +91,8 @@
                 <el-table-column prop="emailAddress" label="邮箱" width="170" />
                 <el-table-column>
                     <template #default="{ $index }">
-                        <el-button type="warning" plain round size="small"
+                        <el-button type="warning" plain round size="small" v-if="$index !== 0"
                             @click="() => changeTeacher($index, flow.id!)">更换</el-button>
-                        <el-button type="info" plain round size="small">查看</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -118,11 +117,6 @@
                 <el-table-column prop="departmentName" label="学院" />
                 <el-table-column prop="phoneNumber" label="电话" width="150" />
                 <el-table-column prop="emailAddress" label="邮箱" width="170" />
-                <el-table-column width="80">
-                    <template #default>
-                        <el-button type="info" plain round size="small">查看</el-button>
-                    </template>
-                </el-table-column>
             </el-table>
         </el-card>
     </div>
@@ -143,7 +137,7 @@
     </el-dialog>
 
     <!-- 弹窗，用于更换外审教师1 -->
-    <el-dialog title="更换外审老师A" v-model="showOuterAuditorDialog1">
+    <el-dialog title="更换外审老师1" v-model="showOuterAuditorDialog1">
         <el-table :data="outerAuditorInfos" style="width: 90vw">
             <el-table-column prop="teacherId" label="工号" width="110" />
             <el-table-column prop="name" label="教师姓名" width="150" />
@@ -159,7 +153,7 @@
     </el-dialog>
 
     <!-- 弹窗，用于更换外审教师2 -->
-    <el-dialog title="更换外审老师B" v-model="showOuterAuditorDialog2">
+    <el-dialog title="更换外审老师2" v-model="showOuterAuditorDialog2">
         <el-table :data="outerAuditorInfos" style="width: 90vw">
             <el-table-column prop="teacherId" label="工号" width="110" />
             <el-table-column prop="name" label="教师姓名" width="150" />
@@ -208,7 +202,7 @@
                         v-if="flows.find(i => i.id == currentFlowId)?.status == FlowStatus.THESIS_AUDIT &&
                             (flows.find(i => i.id == currentFlowId)?.outerAuditor1?.teacherId == useAuthStore().teacherId ||
                                 flows.find(i => i.id == currentFlowId)?.outerAuditor2?.teacherId == useAuthStore().teacherId)"
-                        label="外审" value="INNER_AUDIT"></el-option>
+                        label="外审" value="OUTER_AUDIT"></el-option>
                     <el-option label="答辩"
                         v-if="flows.find(i => i.id == currentFlowId)?.status == FlowStatus.WAIT_STUDENT_CONFIRM_ORAL_DEFENSE"
                         value="ORAL_DEFENCE"></el-option>
@@ -223,6 +217,7 @@
             <el-form-item label="审核结果">
                 <el-radio-group v-model="verifyForm.score">
                     <el-radio :label="59">需修改</el-radio>
+                    <el-radio :label="60">无需修改</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="评语">
@@ -239,20 +234,31 @@
     <el-dialog title="上传查重报告" v-model="showUploadReportDialog">
         <el-form label-width="150">
             <el-form-item label="学号">
-                <el-input style="width: 60%;" v-model="studentIdInput" placeholder="用于验证"></el-input>
+                <el-input style="width: 60%;" v-model="studentIdInput" placeholder="请确认学号">
+                    <template #suffix>
+                        <el-icon v-if="studentIdInput !== flows.find(i => i.id == currentFlowId)?.studentId">
+                            <WarningFilled />
+                        </el-icon>
+                        <el-icon v-else>
+                            <CircleCheckFilled />
+                        </el-icon>
+                    </template>
+                </el-input>
             </el-form-item>
             <el-form-item label="查重率">
                 <el-input-number style="width: 30%;" :precision="2" :min="0" :max="100" v-model="duplicateRate"
                     controls-position="right"></el-input-number>
             </el-form-item>
         </el-form>
+        <div style="color:red">*校验学号并输入查重率即可直接上传</div>
         <el-upload v-model="fileList" class="upload-demo"
-            v-if="(studentIdInput == flows.find(i => i.id == currentFlowId)?.studentId) && duplicateRate"
             :action="`${webApi.axios.defaults.baseURL}/upload/duplicateReport?id=${currentFlowId!}&duplicateRate=${duplicateRate}`"
             :headers="{
                 token: useAuthStore().token, 'Content-Type': 'application/json'
-            }" :limit="1" multiple :data="{ duplicateRate: duplicateRate }">
-            <el-button :icon="Upload">上传查重报告</el-button>
+            }" :limit="1" multiple :data="{ duplicateRate: duplicateRate }"
+            :disabled="!(studentIdInput == (flows.find(i => i.id == currentFlowId)?.studentId) && duplicateRate > 0)">
+            <el-button :icon="Upload"
+                :disabled="!(studentIdInput == (flows.find(i => i.id == currentFlowId)?.studentId) && duplicateRate > 0)">上传查重报告</el-button>
         </el-upload>
     </el-dialog>
 </template>
@@ -266,7 +272,7 @@ import { FlowStatus } from '~/entity/enum/Flow';
 import { Role } from '~/entity/enum/Role';
 import webApi from '~/util/webApi';
 import { GetDefenceGroupsRes, GetFlowDetailRes, GetTeacherInfoRes } from '~/util/webRes';
-import { Download, Upload } from '@element-plus/icons-vue';
+import { Download, Upload, WarningFilled, CircleCheckFilled } from '@element-plus/icons-vue';
 import { useAuthStore } from '~/store/authStore';
 import { ElMessage } from 'element-plus';
 
@@ -292,7 +298,7 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
             fifter.outerAuditorId = useAuthStore().teacherId
             break;
         case 'verify':
-            fifter.verifyerId = useAuthStore().teacherId
+            fifter.verifierId = useAuthStore().teacherId
             break;
     }
 
@@ -301,7 +307,8 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
         flows.push(...res.data.data)
     })
 }
-search()
+
+setTimeout(() => { ElMessage.success('加载完毕'); search() }, 850)
 
 
 //触发download事件，下载文件
