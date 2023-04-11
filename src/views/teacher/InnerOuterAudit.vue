@@ -6,56 +6,90 @@
     <el-row :gutter="20" style="width: 80vw;">
         <el-col :span="7">
             <div class="sabar-list-item">
+                <div style="margin:12px">
+                    <el-input v-model="innerSearch" placeholder="搜索内审导师">
+                        <template #suffix>
+                            <el-icon>
+                                <Search />
+                            </el-icon>
+                        </template>
+                    </el-input>
+                </div>
                 <div v-for="teacher, idx in innerAuditorInfos" :key="idx" style="margin: 12px;">
                     <el-card>
-                        <el-descriptions class="margin-top" :title="teacher.teacherId + ' ' + teacher.name" :column="3"
+                        <el-descriptions class="margin-top" :title="teacher.teacherId + ' ' + teacher.name" :column="1"
                             size="small" border>
                             <el-descriptions-item>
                                 <template #label>
                                     <div class="cell-item">
-                                        内审
+                                        学校
                                     </div>
                                 </template>
-                                {{ teacher.innerProcessNum }}
+                                {{ teacher.schoolName }}
                             </el-descriptions-item>
                             <el-descriptions-item>
                                 <template #label>
                                     <div class="cell-item">
-                                        外审
+                                        学院
                                     </div>
                                 </template>
-                                {{ teacher.outerProcessNum }}
+                                {{ teacher.departmentName }}
+                            </el-descriptions-item>
+                            <el-descriptions-item>
+                                <template #label>
+                                    <div class="cell-item">
+                                        内审任务数量
+                                    </div>
+                                </template>
+                                {{ teacher.innerProcessNum }}
                             </el-descriptions-item>
                         </el-descriptions>
-                        <el-checkbox @change="(e) => chooseTeacher(e, teacher.id!, 'i')" />
+                        <el-checkbox label="选入" v-model="innerAuditorInfos[idx].choose" />
                     </el-card>
                 </div>
             </div>
         </el-col>
         <el-col :span="7">
             <div class="sabar-list-item">
+                <div style="margin:12px">
+                    <el-input v-model="outerSearch" placeholder="搜索外审导师">
+                        <template #suffix>
+                            <el-icon>
+                                <Search />
+                            </el-icon>
+                        </template>
+                    </el-input>
+                </div>
                 <div v-for="teacher, idx in outerAuditorInfos" :key="idx" style="margin: 12px;">
                     <el-card>
-                        <el-descriptions class="margin-top" :title="teacher.teacherId + ' ' + teacher.name" :column="3"
+                        <el-descriptions class="margin-top" :title="teacher.teacherId + ' ' + teacher.name" :column="1"
                             size="small" border>
                             <el-descriptions-item>
                                 <template #label>
                                     <div class="cell-item">
-                                        内审
+                                        学校
                                     </div>
                                 </template>
-                                {{ teacher.innerProcessNum }}
+                                {{ teacher.schoolName }}
                             </el-descriptions-item>
                             <el-descriptions-item>
                                 <template #label>
                                     <div class="cell-item">
-                                        外审
+                                        学院
                                     </div>
                                 </template>
-                                {{ teacher.outerProcessNum }}
+                                {{ teacher.departmentName }}
+                            </el-descriptions-item>
+                            <el-descriptions-item>
+                                <template #label>
+                                    <div class="cell-item">
+                                        外审任务数量
+                                    </div>
+                                </template>
+                                {{ teacher.innerProcessNum }}
                             </el-descriptions-item>
                         </el-descriptions>
-                        <el-checkbox label="选入" @change="(e) => chooseTeacher(e, teacher.id, 'o')" />
+                        <el-checkbox label="选入" v-model="outerAuditorInfos[idx].choose" />
                     </el-card>
                 </div>
             </div>
@@ -67,8 +101,11 @@
                         <el-descriptions :column="3" :title="flow.studentId + ' ' + flow.studentName" size="small" border>
                             <el-descriptions-item width="100px">
                                 <template #label>
-                                    <div class="cell-item">
-                                        内审导师
+                                    <div class="cell-item"
+                                        style="display:flex; justify-content:space-between;align-items: center;">
+                                        <div>内审导师</div>
+                                        <Switch style="width: 1em; height: 1em;cursor: pointer;"
+                                            @click="() => changeTeacher(1, flow.id!)" />
                                     </div>
                                 </template>
                                 <div v-if="flow.innerAuditor">
@@ -79,8 +116,11 @@
                         <el-descriptions :column="3" size="small" border>
                             <el-descriptions-item width="100px">
                                 <template #label>
-                                    <div class="cell-item">
-                                        外审导师1
+                                    <div class="cell-item"
+                                        style="display:flex; justify-content:space-between;align-items: center;">
+                                        <div>外审导师1</div>
+                                        <Switch style="width: 1em; height: 1em;cursor: pointer;"
+                                            @click="() => changeTeacher(2, flow.id!)" />
                                     </div>
                                 </template>
                                 <div v-if="flow.outerAuditor1">
@@ -91,8 +131,11 @@
                         <el-descriptions :column="3" size="small" border>
                             <el-descriptions-item width="100px">
                                 <template #label>
-                                    <div class="cell-item">
-                                        外审导师2
+                                    <div class="cell-item"
+                                        style="display:flex; justify-content:space-between;align-items: center;">
+                                        <div>外审老师2</div>
+                                        <Switch style="width: 1em; height: 1em;cursor: pointer;"
+                                            @click="() => changeTeacher(3, flow.id!)" />
                                     </div>
                                 </template>
                                 <div v-if="flow.outerAuditor2">
@@ -110,7 +153,7 @@
                                 {{ flow.status }}
                             </el-descriptions-item>
                         </el-descriptions>
-                        <el-checkbox label="选入" @change="(e) => chooseStudent(e, flow.id!)" />
+                        <el-checkbox label="选入" v-model="flowInfos[idx].choose" />
                     </el-card>
                 </div>
             </div>
@@ -123,11 +166,65 @@
     <el-row>
         <el-button type="primary" style="margin: 10px auto;" @click="() => savePlan()">保存方案</el-button>
     </el-row>
+
+    <!-- 弹窗，用于更换内审教师 -->
+    <el-dialog title="更换内审教师" v-model="showInnerAuditorDialog">
+        <el-table :data="innerAuditorInfos" style="width: 90vw">
+            <el-table-column prop="teacherId" label="工号" width="110" />
+            <el-table-column prop="name" label="教师姓名" width="150" />
+            <el-table-column prop="schoolName" label="学校" />
+            <el-table-column prop="departmentName" label="学院" />
+            <el-table-column width="80">
+                <template #default="{ row }">
+                    <el-button type="warning" plain round size="small" @click="() => {
+                        flowInfos.find(i => i.id == currentFlowId)!.innerAuditor = row;
+                        showInnerAuditorDialog = false;
+                    }">指定</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-dialog>
+
+    <!-- 弹窗，用于更换外审教师1 -->
+    <el-dialog title="更换外审老师1" v-model="showOuterAuditorDialog1">
+        <el-table :data="outerAuditorInfosBak" style="width: 90vw">
+            <el-table-column prop="teacherId" label="工号" width="110" />
+            <el-table-column prop="name" label="教师姓名" width="150" />
+            <el-table-column prop="schoolName" label="学校" />
+            <el-table-column prop="departmentName" label="学院" />
+            <el-table-column width="80">
+                <template #default="{ row }">
+                    <el-button type="warning" plain round size="small" @click="() => {
+                        flowInfos.find(i => i.id == currentFlowId)!.outerAuditor1 = row;
+                        showOuterAuditorDialog1 = false;
+                    }">指定</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-dialog>
+
+    <!-- 弹窗，用于更换外审教师2 -->
+    <el-dialog title="更换外审老师2" v-model="showOuterAuditorDialog2">
+        <el-table :data="outerAuditorInfosBak" style="width: 90vw">
+            <el-table-column prop="teacherId" label="工号" width="110" />
+            <el-table-column prop="name" label="教师姓名" width="150" />
+            <el-table-column prop="schoolName" label="学校" />
+            <el-table-column prop="departmentName" label="学院" />
+            <el-table-column width="80">
+                <template #default="{ row }">
+                    <el-button type="warning" plain round size="small" @click="() => {
+                        flowInfos.find(i => i.id == currentFlowId)!.outerAuditor2 = row;
+                        showOuterAuditorDialog2 = false;
+                    }">指定</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </el-dialog>
 </template>
   
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus';
-import { reactive, Ref, ref } from 'vue';
+import { Ref, ref, watch } from 'vue';
 import { ProcessDetail } from '~/entity/base/Process';
 import { TeacherInfo } from '~/entity/base/Teacher';
 import { FlowStatus } from '~/entity/enum/Flow';
@@ -135,49 +232,100 @@ import { Role } from '~/entity/enum/Role';
 import webApi from '~/util/webApi';
 import { GetFlowDetailRes, GetTeacherInfoRes, AssignAuditRes } from '~/util/webRes';
 
+import { Switch, Search } from '@element-plus/icons-vue'
+
 const innerAuditorInfos: Ref<TeacherInfo[]> = ref([]);
-webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
-    innerAuditorInfos.value = res.data.data;
-});
-
+const innerAuditorInfosBak: Ref<TeacherInfo[]> = ref([]);
 const outerAuditorInfos: Ref<TeacherInfo[]> = ref([]);
-webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.OUTER_AUDITOR] }).then(res => {
-    outerAuditorInfos.value = res.data.data;
-});
-
+const outerAuditorInfosBak: Ref<TeacherInfo[]> = ref([]);
 const flowInfos: Ref<ProcessDetail[]> = ref([]);
-webApi.post<GetFlowDetailRes, { flowStatus: FlowStatus }>('/getFlowInfo', { flowStatus: FlowStatus.TEACHER_CONFIRMED }).then(res => {
-    console.log(res)
-    flowInfos.value = res.data.data;
-});
 
-const submitForm: any = reactive({
-    assignType: 1,
-    innerTeachers: [],
-    outerTeachers: [],
-    flows: []
+const getInnerTeacherInfo = () => {
+    webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
+        const data: Array<any> = res.data.data.sort((a, b) => a.innerProcessNum - b.innerProcessNum);
+        data.forEach(i => i.choose = false)
+        innerAuditorInfos.value = data.map(i => i);
+        innerAuditorInfosBak.value = data.map(i => i);
+    });
+}
+
+const getOuterTeacherInfo = () => {
+    webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.OUTER_AUDITOR] }).then(res => {
+        const data: Array<any> = res.data.data.sort((a, b) => a.outerProcessNum - b.outerProcessNum);
+        data.forEach(i => i.choose = false)
+        outerAuditorInfos.value = data.map(i => i);
+        outerAuditorInfosBak.value = data.map(i => i);
+    });
+}
+
+//更换教师
+const showInnerAuditorDialog: Ref<boolean> = ref(false)
+const showOuterAuditorDialog1: Ref<boolean> = ref(false)
+const showOuterAuditorDialog2: Ref<boolean> = ref(false)
+
+const getFlowInfo = () => {
+    webApi.post<GetFlowDetailRes>('/getFlowInfo', { flowStatus: FlowStatus.TEACHER_CONFIRMED }).then(res => {
+        const data: Array<any> = res.data.data;
+        data.forEach(i => i.choose = false)
+        flowInfos.value = res.data.data;
+    });
+}
+
+setTimeout(() => {
+    getInnerTeacherInfo();
+    getOuterTeacherInfo();
+    getFlowInfo();
+}, 850)
+
+const currentFlowId = ref<string | number>()
+const changeTeacher = (index: number, flowId: string | number) => {
+    currentFlowId.value = flowId;
+    switch (index) {
+        case 1:
+            showInnerAuditorDialog.value = true
+            break
+        case 2:
+            showOuterAuditorDialog1.value = true
+            break
+        case 3:
+            showOuterAuditorDialog2.value = true
+            break
+    }
+}
+
+const innerSearch = ref('')
+const outerSearch = ref('')
+
+watch(innerSearch, () => {
+    if (innerSearch.value === '') {
+        getInnerTeacherInfo()
+        return
+    } else {
+        innerAuditorInfos.value = innerAuditorInfos.value.filter(i =>
+            i.name.includes(innerSearch.value) || i.teacherId?.includes(innerSearch.value) || i.schoolName?.includes(innerSearch.value) || i.departmentName?.includes(innerSearch.value)
+        )
+    }
 })
 
-const chooseTeacher = (e: any, id: string | number, type: 'i' | 'o') => {
-    if (e) {
-        if (type === 'i') submitForm.innerTeachers.push(id);
-        else submitForm.outerTeachers.push(id);
+watch(outerSearch, () => {
+    if (outerSearch.value === '') {
+        getOuterTeacherInfo()
+        return
     } else {
-        if (type == 'i')
-            submitForm.innerTeachers = submitForm.innerTeachers.filter((id: number | string) => id !== id);
-        else
-            submitForm.outerTeachers = submitForm.outerTeachers.filter((id: number | string) => id !== id);
+        outerAuditorInfos.value = outerAuditorInfos.value.filter(i =>
+            i.name.includes(outerSearch.value) || i.teacherId?.includes(outerSearch.value) || i.schoolName?.includes(outerSearch.value) || i.departmentName?.includes(outerSearch.value)
+        )
     }
-}
-const chooseStudent = (e: any, flowId: string | number) => {
-    if (e) {
-        submitForm.flows.push(flowId);
-    } else {
-        submitForm.flows = submitForm.flows.filter((id: number | string) => id !== flowId);
-    }
-}
+})
 
 const assignAudit = () => {
+    const submitForm: any = {
+        assignType: 1,
+        innerTeachers: innerAuditorInfos.value.filter(i => i.choose).map(i => i.id),
+        outerTeachers: outerAuditorInfos.value.filter(i => i.choose).map(i => i.id),
+        flows: flowInfos.value.filter(i => i.choose).map(i => i.id)
+    }
+
     if (submitForm.innerTeachers.length === 0) {
         alert('请至少选择一个内审导师');
         return
@@ -190,11 +338,12 @@ const assignAudit = () => {
         alert('请至少选择一个学生');
         return
     }
+    ElMessage(JSON.stringify(submitForm));
     webApi.post<AssignAuditRes>('/assignAudit', submitForm).then(res => {
         //删除未被选择的教师项和Flow项
-        innerAuditorInfos.value = innerAuditorInfos.value.filter(teacher => submitForm.innerTeachers.includes(teacher.id));
-        outerAuditorInfos.value = outerAuditorInfos.value.filter(teacher => submitForm.outerTeachers.includes(teacher.id));
-        flowInfos.value = flowInfos.value.filter(flow => submitForm.flows.includes(flow.id));
+        innerAuditorInfos.value = innerAuditorInfos.value.filter(i => i.choose);
+        outerAuditorInfos.value = outerAuditorInfos.value.filter(i => i.choose);
+        flowInfos.value = flowInfos.value.filter(i => i.choose);
         //遍历返回结果，补充对应的flow信息
         res.data.forEach((item: any) => {
             const flow = flowInfos.value.find(flow => flow.id === item.id);
@@ -203,7 +352,6 @@ const assignAudit = () => {
                 flow.outerAuditor1 = item.outerAuditor1;
                 flow.outerAuditor2 = item.outerAuditor2;
             }
-            console.log('flow', flow)
         });
     });
 }
@@ -219,19 +367,12 @@ const savePlan = () => {
         }).then((res) => {
             ElMessage('保存成功')
             ElMessage(JSON.stringify(res))
+            // 重新请求学生、教师以及flow数据
+            getInnerTeacherInfo();
+            getOuterTeacherInfo();
+            getFlowInfo();
         })
     })
-    // 重新请求学生、教师以及flow数据
-    webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
-        innerAuditorInfos.value = res.data.data;
-    })
-    webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.OUTER_AUDITOR] }).then(res => {
-        outerAuditorInfos.value = res.data.data;
-    });
-    webApi.post<GetFlowDetailRes, { status: FlowStatus }>('/getFlowInfo', { flowStatus: FlowStatus.TEACHER_CONFIRMED }).then(res => {
-        console.log(res)
-        flowInfos.value = res.data.data.filter(i => i.status === FlowStatus.TEACHER_CONFIRMED);
-    });
 }
 </script>
 <style>
