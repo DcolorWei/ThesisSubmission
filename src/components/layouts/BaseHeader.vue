@@ -1,5 +1,3 @@
-
-
 <template>
   <el-menu class="el-menu-demo" mode="horizontal">
     <el-menu-item index="2-1" v-if="useAuthStore().roled(Role.STUDENT)"
@@ -20,7 +18,6 @@
     </el-menu-item>
 
   </el-menu>
-  <!-- 按钮组，用于快速切换身份和工号 -->
 </template>
 <script lang="ts" setup>
 import { Role } from "~/entity/enum/Role";
@@ -29,5 +26,4 @@ import { router } from "../../route/index"
 const toPage = (path: string) => {
   router.push(path)
 }
-
 </script>
