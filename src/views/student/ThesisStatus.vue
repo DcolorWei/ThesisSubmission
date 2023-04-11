@@ -24,14 +24,14 @@
             <el-table-column prop="academicTutorName" label="学业导师姓名" />
         </el-table>
         <el-table v-if="student.studentId" :data="[{}]" style="width: 90vw">
-            <el-table-column label="答辩组信息">
+            <el-table-column label="论文状态">
                 <template #default>
-                    <el-tag type="warning" round>未进入答辩流程</el-tag>
+                    <el-tag type="warning">{{ flowStatus }}</el-tag>
                 </template>
             </el-table-column>
         </el-table>
         <!-- 若存在defence信息，则显示 -->
-        <el-table v-if="student.flow?.defenceGroup" :data="[{}]" style="width: 90vw">
+        <!-- <el-table v-if="student.flow?.defenceGroup" :data="[{}]" style="width: 90vw">
             <el-table-column label="答辩组信息">
                 <template #default>
                     <el-tag type="warning" round>{{ student.flow?.defenceGroup?.chairman?.name }}</el-tag>
@@ -40,11 +40,16 @@
                     <el-tag type="warning" round>{{ student.flow?.defenceGroup?.defenceTime }}</el-tag>
                 </template>
             </el-table-column>
-        </el-table>
+        </el-table> -->
     </el-card>
     <div style="margin-top: 20px;"></div>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
-        <el-button @click="() => requestAudit()"> 发起评审 </el-button>
+        <el-popconfirm width="300" title="发起评审后将会重置流程，确认发起？" @confirm="() => requestAudit()">
+            <template #reference>
+                <el-button>发起评审</el-button>
+            </template>
+        </el-popconfirm>
+        <el-button v-if="flowHistories.length" @click="() => toPage('uploadthesis')"> 上传论文 </el-button>
     </el-card>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
         <el-collapse class="collapse" v-model="index" accordion>
@@ -58,13 +63,16 @@
                                 <div style="width:400px">
                                     <el-text size="large" tag="b">{{ history.operation }}</el-text>
                                     <div>
+                                        <el-tag type="warning" v-if="history.score && history.score == 59">需修改</el-tag>
+                                    </div>
+                                    <div>
                                         <el-text size="default" tag="b"> {{
                                             history.comment ? '评语：' + history.comment : ''
                                         }}</el-text>
                                     </div>
                                 </div>
                                 <div>
-                                    <el-button plain disabled> 查看 </el-button>
+                                    <el-button plain disabled> {{ history.pass }} </el-button>
                                 </div>
                             </div>
                         </el-card>
@@ -79,9 +87,9 @@
     </div>
 
     <el-card body-style="width:85vw" style="margin: 10px 0;">
-        <el-button type="primary" @click="() => joinDefence()" disabled> 确认参加答辩 </el-button>
-        <el-button type="warning" @click="() => showDefenceGroupDialog = true" disabled> 选择答辩组 </el-button>
-        <el-button type="warning" @click="() => readyDuplicate()" disabled> 查重准备就绪 </el-button>
+        <el-button style="margin:5px 0" type="primary" @click="() => joinDefence()" disabled> 确认参加答辩 </el-button>
+        <el-button style="margin:5px 0" type="warning" @click="() => showDefenceGroupDialog = true" disabled> 选择答辩组 </el-button>
+        <el-button style="margin:5px 0" type="warning" @click="() => readyDuplicate()" disabled> 查重准备就绪 </el-button>
     </el-card>
 
     <!-- 弹窗，用于更换答辩组 -->
@@ -108,11 +116,10 @@
 
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus';
-import { reactive, Ref, ref } from 'vue'
-import { DefenceInfo } from '~/entity/base/Defence';
+import { reactive, ref } from 'vue'
 import { StudentInfo } from '~/entity/base/Student';
 import webApi from '~/util/webApi';
-import { FlowHistoryRes, GetDefenceGroupsRes, History, StudentInfoRes } from '~/util/webRes';
+import { FlowHistoryRes, History, StudentInfoRes } from '~/util/webRes';
 import { router } from "../../route"
 
 const index = ref(['1'])
@@ -130,32 +137,33 @@ const student: StudentInfo = reactive(
         name: "",
         phoneNumber: "",
         emailAddress: "",
-        flow: null,
         academicTutor: null,
         nominalTutor: null,
         role: [],
     }
 )
 
-webApi.get<StudentInfoRes>('/student/getStudentInfo', {}).then(res => {
-    const data = res.data
-    student.id = data.id
-    student.userId = data.userId
-    student.studentId = data.studentId
-    student.name = data.name
-    student.phoneNumber = data.phoneNumber
-    student.emailAddress = data.emailAddress
-    student.flow = data.flow
-    student.academicTutor = data.academicTutor
-    student.nominalTutor = data.nominalTutor
-    student.role = data.role
-})
-
 const flowHistories: History[] = reactive([])
-webApi.get<FlowHistoryRes>('/student/getFlowHistory', {}).then(res => {
-    flowHistories.push(...res.data.histories)
-    console.log(flowHistories)
-})
+const flowStatus = ref('')
+setTimeout(() => {
+    webApi.get<StudentInfoRes>('/student/getStudentInfo', {}).then(res => {
+        const data = res.data
+        student.id = data.id
+        student.userId = data.userId
+        student.studentId = data.studentId
+        student.name = data.name
+        student.phoneNumber = data.phoneNumber
+        student.emailAddress = data.emailAddress
+        student.flow = data.flow
+        student.academicTutor = data.academicTutor
+        student.nominalTutor = data.nominalTutor
+        student.role = data.role
+    })
+    webApi.get<FlowHistoryRes>('/student/getFlowHistory', {}).then(res => {
+        flowHistories.push(...res.data.histories)
+        flowStatus.value = res.data.status
+    })
+}, 1150)
 
 const requestAudit = () => {
     webApi.post('/student/request', {}).then(() => {
@@ -165,7 +173,6 @@ const requestAudit = () => {
             type: 'success'
         })
     })
-
 }
 
 // const joinDefence = () => {
