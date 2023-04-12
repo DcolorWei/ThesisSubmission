@@ -24,20 +24,20 @@
     </el-card>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
         <el-row :gutter="10" style="margin: 20px auto;">
-            <!-- <el-col :span="12">
+            <el-col :span="12">
                 <el-upload v-model:file-list="file1" class="upload-demo"
                     :action="`${webApi.axios.defaults.baseURL}/student/upload/thesis?anonymous=false`"
                     :headers="{ 'token': useAuthStore().token }" multiple :limit="1">
                     <el-button :icon="Upload">上传论文</el-button>
                 </el-upload>
-            </el-col> -->
-            <el-col :span="24">
+            </el-col>
+            <!-- <el-col :span="24">
                 <el-upload v-model:file-list="file2" class="upload-demo"
                     :action="`${webApi.axios.defaults.baseURL}/student/upload/thesis?anonymous=true`"
                     :headers="{ 'token': useAuthStore().token }" multiple :limit="1">
                     <el-button :icon="Upload">上传匿名论文</el-button>
                 </el-upload>
-            </el-col>
+            </el-col> -->
         </el-row>
         <el-button @click="() => toBack()">返回</el-button>
     </el-card>

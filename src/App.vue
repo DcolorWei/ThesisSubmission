@@ -2,7 +2,7 @@
   <el-config-provider namespace="ep">
     <BaseHeader />
     <div class="router">
-      <RouterView style="max-width: 90vw;margin: 0 auto;"></RouterView>
+      <RouterView style="width: 90vw;margin: 0 auto;"></RouterView>
     </div>
   </el-config-provider>
 </template>
