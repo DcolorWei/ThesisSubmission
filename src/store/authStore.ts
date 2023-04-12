@@ -44,7 +44,7 @@ export const useAuthStore = defineStore('auth', {
 
             const code = await new Promise<string>((resolve) => {
                 if (dd.env.platform == 'notInDingTalk') {
-                    alert('请在钉钉中打开')
+                    resolve('dfc2781a11c337a5b9fa991b62a09c09')
                     return
                 }
                 dd.ready(() => {
@@ -63,19 +63,16 @@ export const useAuthStore = defineStore('auth', {
             // alert(code)
             webApi.get<{ data: Role[] }>('/roles').then(res => {
                 that.roles = res.data
-                if (that.roles.includes(Role.STUDENT)) {
-                    webApi.get<StudentInfoRes>('/student/getStudentInfo').then(
-                        res => {
-                            that.studentId = res.data.studentId
-                        }
-                    )
-                } else {
-                    webApi.get<TeacherInfoRes>('/teacher/getTeacherInfo').then(
-                        res => {
-                            that.teacherId = res.data.teacherId
-                        }
-                    )
-                }
+                webApi.get<StudentInfoRes>('/student/getStudentInfo').then(
+                    res => {
+                        that.studentId = res.data.studentId
+                    }
+                )
+                webApi.get<TeacherInfoRes>('/teacher/getTeacherInfo').then(
+                    res => {
+                        that.teacherId = res.data.teacherId
+                    }
+                )
             })
         }
     }
