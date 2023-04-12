@@ -30,11 +30,6 @@
                 <el-table-column prop="departmentName" label="学院" />
                 <el-table-column prop="phoneNumber" label="电话" width="150" />
                 <el-table-column prop="emailAddress" label="邮箱" width="170" />
-                <el-table-column width="80">
-                    <template #default>
-                        <el-button type="info" plain round size="small">查看</el-button>
-                    </template>
-                </el-table-column>
             </el-table>
             <div style="display:flex;justify-content: flex-end;margin-top: 20px;">
                 <el-button type="warning" plain @click="() => edit(item)">编辑</el-button>
@@ -88,8 +83,7 @@
 </template>
 
 <script lang="ts" setup>
-import axios from 'axios';
-import { Ref, ref, reactive } from 'vue'
+import { Ref, ref, reactive} from 'vue'
 import { DefenceInfo } from '~/entity/base/Defence';
 import webApi from '~/util/webApi';
 import { GetDefenceGroupsRes, GetTeacherInfoRes, UsualRes } from '~/util/webRes';
@@ -109,7 +103,11 @@ function getTeacherInfo(pageIndex = 1) {
         if (page * size < total) return getTeacherInfo(pageIndex + 1)
     })
 }
-getTeacherInfo()
+
+setTimeout(() => {
+    getTeacherInfo()
+}, 850)
+
 const dialogVisible = ref(false)
 const form = reactive({
     id: '',
