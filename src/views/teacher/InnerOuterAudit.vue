@@ -6,7 +6,7 @@
     <el-row :gutter="20" style="width: 80vw;">
         <el-col :span="7">
             <div class="sabar-list-item">
-                <div style="margin:12px">
+                    <el-checkbox v-model="allInnerChoose" label="全选" size="large" />
                     <el-input v-model="innerSearch" placeholder="搜索内审导师">
                         <template #suffix>
                             <el-icon>
@@ -96,6 +96,7 @@
         </el-col>
         <el-col :span="10">
             <div class="sabar-list-item">
+                    <el-checkbox v-model="allFlowChoose" label="全选" size="large" />
                 <div v-for="flow, idx in flowInfos" :key="idx" style="margin: 12px;">
                     <el-card>
                         <el-descriptions :column="3" :title="flow.studentId + ' ' + flow.studentName" size="small" border>
@@ -240,6 +241,26 @@ const outerAuditorInfos: Ref<TeacherInfo[]> = ref([]);
 const outerAuditorInfosBak: Ref<TeacherInfo[]> = ref([]);
 const flowInfos: Ref<ProcessDetail[]> = ref([]);
 
+//全选按钮
+const allInnerChoose = ref()
+const allOuterChoose = ref()
+const allFlowChoose = ref()
+
+watch(allInnerChoose, () => {
+    if (allInnerChoose.value) {
+        innerAuditorInfos.value.forEach(i => i.choose = true)
+    } else {
+        innerAuditorInfos.value.forEach(i => i.choose = false)
+    }
+})
+
+watch(allOuterChoose, () => {
+    if (allOuterChoose.value) {
+        outerAuditorInfos.value.forEach(i => i.choose = true)
+    } else {
+        outerAuditorInfos.value.forEach(i => i.choose = false)
+    }
+})
 const getInnerTeacherInfo = () => {
     webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
         const data: Array<any> = res.data.data.sort((a, b) => a.innerProcessNum - b.innerProcessNum);
