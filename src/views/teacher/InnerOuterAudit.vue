@@ -6,6 +6,7 @@
     <el-row :gutter="20" style="width: 80vw;">
         <el-col :span="7">
             <div class="sabar-list-item">
+                <div style="margin:12px;">
                     <el-checkbox v-model="allInnerChoose" label="全选" size="large" />
                     <el-input v-model="innerSearch" placeholder="搜索内审导师">
                         <template #suffix>
@@ -52,6 +53,7 @@
         <el-col :span="7">
             <div class="sabar-list-item">
                 <div style="margin:12px">
+                    <el-checkbox v-model="allOuterChoose" label="全选" size="large" />
                     <el-input v-model="outerSearch" placeholder="搜索外审导师">
                         <template #suffix>
                             <el-icon>
@@ -96,7 +98,9 @@
         </el-col>
         <el-col :span="10">
             <div class="sabar-list-item">
+                <div style="margin:12px">
                     <el-checkbox v-model="allFlowChoose" label="全选" size="large" />
+                </div>
                 <div v-for="flow, idx in flowInfos" :key="idx" style="margin: 12px;">
                     <el-card>
                         <el-descriptions :column="3" :title="flow.studentId + ' ' + flow.studentName" size="small" border>
@@ -169,8 +173,9 @@
     </el-row>
 
     <!-- 弹窗，用于更换内审教师 -->
-    <el-dialog title="更换内审教师" v-model="showInnerAuditorDialog">
-        <el-table :data="innerAuditorInfos" style="width: 90vw">
+    <el-dialog title="更换内审教师" v-model="showInnerAuditorDialog" style="overflow-y: scroll;height: 50vh;">
+        <el-input v-model="searchInner"></el-input>
+        <el-table :data="innerAuditorInfosBak.filter(i => JSON.stringify(i).includes(searchInner))" style="width: 90vw">
             <el-table-column prop="teacherId" label="工号" width="110" />
             <el-table-column prop="name" label="教师姓名" width="150" />
             <el-table-column prop="schoolName" label="学校" />
@@ -187,8 +192,9 @@
     </el-dialog>
 
     <!-- 弹窗，用于更换外审教师1 -->
-    <el-dialog title="更换外审老师1" v-model="showOuterAuditorDialog1">
-        <el-table :data="outerAuditorInfosBak" style="width: 90vw">
+    <el-dialog title="更换外审老师1" v-model="showOuterAuditorDialog1" style="overflow-y: scroll;height: 50vh;">
+        <el-input v-model="searchOuter1"></el-input>
+        <el-table :data="outerAuditorInfosBak.filter(i => JSON.stringify(i).includes(searchOuter1))" style="width: 90vw">
             <el-table-column prop="teacherId" label="工号" width="110" />
             <el-table-column prop="name" label="教师姓名" width="150" />
             <el-table-column prop="schoolName" label="学校" />
@@ -205,8 +211,9 @@
     </el-dialog>
 
     <!-- 弹窗，用于更换外审教师2 -->
-    <el-dialog title="更换外审老师2" v-model="showOuterAuditorDialog2">
-        <el-table :data="outerAuditorInfosBak" style="width: 90vw">
+    <el-dialog title="更换外审老师2" v-model="showOuterAuditorDialog2" style="overflow-y: scroll;height: 50vh;">
+        <el-input v-model="searchOuter2"></el-input>
+        <el-table :data="outerAuditorInfosBak.filter(i => JSON.stringify(i).includes(searchOuter2))" style="width: 90vw">
             <el-table-column prop="teacherId" label="工号" width="110" />
             <el-table-column prop="name" label="教师姓名" width="150" />
             <el-table-column prop="schoolName" label="学校" />
@@ -241,6 +248,12 @@ const outerAuditorInfos: Ref<TeacherInfo[]> = ref([]);
 const outerAuditorInfosBak: Ref<TeacherInfo[]> = ref([]);
 const flowInfos: Ref<ProcessDetail[]> = ref([]);
 
+
+//搜索
+const searchInner = ref('')
+const searchOuter1 = ref('')
+const searchOuter2 = ref('')
+
 //全选按钮
 const allInnerChoose = ref()
 const allOuterChoose = ref()
@@ -261,6 +274,16 @@ watch(allOuterChoose, () => {
         outerAuditorInfos.value.forEach(i => i.choose = false)
     }
 })
+
+watch(allFlowChoose, () => {
+    if (allFlowChoose.value) {
+        flowInfos.value.forEach(i => i.choose = true)
+    } else {
+        flowInfos.value.forEach(i => i.choose = false)
+    }
+})
+
+
 const getInnerTeacherInfo = () => {
     webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
         const data: Array<any> = res.data.data.sort((a, b) => a.innerProcessNum - b.innerProcessNum);
@@ -359,12 +382,16 @@ const assignAudit = () => {
         alert('请至少选择一个学生');
         return
     }
-    ElMessage(JSON.stringify(submitForm));
     webApi.post<AssignAuditRes>('/assignAudit', submitForm).then(res => {
         //删除未被选择的教师项和Flow项
         innerAuditorInfos.value = innerAuditorInfos.value.filter(i => i.choose);
         outerAuditorInfos.value = outerAuditorInfos.value.filter(i => i.choose);
         flowInfos.value = flowInfos.value.filter(i => i.choose);
+        //检查flow分配有空白的项目
+        const empty = flowInfos.value.find(i => !(i.innerAuditor && i.outerAuditor1 && i.outerAuditor2))
+        if (empty) {
+            ElMessage.error("存在未分配的学生，请注意检查")
+        }
         //遍历返回结果，补充对应的flow信息
         res.data.forEach((item: any) => {
             const flow = flowInfos.value.find(flow => flow.id === item.id);
@@ -374,6 +401,14 @@ const assignAudit = () => {
                 flow.outerAuditor2 = item.outerAuditor2;
             }
         });
+        //重新排序flows，将有空白的flow放到最前
+        flowInfos.value.sort((a, b) => {
+            if (a.innerAuditor && a.outerAuditor1 && a.outerAuditor2) {
+                return 1
+            } else {
+                return -1
+            }
+        })
     });
 }
 
