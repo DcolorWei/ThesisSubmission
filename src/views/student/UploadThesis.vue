@@ -28,7 +28,7 @@
                 <el-upload v-model:file-list="file1" class="upload-demo"
                     :action="`${webApi.axios.defaults.baseURL}/student/upload/thesis?anonymous=false`"
                     :headers="{ 'token': useAuthStore().token }" multiple :limit="1">
-                    <el-button :icon="Upload">上传论文</el-button>
+                    <el-button :icon="Upload">上传匿名论文</el-button>
                 </el-upload>
             </el-col>
             <!-- <el-col :span="24">

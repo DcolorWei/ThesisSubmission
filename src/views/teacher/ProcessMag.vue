@@ -67,18 +67,20 @@
                 </el-table-column>
             </el-table>
             <el-table :data="[{}]" style="width: 90vw">
-                <!-- <el-table-column>
-                    <template #default>
-                        <el-button :icon="Download" @click="() => download(flow.id!, false)">下载论文</el-button>
-                    </template>
-                </el-table-column> -->
                 <el-table-column align="center">
+                    <template #default>
+                        <el-button :icon="Download" @click="() => download(flow.id!, false)">下载匿名论文</el-button>
+                        <el-button :icon="Upload" v-if="useAuthStore().roled(Role.ACADEMIC_REGISTRY)"
+                            @click="() => (showUploadReportDialog = true) && (currentFlowId = flow.id!)">上传查重报告</el-button>
+                    </template>
+                </el-table-column>
+                <!-- <el-table-column align="center">
                     <template #default>
                         <el-button :icon="Download" @click="() => download(flow.id!, true)">下载匿名论文</el-button>
                         <el-button :icon="Upload" v-if="useAuthStore().roled(Role.ACADEMIC_REGISTRY)"
                             @click="() => (showUploadReportDialog = true) && (currentFlowId = flow.id!)">上传查重报告</el-button>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
             </el-table>
         </el-card>
         <!-- 暂无学生与流程的信息 -->
