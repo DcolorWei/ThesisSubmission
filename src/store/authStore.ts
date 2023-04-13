@@ -44,7 +44,8 @@ export const useAuthStore = defineStore('auth', {
 
             const code = await new Promise<string>((resolve) => {
                 if (dd.env.platform == 'notInDingTalk') {
-                    resolve('dfc2781a11c337a5b9fa991b62a09c09')
+                    alert('非钉钉环境')
+                    resolve('oo777')
                     return
                 }
                 dd.ready(() => {
@@ -73,6 +74,8 @@ export const useAuthStore = defineStore('auth', {
                         that.teacherId = res.data.teacherId
                     }
                 )
+            }).catch(err => {
+                console.log(err)
             })
         }
     }

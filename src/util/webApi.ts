@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useAuthStore } from '~/store/authStore'
 import { Params } from './type'
 
-axios.defaults.baseURL = 'https://home.viger.xyz:9512'
+axios.defaults.baseURL = 'http://219.219.120.70:8080'
 const get = async <T>(url: string, params?: Params<Object>): Promise<T> => {
     if (useAuthStore().token == '') return null as T
     return new Promise<T>(r => {
@@ -14,7 +14,7 @@ const get = async <T>(url: string, params?: Params<Object>): Promise<T> => {
             headers: {
                 token: token
             }
-        }).then(res => r(res.data as T)).catch(() => r(null as T))
+        }).then(res => { r(res.data as T) }).catch(() => r(null as T))
     })
 }
 
@@ -30,7 +30,7 @@ const post = async <T, K = Params<any>>(url: string, data?: K): Promise<T> => {
                 token: useAuthStore().token
             }
         })
-            .then(res => r(res.data as T))
+            .then(res => { r(res.data as T) })
             .catch(() => r(null as T))
     })
 }
