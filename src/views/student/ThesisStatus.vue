@@ -13,9 +13,9 @@
             <el-table-column prop="email" label="邮箱" />
         </el-table>
         <el-table :data="[{
-            nominalTutorId: student.nominalTutor?.id,
+            nominalTutorId: student.nominalTutor?.teacherId,
             nominalTutorName: student.nominalTutor?.name,
-            academicTutorId: student.academicTutor?.id,
+            academicTutorId: student.academicTutor?.teacherId,
             academicTutorName: student.academicTutor?.name,
         }]" v-if="student.studentId" style="width: 90vw">
             <el-table-column prop="nominalTutorId" label="挂名导师工号" width="200" />
@@ -24,7 +24,7 @@
             <el-table-column prop="academicTutorName" label="学业导师姓名" />
         </el-table>
         <el-table v-if="student.studentId" :data="[{}]" style="width: 90vw">
-            <el-table-column label="论文状态">
+            <el-table-column label="流程状态">
                 <template #default>
                     <el-tag type="warning">{{ flowStatus }}</el-tag>
                 </template>
@@ -87,9 +87,9 @@
     </div>
 
     <el-card body-style="width:85vw" style="margin: 10px 0;">
-        <el-button style="margin:5px 0" type="primary" @click="() => joinDefence()" disabled> 确认参加答辩 </el-button>
-        <el-button style="margin:5px 0" type="warning" @click="() => showDefenceGroupDialog = true" disabled> 选择答辩组 </el-button>
-        <el-button style="margin:5px 0" type="warning" @click="() => readyDuplicate()" disabled> 查重准备就绪 </el-button>
+        <el-button style="margin:5px 5px" type="primary" @click="() => joinDefence()" disabled> 确认参加答辩 </el-button>
+        <el-button style="margin:5px 5px" type="warning" @click="() => showDefenceGroupDialog = true" disabled> 选择答辩组 </el-button>
+        <el-button style="margin:5px 5px" type="warning" @click="() => readyDuplicate()" disabled> 查重准备就绪 </el-button>
     </el-card>
 
     <!-- 弹窗，用于更换答辩组 -->

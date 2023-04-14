@@ -107,13 +107,15 @@
             </el-form-item>
             <el-form-item label="挂名导师">
                 <el-select v-model="studentInfo.nominalTutorId" filterable placeholder="请选择" style="width: 80%;">
-                    <el-option style="width: 100%;" v-for="item in teacherInfosForNA" :key="item.id"
+                    <el-option style="width: 100%;"
+                        v-for="item in teacherInfosForNA.filter(i => i.role?.includes(Role.NOMINAL_TUTOR))" :key="item.id"
                         :label="item.name + ' ' + item.teacherId" :value="item.id"></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="学术导师">
                 <el-select v-model="studentInfo.academicTutorId" filterable placeholder="请选择" style="width: 80%;">
-                    <el-option style="width: 100%;" v-for="item in teacherInfosForNA" :key="item.id"
+                    <el-option style="width: 100%;"
+                        v-for="item in teacherInfosForNA.filter(i => i.role?.includes(Role.ACADEMIC_TUTOR))" :key="item.id"
                         :label="item.name + ' ' + item.teacherId" :value="item.id"></el-option>
                 </el-select>
             </el-form-item>
@@ -136,7 +138,8 @@
             <div class="form-item"><el-input v-model="teacherInfo.name" placeholder="姓名" /></div>
             <div style="margin: 5px 0;">
                 <el-select v-model="teacherInfo.role" multiple placeholder="身份" style="width: 80%;">
-                    <el-option v-for="item in Object.entries(Role)" :key="item[0]" :label="item[0]" :value="item[0]" />
+                    <el-option v-for="item in Object.entries(Role).filter(i => i[0] != Role.STUDENT)" :key="item[0]"
+                        :label="item[0]" :value="item[0]" />
                 </el-select>
             </div>
             <div style="margin: 5px 0;">
