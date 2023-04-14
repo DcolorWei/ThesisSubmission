@@ -45,7 +45,8 @@ export const useAuthStore = defineStore('auth', {
             const code = await new Promise<string>((resolve) => {
                 if (dd.env.platform == 'notInDingTalk') {
                     alert('非钉钉环境')
-                    resolve('oo777')
+                    let token = prompt('请输入token')
+                    resolve(token?token:'')
                     return
                 }
                 dd.ready(() => {
