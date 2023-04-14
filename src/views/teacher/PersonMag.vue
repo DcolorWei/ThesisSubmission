@@ -165,6 +165,9 @@
 
     <el-dialog v-model="dialogPerson">
         <el-descriptions title="人员信息">
+            <el-descriptions-item label="UserID">
+                {{ person.userId }}
+            </el-descriptions-item>
             <el-descriptions-item label="学工号">
                 {{ person.studentId || person.teacherId }}
             </el-descriptions-item>
@@ -373,6 +376,7 @@ const save = (identify: 's' | 't') => {
     //身份为teacher
     else {
         const exist = tableData.value.find(i => i.teacherId == teacherInfo.value.teacherId)
+
         if (!exist) {
             tableData.value.unshift(teacherInfo.value)
             webApi.post<UsualRes>('/createTeacherInfo', teacherInfo.value).then(res => {
