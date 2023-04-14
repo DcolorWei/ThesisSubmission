@@ -14,10 +14,14 @@
             <el-col :span="13">
                 <!-- 根据流程状态显示筛选 -->
                 <el-radio-group v-model="flowStatusFifter">
-                    <el-radio label="全部" border @click="() => search()"></el-radio>
-                    <el-radio label="待确认" border @click="() => search(FlowStatus.FLOW_START, null, 'verify')"></el-radio>
-                    <el-radio label="待内审" border @click="() => search(FlowStatus.THESIS_AUDIT, null, 'inner')"></el-radio>
-                    <el-radio label="待外审" border @click="() => search(FlowStatus.THESIS_AUDIT, null, 'outer')"></el-radio>
+                    <el-radio label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
+                        @click="() => search()"></el-radio>
+                    <el-radio label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
+                        @click="() => search(FlowStatus.FLOW_START, null, 'verify')"></el-radio>
+                    <el-radio label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
+                        @click="() => search(FlowStatus.THESIS_AUDIT, null, 'inner')"></el-radio>
+                    <el-radio label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
+                        @click="() => search(FlowStatus.THESIS_AUDIT, null, 'outer')"></el-radio>
                 </el-radio-group>
             </el-col>
         </el-row>
@@ -34,12 +38,12 @@
                 <el-table-column prop="id" label="ID" width="100" />
                 <el-table-column label="学号" width="150">
                     <template #default>
-                        {{ useAuthStore().roles.includes(Role.ACADEMIC_REGISTRY) ? flow.studentId : "***" }}
+                        {{ userInfo.roles.includes(Role.ACADEMIC_REGISTRY) ? flow.studentId : "***" }}
                     </template>
                 </el-table-column>
                 <el-table-column label="姓名" width="150">
                     <template #default>
-                        {{ useAuthStore().roles.includes(Role.ACADEMIC_REGISTRY) ? flow.studentName : "***" }}
+                        {{ userInfo.roles.includes(Role.ACADEMIC_REGISTRY) ? flow.studentName : "***" }}
                     </template>
                 </el-table-column>
                 <el-table-column label="论文名称" width="200">
@@ -70,14 +74,14 @@
                 <el-table-column align="center">
                     <template #default>
                         <el-button :icon="Download" @click="() => download(flow.id!, false)">下载匿名论文</el-button>
-                        <el-button :icon="Upload" v-if="useAuthStore().roled(Role.ACADEMIC_REGISTRY)"
+                        <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)"
                             @click="() => (showUploadReportDialog = true) && (currentFlowId = flow.id!)">上传查重报告</el-button>
                     </template>
                 </el-table-column>
                 <!-- <el-table-column align="center">
                     <template #default>
                         <el-button :icon="Download" @click="() => download(flow.id!, true)">下载匿名论文</el-button>
-                        <el-button :icon="Upload" v-if="useAuthStore().roled(Role.ACADEMIC_REGISTRY)"
+                        <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)"
                             @click="() => (showUploadReportDialog = true) && (currentFlowId = flow.id!)">上传查重报告</el-button>
                     </template>
                 </el-table-column> -->
@@ -91,8 +95,8 @@
         </el-card>
 
         <h3 style="color:#606266;width: 90%;margin-top: 20px;text-align: left"
-            v-if="useAuthStore().roled(Role.ACADEMIC_REGISTRY)">关联教师</h3>
-        <el-card body-style="width:85vw" v-if="useAuthStore().roled(Role.ACADEMIC_REGISTRY)">
+            v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)">关联教师</h3>
+        <el-card body-style="width:85vw" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)">
             <el-table v-if="flow.verifier" style="width: 90vw"
                 :data="[flow.verifier, flow.innerAuditor, flow.outerAuditor1, flow.outerAuditor2]">
                 <el-table-column prop="teacherId" label="工号" width="150" />
@@ -116,8 +120,8 @@
         </el-card>
 
         <h3 style="color:#606266;width: 90%;margin-top: 20px;text-align: left"
-            v-if="useAuthStore().roled(Role.ACADEMIC_REGISTRY)">答辩信息</h3>
-        <el-card body-style="width:85vw" style="margin-bottom: 30px;" v-if="useAuthStore().roled(Role.ACADEMIC_REGISTRY)">
+            v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)">答辩信息</h3>
+        <el-card body-style="width:85vw" style="margin-bottom: 30px;" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)">
             <div style="display:flex;justify-content: flex-end;">
                 <el-button type="warning" plain @click="() => changeTeacher(4, flow.id!)">更换答辩组</el-button>
             </div>
@@ -228,7 +232,7 @@
                     <el-radio-button :label="false">不通过</el-radio-button>
                 </el-radio-group>
             </el-form-item>
-            <el-form-item label="审核补充">
+            <el-form-item label="审核补充" v-if="verifyForm.auditType != 'TEACHER_VERIFY'">
                 <el-radio-group v-model="verifyForm.score" :fill="verifyForm.score == 59 ? '#FFD662' : '#0097FF'">
                     <el-radio-button size="small" :label="59">需修改</el-radio-button>
                     <el-radio-button size="small" :label="60">无需修改</el-radio-button>
@@ -268,7 +272,7 @@
         <el-upload v-model="fileList" class="upload-demo"
             :action="`${webApi.axios.defaults.baseURL}/upload/duplicateReport?id=${currentFlowId!}&duplicateRate=${duplicateRate}`"
             :headers="{
-                token: useAuthStore().token, 'Content-Type': 'application/json'
+                token: userInfo.token, 'Content-Type': 'application/json'
             }" :limit="1" multiple :data="{ duplicateRate: duplicateRate }"
             :disabled="!(studentIdInput == (flows.find(i => i.id == currentFlowId)?.studentId) && duplicateRate > 0)">
             <el-button :icon="Upload"
@@ -291,8 +295,23 @@ import { useAuthStore } from '~/store/authStore';
 import { ElMessage } from 'element-plus';
 
 
+const userInfo = useAuthStore();
+
 const flows: ProcessDetail[] = reactive([])
-const flowStatusFifter = ref('全部')
+const flowStatusFifter = ref('')
+setTimeout(() => {
+    if (userInfo.roles.includes(Role.ACADEMIC_REGISTRY)) {
+        flowStatusFifter.value = '全部'
+    } else if (userInfo.roles.includes(Role.ACADEMIC_TUTOR)) {
+        flowStatusFifter.value = '待确定'
+    } else if (userInfo.roles.includes(Role.INNER_AUDITOR)) {
+        flowStatusFifter.value = '待内审'
+    } else if (userInfo.roles.includes(Role.OUTER_AUDITOR)) {
+        flowStatusFifter.value = '待外审'
+    }
+},800)
+
+
 const studentId: Ref<string> = ref('')
 const fileList = ref([])
 const currentFlowId = ref<string | number>()
@@ -312,13 +331,13 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
 
     switch (auditType) {
         case 'inner':
-            fifter.innerAuditorId = useAuthStore().teacherId
+            fifter.innerAuditorId = userInfo.teacherId
             break;
         case 'outer':
-            fifter.outerAuditorId = useAuthStore().teacherId
+            fifter.outerAuditorId = userInfo.teacherId
             break;
         case 'verify':
-            fifter.verifierId = useAuthStore().teacherId
+            fifter.verifierId = userInfo.teacherId
             break;
     }
 
@@ -338,7 +357,7 @@ const download = (id: number, anonymous: boolean) => {
         url: `/getThesis?id=${id}&anonymous=${anonymous}`,
         responseType: "blob",
         headers: {
-            token: useAuthStore().token
+            token: userInfo.token
         }
     })
         .then(res => {
@@ -384,21 +403,26 @@ const openAudit = (flowId: string | number) => {
     currentFlowId.value = flowId;
 
     const flow = flows.find(i => i.id == currentFlowId.value)
-    const tId = useAuthStore().teacherId;
+    const tId = userInfo.teacherId;
+    ElMessage(flow?.status)
     switch (flow?.status) {
         case FlowStatus.FLOW_START:
             verifyForm.auditType = "TEACHER_VERIFY";
             break;
         case FlowStatus.THESIS_AUDIT:
-            if (flows.find(i => i.id == flowId)?.innerAuditor?.teacherId == tId) {
+            if (flowStatusFifter.value == '待内审') {
                 verifyForm.auditType = "INNER_AUDIT";
                 break;
-            } else if (flow.outerAuditor1?.teacherId == tId || flow.outerAuditor2?.teacherId == tId) {
+            } else if (flowStatusFifter.value == '待外审') {
                 verifyForm.auditType = "OUTER_AUDIT";
                 break;
             }
+            break;
         case FlowStatus.WAIT_STUDENT_CONFIRM_ORAL_DEFENSE:
             verifyForm.auditType = "ORAL_DEFENCE"
+            break;
+        default:
+            verifyForm.auditType = "";
             break;
     }
 }
