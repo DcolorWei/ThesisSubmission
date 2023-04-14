@@ -24,7 +24,7 @@
             <el-table-column prop="academicTutorName" label="学业导师姓名" />
         </el-table>
         <el-table v-if="student.studentId" :data="[{}]" style="width: 90vw">
-            <el-table-column label="流程状态">
+            <el-table-column label="流程状态" v-if="flowStatus">
                 <template #default>
                     <el-tag type="warning">{{ flowStatus }}</el-tag>
                 </template>
@@ -88,7 +88,8 @@
 
     <el-card body-style="width:85vw" style="margin: 10px 0;">
         <el-button style="margin:5px 5px" type="primary" @click="() => joinDefence()" disabled> 确认参加答辩 </el-button>
-        <el-button style="margin:5px 5px" type="warning" @click="() => showDefenceGroupDialog = true" disabled> 选择答辩组 </el-button>
+        <el-button style="margin:5px 5px" type="warning" @click="() => showDefenceGroupDialog = true" disabled> 选择答辩组
+        </el-button>
         <el-button style="margin:5px 5px" type="warning" @click="() => readyDuplicate()" disabled> 查重准备就绪 </el-button>
     </el-card>
 
