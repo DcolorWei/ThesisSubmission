@@ -1,37 +1,36 @@
 <template>
     <div style="margin-top: 20px;"></div>
-    <div style="width: 90%;display: flex; align-items:flex-end;">
+    <div style="width: 90vw;display: flex; align-items:flex-end;">
         <h2 style="color:#606266">流程管理</h2>
     </div>
-    <div style="margin: 30px 0;width: 1100px;">
-        <el-row :gutter="20">
-            <el-col :span="4">
-                <el-input v-model="studentId" placeholder="学号"></el-input>
-            </el-col>
-            <el-col :span="3">
-                <el-button @click="() => search(undefined, studentId)">搜索</el-button>
-            </el-col>
-            <el-col :span="13">
-                <!-- 根据流程状态显示筛选 -->
-                <el-radio-group v-model="flowStatusFifter">
-                    <el-radio label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
-                        @click="() => search()"></el-radio>
-                    <el-radio label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
-                        @click="() => search(FlowStatus.FLOW_START, null, 'verify')"></el-radio>
-                    <el-radio label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
-                        @click="() => search(FlowStatus.THESIS_AUDIT, null, 'inner')"></el-radio>
-                    <el-radio label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
-                        @click="() => search(FlowStatus.THESIS_AUDIT, null, 'outer')"></el-radio>
-                </el-radio-group>
-            </el-col>
-        </el-row>
-    </div>
-    <div style="margin: 30px 0;width: 87vw;">
-
+    <div
+        style="margin: 30px 0;width: 80vw;display: flex;justify-content: space-around;align-items: center;flex-wrap: wrap;">
+        <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 300px;">
+            <el-input v-model="personFifter" placeholder="筛选" style="width: 200px;"></el-input>
+            <el-button type="primary" :icon="Search" plain />
+        </div>
+        <!-- 根据流程状态显示筛选 -->
+        <el-radio-group v-model="flowStatusFifter"
+            style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-around;align-items: center;">
+            <el-radio label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border @click="() => search()"></el-radio>
+            <el-radio label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
+                @click="() => search(FlowStatus.FLOW_START, null, 'verify')"></el-radio>
+            <el-radio label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
+                @click="() => search(FlowStatus.THESIS_AUDIT, null, 'inner')"></el-radio>
+            <el-radio label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
+                @click="() => search(FlowStatus.THESIS_AUDIT, null, 'outer')"></el-radio>
+        </el-radio-group>
     </div>
 
-    <div v-for="flow in flows"
-        style="border: 1px solid #999999;padding:1px 30px 20px 30px;margin-bottom: 10px;border-radius: 15px;">
+    <div style="display:flex;align-items: center;margin:10px auto">
+        <el-button :icon="ArrowLeft" color="#fff" style="border:1px solid #efefef"
+            @click="() => flowIndex > 1 ? flowIndex-- : null" />
+        <div style="margin: 0 2vh;">{{ flowIndex + 1 }}</div>
+        <el-button :icon="ArrowRight" color="#fff" style="border:1px solid #efefef"
+            @click="() => flowIndex < flows.length - 1 ? flowIndex++ : null" />
+    </div>
+    <div v-for="flow in flows.filter(i => String(i.id).includes(personFifter) || i.studentName.includes(personFifter) || i.thesisName.includes(personFifter)).slice(flowIndex, flowIndex + 1)"
+        style="border: 1px solid #999999;padding:1px 1.5vw  1.0vw 1.5vw;margin-bottom: 10px;border-radius: 15px;">
         <h3 style="color:#606266;width: 90%;margin-top: 20px;text-align: left">学生信息</h3>
         <el-card v-if="flow.id" body-style="width:85vw">
             <el-table :data="[flow]" style="width: 90vw">
@@ -56,7 +55,7 @@
                         <el-tag type="warning" round>{{ flow.status }}</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column>
+                <el-table-column v-if="flowStatusFifter !== '全部'">
                     <template #default>
                         <!-- 审核操作，点击后还将显示出弹窗，选择审核类型、是否通过，并填写score和comment -->
                         <el-button type="warning" plain round v-if="
@@ -216,7 +215,7 @@
     </el-dialog>
 
     <!-- 弹窗，选择审核类型、是否通过，并填写score和comment -->
-    <el-dialog title="审核" v-model="showAuditDialog">
+    <el-dialog title="审核" v-model="showAuditDialog" style="min-width: 380px">
         <el-form :model="verifyForm" label-width="80px">
             <el-form-item label="评审类型">
                 <el-select v-model="verifyForm.auditType" disabled>
@@ -282,7 +281,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Ref, ref, reactive } from 'vue'
+import { Ref, ref, reactive, watch } from 'vue'
 import { DefenceInfo } from '~/entity/base/Defence';
 import { ProcessDetail } from '~/entity/base/Process';
 import { TeacherInfo } from '~/entity/base/Teacher';
@@ -290,14 +289,15 @@ import { FlowStatus } from '~/entity/enum/Flow';
 import { Role } from '~/entity/enum/Role';
 import webApi from '~/util/webApi';
 import { GetDefenceGroupsRes, GetFlowDetailRes, GetTeacherInfoRes } from '~/util/webRes';
-import { Download, Upload, WarningFilled, CircleCheckFilled } from '@element-plus/icons-vue';
+import { Download, Upload, WarningFilled, CircleCheckFilled, ArrowLeft, ArrowRight, Search } from '@element-plus/icons-vue';
 import { useAuthStore } from '~/store/authStore';
 import { ElMessage } from 'element-plus';
 
 
 const userInfo = useAuthStore();
 
-const flows: ProcessDetail[] = reactive([])
+const flows: Ref<ProcessDetail[]> = ref([])
+const flowIndex = ref(0)
 const flowStatusFifter = ref('')
 setTimeout(() => {
     if (userInfo.roles.includes(Role.ACADEMIC_REGISTRY)) {
@@ -309,10 +309,13 @@ setTimeout(() => {
     } else if (userInfo.roles.includes(Role.OUTER_AUDITOR)) {
         flowStatusFifter.value = '待外审'
     }
-},800)
+}, 800)
 
 
-const studentId: Ref<string> = ref('')
+const personFifter: Ref<string> = ref('')
+watch(personFifter, () => {
+    flowIndex.value = 0
+})
 const fileList = ref([])
 const currentFlowId = ref<string | number>()
 
@@ -342,8 +345,8 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
     }
 
     webApi.post<GetFlowDetailRes>('/getFlowInfo', fifter).then(res => {
-        while (flows.length) flows.pop()
-        flows.push(...res.data.data)
+        while (flows.value.length) flows.value.pop()
+        flows.value.push(...res.data.data)
     })
 }
 
@@ -366,7 +369,7 @@ const download = (id: number, anonymous: boolean) => {
             });
             let eLink = document.createElement("a");
 
-            const thesisName = flows.find(i => i.id == id)?.thesisName!
+            const thesisName = flows.value.find(i => i.id == id)?.thesisName!
 
             eLink.setAttribute("target", "_blank")
             eLink.style.display = "none";
@@ -402,8 +405,7 @@ const openAudit = (flowId: string | number) => {
     showAuditDialog.value = true;
     currentFlowId.value = flowId;
 
-    const flow = flows.find(i => i.id == currentFlowId.value)
-    const tId = userInfo.teacherId;
+    const flow = flows.value.find(i => i.id == currentFlowId.value)
     ElMessage(flow?.status)
     switch (flow?.status) {
         case FlowStatus.FLOW_START:
@@ -429,13 +431,9 @@ const openAudit = (flowId: string | number) => {
 
 //更新流程信息
 const updateFlow = (type: 'i' | 'oa' | 'ob' | 'd', teacherId: string) => {
-    const flow = flows.find(f => String(f.id) == String(currentFlowId.value))!
-    const form = {
+    const flow = flows.value.find(f => String(f.id) == String(currentFlowId.value))!
+    const form: any = {
         id: flow.id,
-        innerAuditorId: flow.innerAuditor?.id,
-        outerAuditorId1: flow.outerAuditor1?.id,
-        outerAuditorId2: flow.outerAuditor2?.id,
-        defenceGroupId: flow.defenceGroup?.id,
     }
     switch (type) {
         case 'i':

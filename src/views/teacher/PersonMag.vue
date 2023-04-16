@@ -223,6 +223,7 @@ const file2 = ref()
 const teacherInfosForNA = ref<TeacherInfo[]>([])
 function getTeacherInfo(pageIndex = 1, content: string = '') {
     webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, {}).then(res => {
+        while (teacherInfosForNA.value.length > 0) teacherInfosForNA.value.pop()
         teacherInfosForNA.value.push(...res.data.data)
         const targets = res.data.data
             .filter(i =>
@@ -339,8 +340,8 @@ const search = (content = '') => {
 const edit = (e: any, identify: 's' | 't') => {
     if (identify == 's') {
         studentInfo.value = e
-        studentInfo.value.academicTutorId = e.academicTutor.id
-        studentInfo.value.nominalTutorId = e.nominalTutor.id
+        studentInfo.value.academicTutorId = e.academicTutor?.id || ''
+        studentInfo.value.nominalTutorId = e.nominalTutor?.id || ''
         dialogStudent.value = true
     } else {
         teacherInfo.value = e

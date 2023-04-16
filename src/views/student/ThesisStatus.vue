@@ -1,12 +1,11 @@
 <template>
     <div style="margin-top: 20px;"></div>
-    <div style="width: 90%;display: flex; align-items:flex-end;">
+    <div style="width: 90vw;display: flex; align-items:flex-end;">
         <el-text size="large" tag="b">学生信息</el-text>
     </div>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
-        <el-table
-            :data="[{ id: student.studentId, name: student.name, phone: student.phoneNumber, email: student.emailAddress }]"
-            v-if="student.studentId" style="width: 90vw">
+        <el-table v-if="student.studentId" style="width: 90vw"
+            :data="[{ id: student.studentId, name: student.name, phone: student.phoneNumber, email: student.emailAddress }]">
             <el-table-column prop="id" label="学号" width="200" />
             <el-table-column prop="name" label="姓名" width="200" />
             <el-table-column prop="phone" label="电话" width="200" />
@@ -82,7 +81,7 @@
         </el-collapse>
     </el-card>
     <div style="margin-top: 20px;"></div>
-    <div style="width: 90%;display: flex; align-items:flex-end;">
+    <div style="display: flex; align-items:flex-end;">
         <el-text size="large" tag="b">可用操作</el-text>
     </div>
 
