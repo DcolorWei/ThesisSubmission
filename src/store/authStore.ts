@@ -27,8 +27,8 @@ interface AuthCode {
 export const useAuthStore = defineStore('auth', {
     state: () => ({
         token: '',
-        studentId: null as number | string | null,
-        teacherId: null as number | string | null,
+        studentId: null as  string | null,
+        teacherId: null as  string | null,
         roles: [] as Role[]
     }),
     actions: {
@@ -46,7 +46,7 @@ export const useAuthStore = defineStore('auth', {
                 if (dd.env.platform == 'notInDingTalk') {
                     alert('非钉钉环境')
                     let token = prompt('请输入token')
-                    resolve(token?token:'')
+                    resolve(token ? token : '')
                     return
                 }
                 dd.ready(() => {
@@ -65,16 +65,19 @@ export const useAuthStore = defineStore('auth', {
             // alert(code)
             webApi.get<{ data: Role[] }>('/roles').then(res => {
                 that.roles = res.data
-                webApi.get<StudentInfoRes>('/student/getStudentInfo').then(
-                    res => {
-                        that.studentId = res.data.studentId
-                    }
-                )
-                webApi.get<TeacherInfoRes>('/teacher/getTeacherInfo').then(
-                    res => {
-                        that.teacherId = res.data.teacherId
-                    }
-                )
+                if (that.roles.includes(Role.STUDENT)) {
+                    webApi.get<StudentInfoRes>('/student/getStudentInfo').then(
+                        res => {
+                            that.studentId = res.data.studentId
+                        }
+                    )
+                } else {
+                    webApi.get<TeacherInfoRes>('/teacher/getTeacherInfo').then(
+                        res => {
+                            that.teacherId = res.data.teacherId
+                        }
+                    )
+                }
             }).catch(err => {
                 console.log(err)
             })

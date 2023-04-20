@@ -32,7 +32,7 @@ export interface ProcessDetail {
     /**
      * 归属学生id
      */
-    studentId: number | null;
+    studentId: string;
     /**
      * 归属学生姓名
      */
