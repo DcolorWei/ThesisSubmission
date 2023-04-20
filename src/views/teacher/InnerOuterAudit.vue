@@ -242,11 +242,19 @@ import { GetFlowDetailRes, GetTeacherInfoRes, AssignAuditRes } from '~/util/webR
 
 import { Switch, Search } from '@element-plus/icons-vue'
 
-const innerAuditorInfos: Ref<TeacherInfo[]> = ref([]);
-const innerAuditorInfosBak: Ref<TeacherInfo[]> = ref([]);
-const outerAuditorInfos: Ref<TeacherInfo[]> = ref([]);
-const outerAuditorInfosBak: Ref<TeacherInfo[]> = ref([]);
-const flowInfos: Ref<ProcessDetail[]> = ref([]);
+interface TeacherInfoChoose extends TeacherInfo {
+    choose?: boolean
+}
+
+interface ProcessDetailChoose extends ProcessDetail {
+    choose?: boolean
+}
+
+const innerAuditorInfos: Ref<TeacherInfoChoose[]> = ref([]);
+const innerAuditorInfosBak: Ref<TeacherInfoChoose[]> = ref([]);
+const outerAuditorInfos: Ref<TeacherInfoChoose[]> = ref([]);
+const outerAuditorInfosBak: Ref<TeacherInfoChoose[]> = ref([]);
+const flowInfos: Ref<ProcessDetailChoose[]> = ref([]);
 
 
 //搜索
@@ -297,7 +305,7 @@ const getInnerTeacherInfo = (pageIndex = 1) => {
         innerAuditorInfosBak.value = innerAuditorInfosBak.value.filter((item, index, array) => {
             return array.findIndex(i => i.teacherId == item.teacherId) === index;
         });
-        if (innerAuditorInfos.value.length < res.data.total) {
+        if (res.data.page * res.data.size < res.data.total) {
             getInnerTeacherInfo(pageIndex + 1)
         }
     });
@@ -316,7 +324,7 @@ const getOuterTeacherInfo = (pageIndex = 1) => {
         outerAuditorInfosBak.value = outerAuditorInfosBak.value.filter((item, index, array) => {
             return array.findIndex(i => i.teacherId == item.teacherId) === index;
         });
-        if (outerAuditorInfos.value.length < res.data.total) {
+        if (res.data.page * res.data.size < res.data.total) {
             getOuterTeacherInfo(pageIndex + 1)
         }
     });
@@ -330,7 +338,7 @@ const showOuterAuditorDialog2: Ref<boolean> = ref(false)
 function getFlowInfo(pageIndex = 1, filter: any) {
     webApi.post<GetFlowDetailRes>(`/getFlowInfo?current= ${pageIndex}`, filter).then(res => {
         flowInfos.value.push(...res.data.data)
-        if (flowInfos.value.length < res.data.total) {
+        if (res.data.page * res.data.size < res.data.total) {
             getFlowInfo(pageIndex + 1, filter)
         }
     })
@@ -447,7 +455,7 @@ const savePlan = () => {
             // 重新请求学生、教师以及flow数据
             getInnerTeacherInfo();
             getOuterTeacherInfo();
-            getFlowInfo();
+            getFlowInfo(1, { flowStatus: "TEACHER_CONFIRMED" });
         })
     })
 }

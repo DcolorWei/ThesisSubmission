@@ -478,7 +478,7 @@ function getFlowInfo(pageIndex = 1, filter: any) {
                 )
         }
 
-        if (flows.value.length < res.data.total && res.data.data.length) {
+        if (res.data.page * res.data.size < res.data.total) {
             getFlowInfo(pageIndex + 1, filter)
         }
     })
