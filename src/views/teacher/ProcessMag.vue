@@ -11,25 +11,26 @@
         </div>
         <!-- 根据流程状态显示筛选 -->
         <el-radio-group v-model="flowStatusFifter"
-            style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-around;align-items: center;">
-            <el-radio label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border @click="() => search()"></el-radio>
-            <el-radio label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
+            style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
+            <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
+                @click="() => search()"></el-radio>
+            <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
                 @click="() => search(FlowStatus.FLOW_START, null, 'verify')"></el-radio>
-            <el-radio label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
+            <el-radio style="margin-bottom: 10px;" label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
                 @click="() => search(FlowStatus.THESIS_AUDIT, null, 'inner')"></el-radio>
-            <el-radio label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
+            <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
                 @click="() => search(FlowStatus.THESIS_AUDIT, null, 'outer')"></el-radio>
         </el-radio-group>
     </div>
 
     <div style="display:flex;align-items: center;margin:10px auto">
         <el-button :icon="ArrowLeft" color="#fff" style="border:1px solid #efefef"
-            @click="() => flowIndex > 1 ? flowIndex-- : null" />
-        <div style="margin: 0 2vh;">{{ flowIndex + 1 }}</div>
+            @click="() => (flowIndex > 0 ? flowIndex-- : null, currentFlowId = flowsFilter[flowIndex].id)" />
+        <div style="margin: 0 2vh;">{{ flowsFilter.length && flowIndex + 1 }} / {{ flowsFilter.length }}</div>
         <el-button :icon="ArrowRight" color="#fff" style="border:1px solid #efefef"
-            @click="() => flowIndex < flows.length - 1 ? flowIndex++ : null" />
+            @click="() => (flowIndex < flowsFilter.length - 1 ? flowIndex++ : null, currentFlowId = flowsFilter[flowIndex].id)" />
     </div>
-    <div v-for="flow in flows.filter(i => String(i.id).includes(personFifter) || i.studentName.includes(personFifter) || i.thesisName.includes(personFifter)).slice(flowIndex, flowIndex + 1)"
+    <div v-for="flow in flowsFilter.slice(flowIndex, flowIndex + pagesize)"
         style="border: 1px solid #999999;padding:1px 1.5vw  1.0vw 1.5vw;margin-bottom: 10px;border-radius: 15px;">
         <h3 style="color:#606266;width: 90%;margin-top: 20px;text-align: left">学生信息</h3>
         <el-card v-if="flow.id" body-style="width:85vw">
@@ -47,7 +48,7 @@
                 </el-table-column>
                 <el-table-column label="论文名称" width="200">
                     <template #default>
-                        {{ flow.thesisName }}
+                        {{ flow.thesisName || '(未上传)' }}
                     </template>
                 </el-table-column>
                 <el-table-column label="流程状态">
@@ -56,26 +57,20 @@
                     </template>
                 </el-table-column>
                 <el-table-column v-if="flowStatusFifter !== '全部'">
-                    <template #default>
-                        <!-- 审核操作，点击后还将显示出弹窗，选择审核类型、是否通过，并填写score和comment -->
-                        <el-button type="warning" plain round v-if="
-                            flow.status === FlowStatus.FLOW_START || flow.status === FlowStatus.THESIS_AUDIT"
-                            @click="() => openAudit(flow.id!)">审核</el-button>
-                        <div v-else style="display: flex;align-items: center;">
-                            <el-button type="warning" plain round :disabled="true"
-                                @click="() => (showAuditDialog = true) && (currentFlowId = flow.id!)">审核</el-button>
-                            <div style="margin-left: 10px;">(您无需操作)</div>
-                        </div>
-                    </template>
+                    <!-- 审核操作，点击后还将显示出弹窗，选择审核类型、是否通过，并填写score和comment -->
+                    <el-button type="warning" plain round @click="() => openAudit(flow.id!)">审核</el-button>
+                    <!-- <div v-else style="display: flex;align-items: center;">
+                        <el-button type="warning" plain round :disabled="true"
+                            @click="() => (showAuditDialog = true) && (currentFlowId = flow.id!)">审核</el-button>
+                        <div style="margin-left: 10px;">(您无需操作)</div>
+                    </div> -->
                 </el-table-column>
             </el-table>
-            <el-table :data="[{}]" style="width: 90vw">
+            <el-table :data="[{}]" style="width: 90vw" v-if="flow.thesisName">
                 <el-table-column align="center">
-                    <template #default>
-                        <el-button :icon="Download" @click="() => download(flow.id!, false)">下载匿名论文</el-button>
-                        <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)"
-                            @click="() => (showUploadReportDialog = true) && (currentFlowId = flow.id!)">上传查重报告</el-button>
-                    </template>
+                    <el-button :icon="Download" @click="() => download(false)">下载匿名论文</el-button>
+                    <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)"
+                        @click="() => (showUploadReportDialog = true) && (currentFlowId = flow.id!)">上传查重报告</el-button>
                 </el-table-column>
                 <!-- <el-table-column align="center">
                     <template #default>
@@ -219,7 +214,7 @@
         <el-form :model="verifyForm" label-width="80px">
             <el-form-item label="评审类型">
                 <el-select v-model="verifyForm.auditType" disabled>
-                    <el-option label="确认" value="TEACHER_VERIFY"></el-option>
+                    <el-option label="内审" value="TEACHER_VERIFY"></el-option>
                     <el-option label="内审" value="INNER_AUDIT"></el-option>
                     <el-option label="外审" value="OUTER_AUDIT"></el-option>
                     <el-option label="答辩" value="ORAL_DEFENCE"></el-option>
@@ -238,7 +233,7 @@
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="评审意见" v-if="flows.find(i => i.id == currentFlowId)?.status != FlowStatus.FLOW_START">
-                <el-input type="textarea" :autosize="{ minRows: 8 }" v-model="verifyForm.comment" />
+                <el-input type="textarea" :autosize="{ minRows: 8 }" v-model="verifyForm.comment" placeholder="在此输入评审意见" />
             </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -297,7 +292,10 @@ import { ElMessage } from 'element-plus';
 const userInfo = useAuthStore();
 
 const flows: Ref<ProcessDetail[]> = ref([])
+const flowsFilter: Ref<ProcessDetail[]> = ref([])
+
 const flowIndex = ref(0)
+const pagesize = ref(1)
 const flowStatusFifter = ref('')
 setTimeout(() => {
     if (userInfo.roles.includes(Role.ACADEMIC_REGISTRY)) {
@@ -309,13 +307,23 @@ setTimeout(() => {
     } else if (userInfo.roles.includes(Role.OUTER_AUDITOR)) {
         flowStatusFifter.value = '待外审'
     }
-}, 800)
+}, 1000)
 
 
 const personFifter: Ref<string> = ref('')
 watch(personFifter, () => {
     flowIndex.value = 0
 })
+
+//监听flowStatusFifter和perSonFifter的变化，过滤flows
+watch([flows, flowStatusFifter, personFifter], () => {
+    flowsFilter.value = flows.value
+        .filter(i => String(i.id).includes(personFifter.value) ||
+            i.studentId?.toString().includes(personFifter.value) ||
+            i.studentName?.includes(personFifter.value) ||
+            i.thesisName?.includes(personFifter.value))
+}, { deep: true })
+
 const fileList = ref([])
 const currentFlowId = ref<string | number>()
 
@@ -328,6 +336,7 @@ const searchOuter2 = ref('')
 
 //触发search事件，搜索流程信息
 const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner' | 'outer' | 'verify') => {
+    while (flows.value.length) flows.value.pop()
     let fifter: any = {};
     if (type) fifter.flowStatus = type;
     if (studentId) fifter.studentId = studentId;
@@ -344,20 +353,15 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
             break;
     }
 
-    webApi.post<GetFlowDetailRes>('/getFlowInfo', fifter).then(res => {
-        while (flows.value.length) flows.value.pop()
-        flows.value.push(...res.data.data)
-    })
+    getFlowInfo(1, fifter)
 }
 
 setTimeout(() => { ElMessage.success('加载完毕'); search() }, 850)
-
-
 //触发download事件，下载文件
-const download = (id: number, anonymous: boolean) => {
+const download = (anonymous: boolean) => {
     webApi.axios({
         method: "GET",
-        url: `/getThesis?id=${id}&anonymous=${anonymous}`,
+        url: `/getThesis?id=${currentFlowId.value}&anonymous=${anonymous}`,
         responseType: "blob",
         headers: {
             token: userInfo.token
@@ -369,11 +373,11 @@ const download = (id: number, anonymous: boolean) => {
             });
             let eLink = document.createElement("a");
 
-            const thesisName = flows.value.find(i => i.id == id)?.thesisName!
+            const { thesisName, id } = flowsFilter.value[flowIndex.value]
 
             eLink.setAttribute("target", "_blank")
             eLink.style.display = "none";
-            eLink.download = thesisName;
+            eLink.download = id + '_' + thesisName;
             eLink.href = URL.createObjectURL(blob);
             document.body.appendChild(eLink);
             eLink.click();
@@ -428,7 +432,57 @@ const openAudit = (flowId: string | number) => {
             break;
     }
 }
+function getTeacherInfo(pageIndex = 1, type?: Role) {
+    if (type == Role.INNER_AUDITOR) {
+        webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, { role: [Role.INNER_AUDITOR] }).then(res => {
+            innerAuditorInfos.value.push(...res.data.data)
+            //去除重复项
+            innerAuditorInfos.value = innerAuditorInfos.value.filter((item, index, arr) => {
+                return arr.findIndex(i => i.id == item.id) == index
+            })
+            const { page, size, total } = res.data
+            if (page * size < total) return getTeacherInfo(pageIndex + 1, type)
+        })
+    } else if (type == Role.OUTER_AUDITOR) {
+        webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, { role: [Role.OUTER_AUDITOR] }).then(res => {
+            outerAuditorInfos.value.push(...res.data.data)
+            //去除重复项
+            outerAuditorInfos.value = outerAuditorInfos.value.filter((item, index, arr) => {
+                return arr.findIndex(i => i.id == item.id) == index
+            })
+            const { page, size, total } = res.data
+            if (page * size < total) return getTeacherInfo(pageIndex + 1, type)
+        })
+    }
+}
 
+function getFlowInfo(pageIndex = 1, filter: any) {
+    webApi.post<GetFlowDetailRes>(`/getFlowInfo?current= ${pageIndex}`, filter).then(res => {
+        flows.value.push(...res.data.data)
+        flowsFilter.value = flows.value
+        currentFlowId.value = flows.value[0]?.id
+        flowIndex.value = 0;
+        //删除flows中的重复项
+        flows.value = flows.value.filter((item, index, self) => {
+            return self.findIndex(i => i.id == item.id) == index
+        })
+        //若非教务老师，删除不是自己审核的流程
+        if (useAuthStore().roled(Role.ACADEMIC_REGISTRY) == false) {
+            flows.value = flows.value
+                .filter(i =>
+                    String(i.verifier?.id) == String(userInfo.teacherId) ||
+                    String(i.innerAuditor?.id) == String(userInfo.teacherId) ||
+                    String(i.outerAuditor1?.id) == String(userInfo.teacherId) ||
+                    String(i.outerAuditor2?.id) == String(userInfo.teacherId) ||
+                    String(i.defenceGroup?.id) == String(userInfo.teacherId)
+                )
+        }
+
+        if (flows.value.length < res.data.total && res.data.data.length) {
+            getFlowInfo(pageIndex + 1, filter)
+        }
+    })
+}
 //更新流程信息
 const updateFlow = (type: 'i' | 'oa' | 'ob' | 'd', teacherId: string) => {
     const flow = flows.value.find(f => String(f.id) == String(currentFlowId.value))!
@@ -452,12 +506,10 @@ const updateFlow = (type: 'i' | 'oa' | 'ob' | 'd', teacherId: string) => {
     webApi.post('/reassignFlow', form).then(res => {
         if (res) {
             ElMessage(JSON.stringify(res))
-            webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
-                innerAuditorInfos.value = res.data.data;
-            });
-            webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.OUTER_AUDITOR] }).then(res => {
-                outerAuditorInfos.value = res.data.data;
-            });
+            while (innerAuditorInfos.value.length > 0) innerAuditorInfos.value.pop()
+            while (innerAuditorInfos.value.length > 0) outerAuditorInfos.value.pop()
+            getTeacherInfo(1, Role.INNER_AUDITOR)
+            getTeacherInfo(1, Role.OUTER_AUDITOR)
             webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
                 defenceGroupInfos.value = res.data.data;
             });
@@ -472,23 +524,21 @@ const updateFlow = (type: 'i' | 'oa' | 'ob' | 'd', teacherId: string) => {
 }
 
 const showInnerAuditorDialog: Ref<boolean> = ref(false)
-const innerAuditorInfos: Ref<TeacherInfo[]> = ref([]);
-webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
-    innerAuditorInfos.value = res.data.data;
-});
-
 const showOuterAuditorDialog1: Ref<boolean> = ref(false)
 const showOuterAuditorDialog2: Ref<boolean> = ref(false)
 
+const innerAuditorInfos: Ref<TeacherInfo[]> = ref([]);
 const outerAuditorInfos: Ref<TeacherInfo[]> = ref([]);
-webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.OUTER_AUDITOR] }).then(res => {
-    outerAuditorInfos.value = res.data.data;
-});
 
+setTimeout(() => {
+    getTeacherInfo(1, Role.INNER_AUDITOR)
+    getTeacherInfo(1, Role.OUTER_AUDITOR)
+    getFlowInfo(1, {})
+}, 850)
 const showDefenceGroupDialog: Ref<boolean> = ref(false)
+
 const defenceGroupInfos: Ref<DefenceInfo[]> = ref([]);
 webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
-    console.log(res.data.data)
     defenceGroupInfos.value = res.data.data;
 });
 

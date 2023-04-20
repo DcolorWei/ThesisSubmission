@@ -284,21 +284,41 @@ watch(allFlowChoose, () => {
 })
 
 
-const getInnerTeacherInfo = () => {
+const getInnerTeacherInfo = (pageIndex = 1) => {
     webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
         const data: Array<any> = res.data.data.sort((a, b) => a.innerProcessNum - b.innerProcessNum);
         data.forEach(i => i.choose = false)
         innerAuditorInfos.value = data.map(i => i);
         innerAuditorInfosBak.value = data.map(i => i);
+        //去除重复项
+        innerAuditorInfos.value = innerAuditorInfos.value.filter((item, index, array) => {
+            return array.findIndex(i => i.teacherId == item.teacherId) === index;
+        });
+        innerAuditorInfosBak.value = innerAuditorInfosBak.value.filter((item, index, array) => {
+            return array.findIndex(i => i.teacherId == item.teacherId) === index;
+        });
+        if (innerAuditorInfos.value.length < res.data.total) {
+            getInnerTeacherInfo(pageIndex + 1)
+        }
     });
 }
 
-const getOuterTeacherInfo = () => {
+const getOuterTeacherInfo = (pageIndex = 1) => {
     webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.OUTER_AUDITOR] }).then(res => {
         const data: Array<any> = res.data.data.sort((a, b) => a.outerProcessNum - b.outerProcessNum);
         data.forEach(i => i.choose = false)
         outerAuditorInfos.value = data.map(i => i);
         outerAuditorInfosBak.value = data.map(i => i);
+        //去除重复项
+        outerAuditorInfos.value = outerAuditorInfos.value.filter((item, index, array) => {
+            return array.findIndex(i => i.teacherId == item.teacherId) === index;
+        });
+        outerAuditorInfosBak.value = outerAuditorInfosBak.value.filter((item, index, array) => {
+            return array.findIndex(i => i.teacherId == item.teacherId) === index;
+        });
+        if (outerAuditorInfos.value.length < res.data.total) {
+            getOuterTeacherInfo(pageIndex + 1)
+        }
     });
 }
 
@@ -307,18 +327,19 @@ const showInnerAuditorDialog: Ref<boolean> = ref(false)
 const showOuterAuditorDialog1: Ref<boolean> = ref(false)
 const showOuterAuditorDialog2: Ref<boolean> = ref(false)
 
-const getFlowInfo = () => {
-    webApi.post<GetFlowDetailRes>('/getFlowInfo', { flowStatus: FlowStatus.TEACHER_CONFIRMED }).then(res => {
-        const data: Array<any> = res.data.data;
-        data.forEach(i => i.choose = false)
-        flowInfos.value = res.data.data;
-    });
+function getFlowInfo(pageIndex = 1, filter: any) {
+    webApi.post<GetFlowDetailRes>(`/getFlowInfo?current= ${pageIndex}`, filter).then(res => {
+        flowInfos.value.push(...res.data.data)
+        if (flowInfos.value.length < res.data.total) {
+            getFlowInfo(pageIndex + 1, filter)
+        }
+    })
 }
 
 setTimeout(() => {
     getInnerTeacherInfo();
     getOuterTeacherInfo();
-    getFlowInfo();
+    getFlowInfo(1, { flowStatus: "TEACHER_CONFIRMED" });
 }, 850)
 
 const currentFlowId = ref<string | number>()
