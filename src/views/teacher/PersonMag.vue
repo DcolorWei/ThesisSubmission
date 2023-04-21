@@ -39,9 +39,9 @@
                 <el-upload v-model:file-list="file1" class="upload-demo"
                     :action="`${webApi.axios.defaults.baseURL}/upload/student`" :headers="{ 'token': useAuthStore().token }"
                     multiple :limit="1" :show-file-list="false" :on-success="() => {
-                        ElMessage.success('导入成功');
-                        search();
-                    }">
+                            ElMessage.success('导入成功');
+                            search();
+                        }">
                     <el-button type="warning" plain style="width: 80px;">导入学生</el-button>
                 </el-upload>
             </el-col>
@@ -49,34 +49,45 @@
                 <el-upload v-model:file-list="file2" class="upload-demo"
                     :action="`${webApi.axios.defaults.baseURL}/upload/teacher`" :headers="{ 'token': useAuthStore().token }"
                     multiple :limit="1" :show-file-list="false" :on-success="() => {
-                        ElMessage.success('导入成功');
-                        search();
-                    }">
+                            ElMessage.success('导入成功');
+                            search();
+                        }">
                     <el-button type="warning" plain style="width: 80px;">导入教师</el-button>
                 </el-upload>
             </el-col>
         </el-row>
     </div>
-    <div style="z-index:0">
-        <el-table :data="tableData.slice(pageIndex * 10, pageIndex * 10 + 10)" border>
-            <el-table-column label="学号/工号" width="100">
+    <div>
+        <el-table
+            :data="tableData.sort((a, b) => a.id > b.id ? 1 : -1).slice(pageIndex * 10, pageIndex * 10 + 10).filter(i => i.name != 'admin')"
+            border>
+            <el-table-column label="学号/工号" width="150">
                 <template #default="{ row }">
                     {{ row.studentId ? row.studentId : '' + row.teacherId ? row.teacherId : '' }}
                 </template>
             </el-table-column>
-            <el-table-column prop="name" label="姓名" width="130" />
+            <el-table-column prop="name" label="姓名" width="110" />
             <el-table-column prop="role" label="身份" width="200">
                 <template #default="{ row }">
-                    {{ row.role && row.role.join() }}
+                    {{ row.role &&
+                        row.role.join().replace('STUDENT', '学生')
+                            .replace('INNER_AUDITOR', '内审教师')
+                            .replace('OUTER_AUDITOR', '外审教师')
+                            .replace('ACADEMIC_REGISTRY', '教务教师')
+                            .replace('DEFENCE_GROUP_TEACHER', '答辩组教师')
+                            .replace('ACADEMIC_TUTOR', '学术导师')
+                            .replace('NOMINAL_TUTOR', '挂名导师')
+                    }}
                 </template>
             </el-table-column>
             <el-table-column prop="emailAddress" label="邮箱" width="170" />
             <el-table-column prop="phoneNumber" label="电话" width="130" />
-            <el-table-column label="操作" width="180">
+            <el-table-column label="操作" width="250">
                 <template #default="{ row }">
                     <el-button type="warning" :icon="Edit" size="small" plain
                         @click="() => edit(row, row.role == 'STUDENT' ? 's' : 't')">编辑</el-button>
                     <el-button type="primary" :icon="Search" size="small" plain @click="() => viewInfo(row)">查看</el-button>
+                    <el-button type="danger" :icon="Delete" size="small" plain @click="() => deleteUser(row)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -169,7 +180,7 @@
                 {{ person.userId }}
             </el-descriptions-item>
             <el-descriptions-item label="学工号">
-                {{ person.studentId || person.teacherId }}
+                {{ person.role?.includes(Role.STUDENT) ? person.studentId : person.teacherId }}
             </el-descriptions-item>
             <el-descriptions-item label="姓名">
                 {{ person.name }}
@@ -183,13 +194,13 @@
             <el-descriptions-item label="电话">
                 {{ person.phoneNumber }}
             </el-descriptions-item>
-            <el-descriptions-item label="职称" v-if="person.title !== ''">
+            <el-descriptions-item label="职称" v-if="person.title !== '' && !person.role.includes(Role.STUDENT)">
                 {{ person.title }}
             </el-descriptions-item>
-            <el-descriptions-item label="挂名导师" v-if="person.nominalTutor">
+            <el-descriptions-item label="挂名导师" v-if="person.nominalTutor && person.role.includes(Role.STUDENT)">
                 {{ person.nominalTutor?.name + ' ' + person.nominalTutor?.teacherId }}
             </el-descriptions-item>
-            <el-descriptions-item label="学术导师" v-if="person.academicTutor">
+            <el-descriptions-item label="学术导师" v-if="person.academicTutor && person.role.includes(Role.STUDENT)">
                 {{ person.academicTutor?.name + ' ' + person.academicTutor?.teacherId }}
             </el-descriptions-item>
         </el-descriptions>
@@ -197,21 +208,22 @@
 </template>
   
 <script lang="ts" setup>
-import { Edit, Search } from '@element-plus/icons-vue'
+import { Edit, Search, Delete } from '@element-plus/icons-vue'
 import { Ref, ref, watch } from 'vue';
 import { Title } from '~/entity/enum/Title'
 import { Role } from '~/entity/enum/Role'
 import { useAuthStore } from '~/store/authStore';
 import webApi from '~/util/webApi';
 import { GetStudentInfoRes, GetTeacherInfoRes, UsualRes } from '~/util/webRes';
-import { ElMessage } from 'element-plus';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import { TeacherInfo } from '~/entity/base/Teacher';
 
-//表单筛选
+//人员筛选
 const filter = ref({
-    identify: ''
+    identify: '' as Role | ''
 })
 watch(filter, (val) => {
+    searchContent.value = ''
     search(val.identify)
 }, { deep: true })
 //表单数据
@@ -225,6 +237,7 @@ function getTeacherInfo(pageIndex = 1, content: string = '') {
     webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, {}).then(res => {
         teacherInfosForNA.value.push(...res.data.data)
         const targets = res.data.data
+            .filter(i => filter.value.identify == '' ? true : i.role?.includes(filter.value.identify))
             .filter(i =>
                 i.teacherId?.includes(content) || i.name?.includes(content) || i.emailAddress?.includes(content) || i.phoneNumber?.includes(content) ||
                 i.role?.find(i => i == content) || i.title?.includes(content) || i.schoolName?.includes(content) || i.departmentName?.includes(content)
@@ -239,6 +252,7 @@ function getTeacherInfo(pageIndex = 1, content: string = '') {
 function getStudentInfo(pageIndex = 1, content: string = '') {
     webApi.post<GetStudentInfoRes>(`/getStudentInfoBy?current= ${pageIndex}`, {}).then(res => {
         const targets = res.data.data
+            .filter(i => filter.value.identify == '' ? true : i.role?.includes(filter.value.identify))
             .filter(i =>
                 i.studentId?.includes(content) || i.name?.includes(content) || i.emailAddress?.includes(content) || i.phoneNumber?.includes(content) ||
                 i.role?.find(i => i == content)
@@ -331,7 +345,7 @@ const search = (content = '') => {
     while (tableData.value.length) {
         tableData.value.pop()
     }
-    while (teacherInfosForNA.value.length > 0) teacherInfosForNA.value.pop()
+    while (teacherInfosForNA.value.length) teacherInfosForNA.value.pop()
     getTeacherInfo(1, content)
     getStudentInfo(1, content)
 }
@@ -354,6 +368,16 @@ const viewInfo = (e: any) => {
     Object.keys(e).forEach(key => person.value[key] = e[key])
     dialogPerson.value = true
 }
+
+const deleteUser = (e: any) => {
+    if (confirm(`确定删除 ${e.name} 吗？`)) {
+        webApi.post<UsualRes>('/deleteUser', [e.id]).then(res => {
+            tableData.value.splice(tableData.value.findIndex(i => i.id == e.id), 1)
+            ElMessage(JSON.stringify(res))
+        })
+    }
+}
+
 const save = (identify: 's' | 't') => {
     //身份为student
     if (identify == 's') {
