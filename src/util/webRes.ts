@@ -18,6 +18,7 @@ export interface FlowHistoryRes {
     data: {
         histories: History[];
         id: number;
+        thesisName: string;
         status: string;
     };
     message: string;

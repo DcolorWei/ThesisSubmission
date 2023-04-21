@@ -12,17 +12,22 @@
             <el-table-column prop="email" label="邮箱" />
         </el-table>
         <el-table :data="[{
-            nominalTutorId: student.nominalTutor?.teacherId,
-            nominalTutorName: student.nominalTutor?.name,
-            academicTutorId: student.academicTutor?.teacherId,
-            academicTutorName: student.academicTutor?.name,
-        }]" v-if="student.studentId" style="width: 90vw">
+                nominalTutorId: student.nominalTutor?.teacherId,
+                nominalTutorName: student.nominalTutor?.name,
+                academicTutorId: student.academicTutor?.teacherId,
+                academicTutorName: student.academicTutor?.name,
+            }]" v-if="student.studentId" style="width: 90vw">
             <el-table-column prop="nominalTutorId" label="挂名导师工号" width="200" />
             <el-table-column prop="nominalTutorName" label="挂名导师姓名" width="200" />
             <el-table-column prop="academicTutorId" label="学业导师工号" width="200" />
             <el-table-column prop="academicTutorName" label="学业导师姓名" />
         </el-table>
         <el-table v-if="student.studentId" :data="[{}]" style="width: 90vw">
+            <el-table-column label="论文名称" v-if="thesisName && thesisName.length">
+                <template #default>
+                    <el-tag type="warning">{{ thesisName }}</el-tag>
+                </template>
+            </el-table-column>
             <el-table-column label="流程状态" v-if="flowStatus">
                 <template #default>
                     <el-tag type="warning">{{ flowStatus }}</el-tag>
@@ -48,7 +53,7 @@
                 <el-button>发起评审</el-button>
             </template>
         </el-popconfirm>
-        <el-button v-if="flowHistories.length" @click="() => toPage('uploadthesis')"> 上传论文 </el-button>
+        <el-button v-if="flowHistories.length" @click="() => toPage('uploadthesis')"> 我的论文 </el-button>
     </el-card>
     <el-card body-style="width:85vw" style="margin-top: 10px;">
         <el-collapse class="collapse" v-model="index" accordion>
@@ -116,8 +121,9 @@
 
 <script lang="ts" setup>
 import { ElMessage } from 'element-plus';
-import { reactive, ref } from 'vue'
+import { reactive, Ref, ref } from 'vue'
 import { StudentInfo } from '~/entity/base/Student';
+import { useAuthStore } from '~/store/authStore';
 import webApi from '~/util/webApi';
 import { FlowHistoryRes, History, StudentInfoRes } from '~/util/webRes';
 import { router } from "../../route"
@@ -144,6 +150,8 @@ const student: StudentInfo = reactive(
 )
 
 const flowHistories: History[] = reactive([])
+const flowId: Ref<string | number> = ref('')
+const thesisName: Ref<string> = ref('');
 const flowStatus = ref('')
 setTimeout(() => {
     webApi.get<StudentInfoRes>('/student/getStudentInfo', {}).then(res => {
@@ -162,6 +170,8 @@ setTimeout(() => {
     webApi.get<FlowHistoryRes>('/student/getFlowHistory', {}).then(res => {
         flowHistories.push(...res.data.histories)
         flowStatus.value = res.data.status
+        thesisName.value = res.data.thesisName
+        flowId.value = res.data.id
     })
 }, 1150)
 
