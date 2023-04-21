@@ -293,18 +293,11 @@ watch(allFlowChoose, () => {
 
 
 const getInnerTeacherInfo = (pageIndex = 1) => {
-    webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.INNER_AUDITOR] }).then(res => {
+    webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, { role: [Role.INNER_AUDITOR] }).then(res => {
         const data: Array<any> = res.data.data.sort((a, b) => a.innerProcessNum - b.innerProcessNum);
         data.forEach(i => i.choose = false)
-        innerAuditorInfos.value = data.map(i => i);
-        innerAuditorInfosBak.value = data.map(i => i);
-        //去除重复项
-        innerAuditorInfos.value = innerAuditorInfos.value.filter((item, index, array) => {
-            return array.findIndex(i => i.teacherId == item.teacherId) === index;
-        });
-        innerAuditorInfosBak.value = innerAuditorInfosBak.value.filter((item, index, array) => {
-            return array.findIndex(i => i.teacherId == item.teacherId) === index;
-        });
+        innerAuditorInfos.value.push(...data);
+        innerAuditorInfosBak.value.push(...data);
         if (res.data.page * res.data.size < res.data.total) {
             getInnerTeacherInfo(pageIndex + 1)
         }
@@ -312,18 +305,11 @@ const getInnerTeacherInfo = (pageIndex = 1) => {
 }
 
 const getOuterTeacherInfo = (pageIndex = 1) => {
-    webApi.post<GetTeacherInfoRes>('/getTeacherInfoBy', { role: [Role.OUTER_AUDITOR] }).then(res => {
+    webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, { role: [Role.OUTER_AUDITOR] }).then(res => {
         const data: Array<any> = res.data.data.sort((a, b) => a.outerProcessNum - b.outerProcessNum);
         data.forEach(i => i.choose = false)
-        outerAuditorInfos.value = data.map(i => i);
-        outerAuditorInfosBak.value = data.map(i => i);
-        //去除重复项
-        outerAuditorInfos.value = outerAuditorInfos.value.filter((item, index, array) => {
-            return array.findIndex(i => i.teacherId == item.teacherId) === index;
-        });
-        outerAuditorInfosBak.value = outerAuditorInfosBak.value.filter((item, index, array) => {
-            return array.findIndex(i => i.teacherId == item.teacherId) === index;
-        });
+        outerAuditorInfos.value.push(...data);
+        outerAuditorInfosBak.value.push(...data);
         if (res.data.page * res.data.size < res.data.total) {
             getOuterTeacherInfo(pageIndex + 1)
         }
