@@ -13,7 +13,7 @@ export interface ProcessDetail {
     /**
      * 流程id
      */
-    id?: number;
+    id: number;
     /**
      * 内审教师
      */

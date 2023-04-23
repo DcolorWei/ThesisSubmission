@@ -6,6 +6,7 @@ import webApi from '~/util/webApi'
 import * as dd from 'dingtalk-jsapi';
 import { onMounted } from 'vue';
 import { StudentInfoRes, TeacherInfoRes } from '~/util/webRes';
+import { ElMessage } from 'element-plus';
 
 
 onMounted(() => {
@@ -79,7 +80,7 @@ export const useAuthStore = defineStore('auth', {
                     )
                 }
             }).catch(err => {
-                console.log(err)
+                ElMessage.error("登录失败！")
             })
         }
     }

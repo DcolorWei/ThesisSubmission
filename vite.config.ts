@@ -34,7 +34,7 @@ export default defineConfig({
   plugins: [
     vue(),
     legacy({
-      targets: ['last 2 versions and not dead, > 0.3%, Firefox ESR', 'not IE 11'],
+      targets: ['last 2 versions and not dead, > 0.2%, Firefox ESR', 'not IE 11'],
     }),
     Components({
       // allow auto load markdown components under `./src/components/`
