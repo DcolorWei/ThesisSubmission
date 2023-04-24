@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useAuthStore } from '~/store/authStore'
 import { Params } from './type'
 
-axios.defaults.baseURL = 'http://219.219.120.70:8080'
+axios.defaults.baseURL = 'http://8.130.87.114:8080'
 const get = async <T>(url: string, params?: Params<Object>): Promise<T> => {
     if (useAuthStore().token == '') return null as T
     return new Promise<T>(r => {
