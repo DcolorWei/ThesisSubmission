@@ -207,7 +207,8 @@
     </el-dialog>
 
     <!-- 弹窗，选择审核类型、是否通过，并填写score和comment -->
-    <el-dialog title="审核" v-model="showAuditDialog" style="min-width: 380px">
+    <el-dialog :title="`审核 ${flowsFilter.find(i => i.id == verifyForm.flowId)!.studentName}`" v-model="showAuditDialog"
+        style="min-width: 380px">
         <el-form :model="verifyForm" label-width="80px">
             <el-form-item label="评审类型">
                 <el-select v-model="verifyForm.auditType" disabled>
@@ -421,7 +422,6 @@ const openAudit = (flowId: string | number) => {
     currentFlowId.value = flowId;
 
     const flow = flows.value.find(i => i.id == currentFlowId.value)
-    ElMessage(flow?.status)
     switch (flow?.status) {
         case FlowStatus.FLOW_START:
             verifyForm.auditType = "TEACHER_VERIFY";
