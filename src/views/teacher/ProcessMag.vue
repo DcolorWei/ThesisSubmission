@@ -207,7 +207,8 @@
     </el-dialog>
 
     <!-- 弹窗，选择审核类型、是否通过，并填写score和comment -->
-    <el-dialog :title="'审核' + (verifyForm.flowId ? verifyForm.flowId : '')" v-model="showAuditDialog" style="min-width: 380px">
+    <el-dialog :title="'审核' + (verifyForm.flowId ? verifyForm.flowId : '')" v-model="showAuditDialog"
+        style="min-width: 380px">
         <el-form :model="verifyForm" label-width="80px">
             <el-form-item label="评审类型">
                 <el-select v-model="verifyForm.auditType" disabled>
@@ -564,6 +565,16 @@ const verifyForm: any = reactive({
     score: 60,
     comment: '',
 })
+watch(showAuditDialog, () => {
+    if (!showAuditDialog.value) {
+        verifyForm.flowId = null
+        verifyForm.auditType = ''
+        verifyForm.pass = true
+        verifyForm.score = 60
+        verifyForm.comment = ''
+    }
+})
+
 
 //保存草稿
 const savedraft = () => {
@@ -590,8 +601,8 @@ const getdraft = () => {
         verifyForm.pass = res.data.pass;
         verifyForm.score = res.data.score;
         verifyForm.comment = res.data.comment;
-    }).catch(err => {
-        ElMessage.error(JSON.stringify(err))
+    }).then(() => {
+        ElMessage.success('编辑记录已加载')
     })
 }
 
