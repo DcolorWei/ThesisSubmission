@@ -577,13 +577,6 @@ const savedraft = () => {
 
 //定时器，10秒自动保存一次草稿，暂存按钮将会置零进行暂存操作
 let timer = new Date().getTime();
-watch(verifyForm, (val) => {
-    if (new Date().getTime() - timer < 1000 * 10) return;
-    else {
-        timer = new Date().getTime();
-        savedraft();
-    }
-}, { deep: true })
 
 const getdraft = () => {
     verifyForm.flowId = String(flowsFilter.value[flowIndex.value].id);
