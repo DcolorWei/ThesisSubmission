@@ -563,8 +563,6 @@ const verifyForm: any = reactive({
 
 //保存草稿
 const savedraft = () => {
-    verifyForm.flowId = String(flowsFilter.value[flowIndex.value].id);
-    ElMessage(JSON.stringify(verifyForm))
     webApi.post('/draft', verifyForm).catch(err => {
         ElMessage.error(JSON.stringify(err))
     })
