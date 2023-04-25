@@ -207,7 +207,7 @@
     </el-dialog>
 
     <!-- 弹窗，选择审核类型、是否通过，并填写score和comment -->
-    <el-dialog :title="'审核' + verifyForm.flowId ? verifyForm.flowId : ''" v-model="showAuditDialog" style="min-width: 380px">
+    <el-dialog :title="'审核' + (verifyForm.flowId ? verifyForm.flowId : '')" v-model="showAuditDialog" style="min-width: 380px">
         <el-form :model="verifyForm" label-width="80px">
             <el-form-item label="评审类型">
                 <el-select v-model="verifyForm.auditType" disabled>
@@ -567,7 +567,7 @@ const verifyForm: any = reactive({
 
 //保存草稿
 const savedraft = () => {
-    verifyForm.flowId = String(currentFlowId.value);
+    verifyForm.flowId = String(flowsFilter.value[flowIndex.value].id);
     webApi.post('/draft', verifyForm).catch(err => {
         ElMessage.error(JSON.stringify(err))
     })
@@ -584,7 +584,7 @@ watch(verifyForm, (val) => {
 }, { deep: true })
 
 const getdraft = () => {
-    verifyForm.flowId = String(currentFlowId.value);
+    verifyForm.flowId = String(flowsFilter.value[flowIndex.value].id);
     webApi.get(`/draft?flowId=${verifyForm.flowId}`).then((res: any) => {
         verifyForm.auditType = res.data.auditType;
         verifyForm.pass = res.data.pass;
