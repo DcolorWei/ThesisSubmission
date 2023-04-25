@@ -391,7 +391,7 @@ const deleteFlow = (id: string | number) => {
         webApi.post("/deleteFlow", [id])
             .then(res => {
                 target!.status = FlowStatus.PROCESS_END
-                ElMessage.success(JSON.stringify(res))
+                ElMessage.success(JSON.stringify(res.message))
             })
     }
 
@@ -504,7 +504,7 @@ const updateFlow = (type: 'i' | 'oa' | 'ob' | 'd', teacherId: string) => {
     }
     webApi.post('/reassignFlow', form).then(res => {
         if (res) {
-            ElMessage(JSON.stringify(res))
+            ElMessage(JSON.stringify(res.message))
             while (innerAuditorInfos.value.length > 0) innerAuditorInfos.value.pop()
             while (innerAuditorInfos.value.length > 0) outerAuditorInfos.value.pop()
             getTeacherInfo(1, Role.INNER_AUDITOR)
@@ -604,7 +604,7 @@ watch(showAuditDialog, () => {
 const verify = () => {
     verifyForm.flowId = String(currentFlowId.value);
     webApi.post('/audit', verifyForm).then((res) => {
-        ElMessage(JSON.stringify(res))
+        ElMessage(JSON.stringify(res.message))
         switch (verifyForm.auditType) {
             case "INNER_AUDIT":
                 search(FlowStatus.THESIS_AUDIT, null, 'inner')

@@ -373,7 +373,7 @@ const deleteUser = (e: any) => {
     if (confirm(`确定删除 ${e.name} 吗？`)) {
         webApi.post<UsualRes>('/deleteUser', [e.id]).then(res => {
             tableData.value.splice(tableData.value.findIndex(i => i.id == e.id), 1)
-            ElMessage(JSON.stringify(res))
+            ElMessage(JSON.stringify(res.message))
         })
     }
 }
@@ -385,13 +385,13 @@ const save = (identify: 's' | 't') => {
         if (!exist || studentInfo.value.studentId == '') {
             tableData.value.unshift(studentInfo.value)
             webApi.post<UsualRes>('/createStudentInfo', studentInfo.value).then(res => {
-                ElMessage(JSON.stringify(res))
+                ElMessage(JSON.stringify(res.message))
             })
         } else {
             //@ts-ignore
             Object.keys(exist).forEach(key => exist[key] = studentInfo.value[key])
             webApi.post<UsualRes>('/updateStudentInfo', studentInfo.value).then(res => {
-                ElMessage(JSON.stringify(res))
+                ElMessage(JSON.stringify(res.message))
             })
         }
 
@@ -405,13 +405,13 @@ const save = (identify: 's' | 't') => {
         if (!exist) {
             tableData.value.unshift(teacherInfo.value)
             webApi.post<UsualRes>('/createTeacherInfo', teacherInfo.value).then(res => {
-                ElMessage(JSON.stringify(res))
+                ElMessage(JSON.stringify(res.message))
             })
         } else {
             //@ts-ignore
             Object.keys(exist).forEach(key => exist[key] = teacherInfo.value[key])
             webApi.post<UsualRes>('/updateTeacherInfo', teacherInfo.value).then(res => {
-                ElMessage(JSON.stringify(res))
+                ElMessage(JSON.stringify(res.message))
             })
         }
 
