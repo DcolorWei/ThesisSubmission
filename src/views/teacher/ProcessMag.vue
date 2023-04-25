@@ -58,7 +58,8 @@
                 </el-table-column>
                 <el-table-column v-if="flowStatusFifter !== '全部'">
                     <!-- 审核操作，点击后还将显示出弹窗，选择审核类型、是否通过，并填写score和comment -->
-                    <el-button type="warning" plain round @click="() => openAudit(flow.id!)">审核</el-button>
+                    <el-button type="warning" plain round
+                        @click="() => openAudit(flowsFilter[flowIndex].id!)">审核</el-button>
                     <!-- <div v-else style="display: flex;align-items: center;">
                         <el-button type="warning" plain round :disabled="true"
                             @click="() => (showAuditDialog = true) && (currentFlowId = flow.id!)">审核</el-button>
@@ -70,7 +71,7 @@
                 <el-table-column align="center">
                     <el-button v-if="flow.thesisName" :icon="Download" @click="() => download(false)">下载匿名论文</el-button>
                     <el-button :icon="Upload" v-if="flow.thesisName && userInfo.roled(Role.ACADEMIC_REGISTRY)"
-                        @click="() => (showUploadReportDialog = true) && (currentFlowId =flowsFilter[flowIndex].id!)">上传查重报告</el-button>
+                        @click="() => (showUploadReportDialog = true) && (currentFlowId = flowsFilter[flowIndex].id!)">上传查重报告</el-button>
                     <el-button :icon="Delete" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" type="danger" plain
                         @click="() => deleteFlow(flowsFilter[flowIndex].id)">强行终止流程</el-button>
                 </el-table-column>
@@ -386,7 +387,7 @@ const deleteFlow = (id: string | number) => {
     const target = flows.value.find(i => i.id == id)
 
     //弹窗确认
-    if (confirm("确定删除"+target?.studentName+"的流程？")) {
+    if (confirm("确定删除" + target?.studentName + "的流程？")) {
         webApi.post("/deleteFlow", [id])
             .then(res => {
                 target!.status = FlowStatus.PROCESS_END

@@ -24,7 +24,7 @@ jobs:
         npm install
         npm run build
         
-    - name: copy file via ssh password
+    - name: Server Copy
       uses: appleboy/scp-action@v0.1.4
       with:
         host: ${{ secrets.HOST }}
