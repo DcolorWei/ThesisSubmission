@@ -565,15 +565,6 @@ const verifyForm: any = reactive({
     score: 60,
     comment: '',
 })
-watch(showAuditDialog, () => {
-    if (!showAuditDialog.value) {
-        verifyForm.flowId = null
-        verifyForm.auditType = ''
-        verifyForm.pass = true
-        verifyForm.score = 60
-        verifyForm.comment = ''
-    }
-})
 
 
 //保存草稿
@@ -597,12 +588,13 @@ watch(verifyForm, (val) => {
 const getdraft = () => {
     verifyForm.flowId = String(flowsFilter.value[flowIndex.value].id);
     webApi.get(`/draft?flowId=${verifyForm.flowId}`).then((res: any) => {
-        verifyForm.auditType = res.data.auditType;
         verifyForm.pass = res.data.pass;
         verifyForm.score = res.data.score;
         verifyForm.comment = res.data.comment;
-    }).then(() => {
-        ElMessage.success('编辑记录已加载')
+    }).catch(()=>{
+        verifyForm.pass = true;
+        verifyForm.score = 60;
+        verifyForm.comment = '';
     })
 }
 
