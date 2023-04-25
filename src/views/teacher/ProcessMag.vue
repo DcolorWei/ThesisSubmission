@@ -25,10 +25,10 @@
 
     <div style="display:flex;align-items: center;margin:10px auto">
         <el-button :icon="ArrowLeft" color="#fff" style="border:1px solid #efefef"
-            @click="() => (flowIndex > 0 ? flowIndex-- : null, currentFlowId = flowsFilter[flowIndex].id)" />
+            @click="() => flowIndex > 0 ? flowIndex-- : null" />
         <div style="margin: 0 2vh;">{{ flowsFilter.length && flowIndex + 1 }} / {{ flowsFilter.length }}</div>
         <el-button :icon="ArrowRight" color="#fff" style="border:1px solid #efefef"
-            @click="() => (flowIndex < flowsFilter.length - 1 ? flowIndex++ : null, currentFlowId = flowsFilter[flowIndex].id)" />
+            @click="() => flowIndex < flowsFilter.length - 1 ? flowIndex++ : null" />
     </div>
     <div v-for="flow in flowsFilter.slice(flowIndex, flowIndex + pagesize)"
         style="border: 1px solid #999999;padding:1px 1.5vw  1.0vw 1.5vw;margin-bottom: 10px;border-radius: 15px;">
@@ -58,7 +58,8 @@
                 </el-table-column>
                 <el-table-column v-if="flowStatusFifter !== '全部'">
                     <!-- 审核操作，点击后还将显示出弹窗，选择审核类型、是否通过，并填写score和comment -->
-                    <el-button type="warning" plain round @click="() => openAudit(flow.id!)">审核</el-button>
+                    <el-button type="warning" plain round
+                        @click="() => openAudit(flowsFilter[flowIndex].id!)">审核</el-button>
                     <!-- <div v-else style="display: flex;align-items: center;">
                         <el-button type="warning" plain round :disabled="true"
                             @click="() => (showAuditDialog = true) && (currentFlowId = flow.id!)">审核</el-button>
@@ -70,7 +71,7 @@
                 <el-table-column align="center">
                     <el-button v-if="flow.thesisName" :icon="Download" @click="() => download(false)">下载匿名论文</el-button>
                     <el-button :icon="Upload" v-if="flow.thesisName && userInfo.roled(Role.ACADEMIC_REGISTRY)"
-                        @click="() => (showUploadReportDialog = true) && (currentFlowId =flowsFilter[flowIndex].id!)">上传查重报告</el-button>
+                        @click="() => showUploadReportDialog = true">上传查重报告</el-button>
                     <el-button :icon="Delete" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" type="danger" plain
                         @click="() => deleteFlow(flowsFilter[flowIndex].id)">强行终止流程</el-button>
                 </el-table-column>
@@ -206,7 +207,8 @@
     </el-dialog>
 
     <!-- 弹窗，选择审核类型、是否通过，并填写score和comment -->
-    <el-dialog title="审核" v-model="showAuditDialog" style="min-width: 380px">
+    <el-dialog :title="'审核' + (verifyForm.flowId ? verifyForm.flowId : '')" v-model="showAuditDialog"
+        style="min-width: 380px">
         <el-form :model="verifyForm" label-width="80px">
             <el-form-item label="评审类型">
                 <el-select v-model="verifyForm.auditType" disabled>
@@ -233,8 +235,7 @@
             </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
-            <el-button @click="() => (showAuditDialog = false) || (timer = 0) || (savedraft())"
-                style="width:100px">暂存并返回</el-button>
+            <el-button @click="() => showAuditDialog = false" style="width:100px">暂存并返回</el-button>
             <el-button type="primary" @click="() => verify()" style="width:100px">确定提交</el-button>
         </span>
     </el-dialog>
@@ -245,7 +246,7 @@
             <el-form-item label="学号">
                 <el-input style="width: 60%;" v-model="studentIdInput" placeholder="请确认学号">
                     <template #suffix>
-                        <el-icon v-if="studentIdInput !== flows.find(i => i.id == currentFlowId)?.studentId">
+                        <el-icon v-if="studentIdInput !== flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId">
                             <WarningFilled />
                         </el-icon>
                         <el-icon v-else>
@@ -261,13 +262,13 @@
         </el-form>
         <div style="color:red">*校验学号并输入查重率即可直接上传</div>
         <el-upload v-model="fileList" class="upload-demo"
-            :action="`${webApi.axios.defaults.baseURL}/upload/duplicateReport?id=${currentFlowId!}&duplicateRate=${duplicateRate}`"
+            :action="`${webApi.axios.defaults.baseURL}/upload/duplicateReport?id=${flowsFilter[flowIndex].id}&duplicateRate=${duplicateRate}`"
             :headers="{
                     token: userInfo.token, 'Content-Type': 'application/json'
                 }" :limit="1" multiple :data="{ duplicateRate: duplicateRate }"
-            :disabled="!(studentIdInput == (flows.find(i => i.id == currentFlowId)?.studentId) && duplicateRate > 0)">
+            :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)">
             <el-button :icon="Upload"
-                :disabled="!(studentIdInput == (flows.find(i => i.id == currentFlowId)?.studentId) && duplicateRate > 0)">上传查重报告</el-button>
+                :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)">上传查重报告</el-button>
         </el-upload>
     </el-dialog>
 </template>
@@ -322,9 +323,6 @@ watch([flows, flowStatusFifter, personFifter], () => {
 }, { deep: true })
 
 const fileList = ref([])
-const currentFlowId = ref<string | number>()
-
-
 
 //搜索，用于弹窗内部搜索
 const searchInner = ref('')
@@ -357,7 +355,7 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
 const download = (anonymous: boolean) => {
     webApi.axios({
         method: "GET",
-        url: `/getThesis?id=${currentFlowId.value}&anonymous=${anonymous}`,
+        url: `/getThesis?id=${flowsFilter.value[flowIndex.value].id}&anonymous=${anonymous}`,
         responseType: "blob",
         headers: {
             token: userInfo.token
@@ -386,18 +384,17 @@ const deleteFlow = (id: string | number) => {
     const target = flows.value.find(i => i.id == id)
 
     //弹窗确认
-    if (confirm("确定删除"+target?.studentName+"的流程？")) {
-        webApi.post("/deleteFlow", [id])
+    if (confirm("确定删除" + target?.studentName + "的流程？")) {
+        webApi.post<{ message: string }>("/deleteFlow", [id])
             .then(res => {
                 target!.status = FlowStatus.PROCESS_END
-                ElMessage.success(JSON.stringify(res))
+                ElMessage.success(JSON.stringify(res.message))
             })
     }
 
 }
 
 const changeTeacher = (index: number, flowId: string | number) => {
-    currentFlowId.value = flowId;
     switch (index) {
         case 1:
             showInnerAuditorDialog.value = true
@@ -417,10 +414,7 @@ const changeTeacher = (index: number, flowId: string | number) => {
 //打开审核窗口
 const openAudit = (flowId: string | number) => {
     showAuditDialog.value = true;
-    currentFlowId.value = flowId;
-
-    const flow = flows.value.find(i => i.id == currentFlowId.value)
-    ElMessage(flow?.status)
+    const flow = flows.value.find(i => i.id == flowsFilter.value[flowIndex.value].id)
     switch (flow?.status) {
         case FlowStatus.FLOW_START:
             verifyForm.auditType = "TEACHER_VERIFY";
@@ -441,6 +435,7 @@ const openAudit = (flowId: string | number) => {
             verifyForm.auditType = "";
             break;
     }
+
 }
 function getTeacherInfo(pageIndex = 1, type?: Role) {
     if (type == Role.INNER_AUDITOR) {
@@ -470,7 +465,6 @@ function getFlowInfo(pageIndex = 1, filter: any) {
     webApi.post<GetFlowDetailRes>(`/getFlowInfo?current= ${pageIndex}`, filter).then(res => {
         flows.value.push(...res.data.data)
         flowsFilter.value = flows.value
-        currentFlowId.value = flows.value[0]?.id
         flowIndex.value = 0;
         //删除flows中的重复项
         flows.value = flows.value.filter((item, index, self) => {
@@ -483,7 +477,7 @@ function getFlowInfo(pageIndex = 1, filter: any) {
 }
 //更新流程信息
 const updateFlow = (type: 'i' | 'oa' | 'ob' | 'd', teacherId: string) => {
-    const flow = flows.value.find(f => String(f.id) == String(currentFlowId.value))!
+    const flow = flows.value.find(f => f.id == flowsFilter.value[flowIndex.value].id)!
     const form: any = {
         id: flow.id,
     }
@@ -501,9 +495,9 @@ const updateFlow = (type: 'i' | 'oa' | 'ob' | 'd', teacherId: string) => {
             form.defenceGroupId = String(teacherId)
             break;
     }
-    webApi.post('/reassignFlow', form).then(res => {
+    webApi.post<{ message: string }>('/reassignFlow', form).then(res => {
         if (res) {
-            ElMessage(JSON.stringify(res))
+            ElMessage(JSON.stringify(res.message))
             while (innerAuditorInfos.value.length > 0) innerAuditorInfos.value.pop()
             while (innerAuditorInfos.value.length > 0) outerAuditorInfos.value.pop()
             getTeacherInfo(1, Role.INNER_AUDITOR)
@@ -550,13 +544,14 @@ webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
     defenceGroupInfos.value = res.data.data;
 });
 
-
-//预览PDF
-const previewer = () => {
-    window.open(`/pdf.html`, '_blank')
-}
 //审核相关
 const showAuditDialog: Ref<boolean> = ref(false);
+watch(showAuditDialog, () => {
+    if (showAuditDialog.value == false) {
+        savedraft()
+    }
+}, { deep: true })
+
 const verifyForm: any = reactive({
     flowId: null,
     auditType: '',
@@ -565,9 +560,9 @@ const verifyForm: any = reactive({
     comment: '',
 })
 
+
 //保存草稿
 const savedraft = () => {
-    verifyForm.flowId = String(currentFlowId.value);
     webApi.post('/draft', verifyForm).catch(err => {
         ElMessage.error(JSON.stringify(err))
     })
@@ -575,23 +570,17 @@ const savedraft = () => {
 
 //定时器，10秒自动保存一次草稿，暂存按钮将会置零进行暂存操作
 let timer = new Date().getTime();
-watch(verifyForm, (val) => {
-    if (new Date().getTime() - timer < 1000 * 10) return;
-    else {
-        timer = new Date().getTime();
-        savedraft();
-    }
-}, { deep: true })
 
 const getdraft = () => {
-    verifyForm.flowId = String(currentFlowId.value);
+    verifyForm.flowId = String(flowsFilter.value[flowIndex.value].id);
     webApi.get(`/draft?flowId=${verifyForm.flowId}`).then((res: any) => {
-        verifyForm.auditType = res.data.auditType;
         verifyForm.pass = res.data.pass;
         verifyForm.score = res.data.score;
         verifyForm.comment = res.data.comment;
-    }).catch(err => {
-        ElMessage.error(JSON.stringify(err))
+    }).catch(() => {
+        verifyForm.pass = true;
+        verifyForm.score = 60;
+        verifyForm.comment = '';
     })
 }
 
@@ -601,9 +590,9 @@ watch(showAuditDialog, () => {
     }
 })
 const verify = () => {
-    verifyForm.flowId = String(currentFlowId.value);
-    webApi.post('/audit', verifyForm).then((res) => {
-        ElMessage(JSON.stringify(res))
+    verifyForm.flowId = flowsFilter.value[flowIndex.value].id;
+    webApi.post<{ message: string }>('/audit', verifyForm).then((res) => {
+        ElMessage(JSON.stringify(res.message))
         switch (verifyForm.auditType) {
             case "INNER_AUDIT":
                 search(FlowStatus.THESIS_AUDIT, null, 'inner')

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>PDF Viewer</title>
+</head>
+
+<body>
+</body>
+
+</html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.5.141/pdf.min.js"></script>
+
+<script id="script">
+    const url = 'https://www.africau.edu/images/default/sample.pdf';
+
+    const loadingTask = pdfjsLib.getDocument(url);
+    (async () => {
+        const pdf = await loadingTask.promise;
+        console.log(pdf._pdfInfo.numPages)
+
+        // <canvas class="the-canvas" style="border: 1px solid #9d9d9d; direction: ltr;"></canvas>
+        //根据pagenum设置canvas
+        for (let i = 0; i < pdf._pdfInfo.numPages; i++) {
+            const page = await pdf.getPage(i + 1);
+            const scale = 2;
+            const viewport = page.getViewport({ scale });
+            // Support HiDPI-screens.
+            const outputScale = window.devicePixelRatio || 1;
+            const canvas = document.createElement("canvas");
+            canvas.className = "the-canvas";
+            canvas.style.border = "1px solid #9d9d9d";
+            canvas.style.direction = "ltr";
+
+            const context = canvas.getContext("2d");
+
+            canvas.width = Math.floor(viewport.width * outputScale);
+            canvas.height = Math.floor(viewport.height * outputScale);
+            canvas.style.width = Math.floor(viewport.width) + "px";
+            canvas.style.height = Math.floor(viewport.height) + "px";
+
+            const transform = outputScale !== 1
+                ? [outputScale, 0, 0, outputScale, 0, 0]
+                : null;
+
+            const renderContext = {
+                canvasContext: context,
+                transform,
+                viewport,
+            };
+            page.render(renderContext);
+
+            document.body.appendChild(canvas);
+        }
+    })();
+</script>
