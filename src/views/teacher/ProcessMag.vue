@@ -415,7 +415,6 @@ const changeTeacher = (index: number, flowId: string | number) => {
 const openAudit = (flowId: string | number) => {
     showAuditDialog.value = true;
     const flow = flows.value.find(i => i.id == flowsFilter.value[flowIndex.value].id)
-    ElMessage(`${JSON.stringify(flow)}`)
     switch (flow?.status) {
         case FlowStatus.FLOW_START:
             verifyForm.auditType = "TEACHER_VERIFY";
@@ -436,7 +435,6 @@ const openAudit = (flowId: string | number) => {
             verifyForm.auditType = "";
             break;
     }
-    ElMessage(`${JSON.stringify(verifyForm)}`)
 
 }
 function getTeacherInfo(pageIndex = 1, type?: Role) {
@@ -566,7 +564,7 @@ const verifyForm: any = reactive({
 //保存草稿
 const savedraft = () => {
     verifyForm.flowId = String(flowsFilter.value[flowIndex.value].id);
-
+    ElMessage(JSON.stringify(verifyForm))
     webApi.post('/draft', verifyForm).catch(err => {
         ElMessage.error(JSON.stringify(err))
     })
