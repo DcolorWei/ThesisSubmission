@@ -10,6 +10,9 @@
 <script lang="ts" setup>
 import { useAuthStore } from './store/authStore';
 useAuthStore().login()
+setInterval(() => {
+  useAuthStore().login()
+}, 1000 * 60 * 30)
 </script>
 <style>
 #app {
