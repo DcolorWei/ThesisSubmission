@@ -88,7 +88,7 @@
                                         外审任务数量
                                     </div>
                                 </template>
-                                {{ teacher.innerProcessNum }}
+                                {{ teacher.outerProcessNum }}
                             </el-descriptions-item>
                         </el-descriptions>
                         <el-checkbox label="选入" v-model="outerAuditorInfos[idx].choose" />

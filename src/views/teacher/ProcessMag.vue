@@ -102,17 +102,28 @@
                 <el-table-column prop="phoneNumber" label="电话" width="150" />
                 <el-table-column>
                     <template #default="{ $index }">
-                        <el-tag v-if="$index == 0" :type="flowsFilter[flowIndex].verifierPass ? 'success' : 'danger'">
+                        <!-- <el-tag v-if="$index == 0" :type="flowsFilter[flowIndex].verifierPass ? 'success' : 'danger'">
                             {{ flowsFilter[flowIndex].verifierPass ? 'pass' : 'fail' }}
+                        </el-tag> -->
+                        <el-tag v-if="$index == 0 && flowsFilter[flowIndex]?.verifier"
+                            :type="flowsFilter[flowIndex].verifierPass == true ? 'success' : flowsFilter[flowIndex].verifierPass == false ? 'danger' : 'warning'">
+                            {{ flowsFilter[flowIndex].verifierPass == true ? 'pass' : flowsFilter[flowIndex].verifierPass ==
+                                false ? 'fail' : 'waiting' }}
                         </el-tag>
-                        <el-tag v-else-if="$index == 1" :type="flowsFilter[flowIndex].innerPass ? 'success' : 'danger'">
-                            {{ flowsFilter[flowIndex].innerPass ? 'pass' : 'fail' }}
+                        <el-tag v-else-if="$index == 1 && flowsFilter[flowIndex]?.innerAuditor"
+                            :type="flowsFilter[flowIndex].innerPass == true ? 'success' : flowsFilter[flowIndex].innerPass == false ? 'danger' : 'warning'">
+                            {{ flowsFilter[flowIndex].innerPass == true ? 'pass' : flowsFilter[flowIndex].innerPass ==
+                                false ? 'fail' : 'waiting' }}
                         </el-tag>
-                        <el-tag v-else-if="$index == 2" :type="flowsFilter[flowIndex].outerPass1 ? 'success' : 'danger'">
-                            {{ flowsFilter[flowIndex].outerPass1 ? 'pass' : 'fail' }}
+                        <el-tag v-else-if="$index == 2 && flowsFilter[flowIndex]?.outerAuditor1"
+                            :type="flowsFilter[flowIndex].outerPass1 == true ? 'success' : flowsFilter[flowIndex].outerPass1 == false ? 'danger' : 'warning'">
+                            {{ flowsFilter[flowIndex].outerPass1 == true ? 'pass' : flowsFilter[flowIndex].outerPass1 ==
+                                false ? 'fail' : 'waiting' }}
                         </el-tag>
-                        <el-tag v-else-if="$index == 3" :type="flowsFilter[flowIndex].outerPass2 ? 'success' : 'danger'">
-                            {{ flowsFilter[flowIndex].outerPass2 ? 'pass' : 'fail' }}
+                        <el-tag v-else-if="$index == 3 && flowsFilter[flowIndex]?.outerAuditor2"
+                            :type="flowsFilter[flowIndex].outerPass2 == true ? 'success' : flowsFilter[flowIndex].outerPass2 == false ? 'danger' : 'warning'">
+                            {{ flowsFilter[flowIndex].outerPass2 == true ? 'pass' : flowsFilter[flowIndex].outerPass2 ==
+                                false ? 'fail' : 'waiting' }}
                         </el-tag>
                     </template>
                 </el-table-column>
