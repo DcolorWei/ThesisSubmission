@@ -487,9 +487,6 @@ function getFlowInfo(pageIndex = 1, filter: any) {
         if (res.data.page * res.data.size < res.data.total) {
             getFlowInfo(pageIndex + 1, filter)
         }
-        if (useAuthStore().teacherId == "test") {
-            ElMessage.success(JSON.stringify(flows.value[0]))
-        }
     })
 }
 //更新流程信息
