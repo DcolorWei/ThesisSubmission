@@ -91,16 +91,42 @@
             <el-table style="width: 90vw"
                 :data="[flow.verifier, flow.innerAuditor, flow.outerAuditor1, flow.outerAuditor2]">
                 <el-table-column prop="teacherId" label="工号" width="150" />
-                <el-table-column prop="name" label="教师姓名" width="150" />
-                <el-table-column label="身份" width="150">
+                <el-table-column prop="name" label="教师姓名" />
+                <el-table-column label="身份" width="110">
                     <template #default="{ $index }">
                         {{ $index == 0 ? '确认老师' : $index == 1 ? '内审老师' : '外审老师' }}
                     </template>
                 </el-table-column>
-                <el-table-column prop="schoolName" label="学校" />
-                <el-table-column prop="departmentName" label="学院" />
+                <el-table-column prop="schoolName" label="学校" width="150" />
+                <el-table-column prop="departmentName" label="学院" width="150" />
                 <el-table-column prop="phoneNumber" label="电话" width="150" />
-                <el-table-column prop="emailAddress" label="邮箱" width="170" />
+                <el-table-column>
+                    <template #default="{ $index }">
+                        <!-- <el-tag v-if="$index == 0" :type="flowsFilter[flowIndex].verifierPass ? 'success' : 'danger'">
+                            {{ flowsFilter[flowIndex].verifierPass ? 'pass' : 'fail' }}
+                        </el-tag> -->
+                        <el-tag v-if="$index == 0 && flowsFilter[flowIndex]?.verifier"
+                            :type="flowsFilter[flowIndex].verifierPass == true ? 'success' : flowsFilter[flowIndex].verifierPass == false ? 'danger' : 'warning'">
+                            {{ flowsFilter[flowIndex].verifierPass == true ? 'pass' : flowsFilter[flowIndex].verifierPass ==
+                                false ? 'fail' : 'waiting' }}
+                        </el-tag>
+                        <el-tag v-else-if="$index == 1 && flowsFilter[flowIndex]?.innerAuditor"
+                            :type="flowsFilter[flowIndex].innerPass == true ? 'success' : flowsFilter[flowIndex].innerPass == false ? 'danger' : 'warning'">
+                            {{ flowsFilter[flowIndex].innerPass == true ? 'pass' : flowsFilter[flowIndex].innerPass ==
+                                false ? 'fail' : 'waiting' }}
+                        </el-tag>
+                        <el-tag v-else-if="$index == 2 && flowsFilter[flowIndex]?.outerAuditor1"
+                            :type="flowsFilter[flowIndex].outerPass1 == true ? 'success' : flowsFilter[flowIndex].outerPass1 == false ? 'danger' : 'warning'">
+                            {{ flowsFilter[flowIndex].outerPass1 == true ? 'pass' : flowsFilter[flowIndex].outerPass1 ==
+                                false ? 'fail' : 'waiting' }}
+                        </el-tag>
+                        <el-tag v-else-if="$index == 3 && flowsFilter[flowIndex]?.outerAuditor2"
+                            :type="flowsFilter[flowIndex].outerPass2 == true ? 'success' : flowsFilter[flowIndex].outerPass2 == false ? 'danger' : 'warning'">
+                            {{ flowsFilter[flowIndex].outerPass2 == true ? 'pass' : flowsFilter[flowIndex].outerPass2 ==
+                                false ? 'fail' : 'waiting' }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column>
                     <template #default="{ $index }">
                         <el-button type="warning" plain round size="small" v-if="$index !== 0"
@@ -128,7 +154,6 @@
                 <el-table-column prop="schoolName" label="学校" />
                 <el-table-column prop="departmentName" label="学院" />
                 <el-table-column prop="phoneNumber" label="电话" width="150" />
-                <el-table-column prop="emailAddress" label="邮箱" width="170" />
             </el-table>
         </el-card>
     </div>
@@ -207,7 +232,7 @@
     </el-dialog>
 
     <!-- 弹窗，选择审核类型、是否通过，并填写score和comment -->
-    <el-dialog :title="'审核' + (verifyForm.flowId ? verifyForm.flowId : '')" v-model="showAuditDialog"
+    <el-dialog :title="'审核 ' + flowsFilter.find(i => i.id == verifyForm.flowId)?.studentName" v-model="showAuditDialog"
         style="min-width: 380px">
         <el-form :model="verifyForm" label-width="80px">
             <el-form-item label="评审类型">

@@ -7,8 +7,7 @@
         <el-table :data="[student]" style="width: 90vw">
             <el-table-column prop="studentId" label="学号" width="200" />
             <el-table-column prop="name" label="姓名" width="200" />
-            <el-table-column prop="phoneNumber" label="电话" width="200" />
-            <el-table-column prop="emailAddress" label="邮箱" />
+            <el-table-column prop="phoneNumber" label="电话"  />
         </el-table>
         <el-table :data="[{
                 nominalTutorId: student.nominalTutor?.id,

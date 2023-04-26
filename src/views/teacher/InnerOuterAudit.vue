@@ -88,7 +88,7 @@
                                         外审任务数量
                                     </div>
                                 </template>
-                                {{ teacher.innerProcessNum }}
+                                {{ teacher.outerProcessNum }}
                             </el-descriptions-item>
                         </el-descriptions>
                         <el-checkbox label="选入" v-model="outerAuditorInfos[idx].choose" />
@@ -183,9 +183,9 @@
             <el-table-column width="80">
                 <template #default="{ row }">
                     <el-button type="warning" plain round size="small" @click="() => {
-                        flowInfos.find(i => i.id == currentFlowId)!.innerAuditor = row;
-                        showInnerAuditorDialog = false;
-                    }">指定</el-button>
+                            flowInfos.find(i => i.id == currentFlowId)!.innerAuditor = row;
+                            showInnerAuditorDialog = false;
+                        }">指定</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -202,9 +202,9 @@
             <el-table-column width="80">
                 <template #default="{ row }">
                     <el-button type="warning" plain round size="small" @click="() => {
-                        flowInfos.find(i => i.id == currentFlowId)!.outerAuditor1 = row;
-                        showOuterAuditorDialog1 = false;
-                    }">指定</el-button>
+                            flowInfos.find(i => i.id == currentFlowId)!.outerAuditor1 = row;
+                            showOuterAuditorDialog1 = false;
+                        }">指定</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -221,9 +221,9 @@
             <el-table-column width="80">
                 <template #default="{ row }">
                     <el-button type="warning" plain round size="small" @click="() => {
-                        flowInfos.find(i => i.id == currentFlowId)!.outerAuditor2 = row;
-                        showOuterAuditorDialog2 = false;
-                    }">指定</el-button>
+                            flowInfos.find(i => i.id == currentFlowId)!.outerAuditor2 = row;
+                            showOuterAuditorDialog2 = false;
+                        }">指定</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -294,7 +294,7 @@ watch(allFlowChoose, () => {
 
 const getInnerTeacherInfo = (pageIndex = 1) => {
     webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, { role: [Role.INNER_AUDITOR] }).then(res => {
-        const data: Array<any> = res.data.data.sort((a, b) => a.innerProcessNum - b.innerProcessNum);
+        const data: Array<any> = res.data.data.sort((a, b) => a.innerProcessNum - b.innerProcessNum).filter(i => !["admin", "MR.Test"].includes(i.name));
         data.forEach(i => i.choose = false)
         innerAuditorInfos.value.push(...data);
         innerAuditorInfosBak.value.push(...data);
@@ -306,7 +306,7 @@ const getInnerTeacherInfo = (pageIndex = 1) => {
 
 const getOuterTeacherInfo = (pageIndex = 1) => {
     webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, { role: [Role.OUTER_AUDITOR] }).then(res => {
-        const data: Array<any> = res.data.data.sort((a, b) => a.outerProcessNum - b.outerProcessNum);
+        const data: Array<any> = res.data.data.sort((a, b) => a.outerProcessNum - b.outerProcessNum).filter(i => !["admin", "MR.Test"].includes(i.name));
         data.forEach(i => i.choose = false)
         outerAuditorInfos.value.push(...data);
         outerAuditorInfosBak.value.push(...data);
