@@ -91,8 +91,8 @@
             <el-table style="width: 90vw"
                 :data="[flow.verifier, flow.innerAuditor, flow.outerAuditor1, flow.outerAuditor2]">
                 <el-table-column prop="teacherId" label="工号" width="150" />
-                <el-table-column prop="name" label="教师姓名" width="150" />
-                <el-table-column label="身份" width="150">
+                <el-table-column prop="name" label="教师姓名" width="120" />
+                <el-table-column label="身份" width="110">
                     <template #default="{ $index }">
                         {{ $index == 0 ? '确认老师' : $index == 1 ? '内审老师' : '外审老师' }}
                     </template>
@@ -100,7 +100,6 @@
                 <el-table-column prop="schoolName" label="学校" />
                 <el-table-column prop="departmentName" label="学院" />
                 <el-table-column prop="phoneNumber" label="电话" width="150" />
-                <el-table-column prop="emailAddress" label="邮箱" width="170" />
                 <el-table-column>
                     <template #default="{ $index }">
                         <el-button type="warning" plain round size="small" v-if="$index !== 0"

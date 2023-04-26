@@ -8,8 +8,8 @@
             :data="[{ id: student.studentId, name: student.name, phone: student.phoneNumber, email: student.emailAddress }]">
             <el-table-column prop="id" label="学号" width="200" />
             <el-table-column prop="name" label="姓名" width="200" />
-            <el-table-column prop="phone" label="电话" width="200" />
-            <el-table-column prop="email" label="邮箱" />
+            <el-table-column prop="phone" label="电话" />
+            <!-- <el-table-column prop="email" label="邮箱" /> -->
         </el-table>
         <el-table :data="[{
                 nominalTutorId: student.nominalTutor?.teacherId,

@@ -80,7 +80,6 @@
                     }}
                 </template>
             </el-table-column>
-            <el-table-column prop="emailAddress" label="邮箱" width="170" />
             <el-table-column prop="phoneNumber" label="电话" width="130" />
             <el-table-column label="操作" width="250">
                 <template #default="{ row }">
@@ -188,9 +187,9 @@
             <el-descriptions-item label="身份">
                 {{ person.role.includes(Role.STUDENT) ? '学生' : '教师' }}
             </el-descriptions-item>
-            <el-descriptions-item label="邮箱">
+            <!-- <el-descriptions-item label="邮箱">
                 {{ person.emailAddress }}
-            </el-descriptions-item>
+            </el-descriptions-item> -->
             <el-descriptions-item label="电话">
                 {{ person.phoneNumber }}
             </el-descriptions-item>
