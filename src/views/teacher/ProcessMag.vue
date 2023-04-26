@@ -127,7 +127,6 @@
                 <el-table-column prop="schoolName" label="学校" />
                 <el-table-column prop="departmentName" label="学院" />
                 <el-table-column prop="phoneNumber" label="电话" width="150" />
-                <el-table-column prop="emailAddress" label="邮箱" width="170" />
             </el-table>
         </el-card>
     </div>
