@@ -97,9 +97,25 @@
                         {{ $index == 0 ? '确认老师' : $index == 1 ? '内审老师' : '外审老师' }}
                     </template>
                 </el-table-column>
-                <el-table-column prop="schoolName" label="学校" />
-                <el-table-column prop="departmentName" label="学院" />
+                <el-table-column prop="schoolName" label="学校" width="150" />
+                <el-table-column prop="departmentName" label="学院" width="150" />
                 <el-table-column prop="phoneNumber" label="电话" width="150" />
+                <el-table-column>
+                    <template #default="{ $index }">
+                        <el-tag v-if="$index == 0" :type="flowsFilter[flowIndex].verifierPass ? 'success' : 'danger'">
+                            {{ flowsFilter[flowIndex].verifierPass ? 'pass' : 'fail' }}
+                        </el-tag>
+                        <el-tag v-else-if="$index == 1" :type="flowsFilter[flowIndex].innerPass ? 'success' : 'danger'">
+                            {{ flowsFilter[flowIndex].innerPass ? 'pass' : 'fail' }}
+                        </el-tag>
+                        <el-tag v-else-if="$index == 2" :type="flowsFilter[flowIndex].outerPass1 ? 'success' : 'danger'">
+                            {{ flowsFilter[flowIndex].outerPass1 ? 'pass' : 'fail' }}
+                        </el-tag>
+                        <el-tag v-else-if="$index == 3" :type="flowsFilter[flowIndex].outerPass2 ? 'success' : 'danger'">
+                            {{ flowsFilter[flowIndex].outerPass2 ? 'pass' : 'fail' }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column>
                     <template #default="{ $index }">
                         <el-button type="warning" plain round size="small" v-if="$index !== 0"

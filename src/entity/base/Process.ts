@@ -48,4 +48,11 @@ export interface ProcessDetail {
      * 确认老师
      */
     verifier?: null | TeacherInfo;
+
+
+    verifierPass: boolean;
+    innerPass: boolean;
+    outerPass1: boolean;
+    outerPass2: boolean;
+    oralDefencePass: boolean;
 }
