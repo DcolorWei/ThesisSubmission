@@ -91,7 +91,7 @@
             <el-table style="width: 90vw"
                 :data="[flow.verifier, flow.innerAuditor, flow.outerAuditor1, flow.outerAuditor2]">
                 <el-table-column prop="teacherId" label="工号" width="150" />
-                <el-table-column prop="name" label="教师姓名" width="120" />
+                <el-table-column prop="name" label="教师姓名" />
                 <el-table-column label="身份" width="110">
                     <template #default="{ $index }">
                         {{ $index == 0 ? '确认老师' : $index == 1 ? '内审老师' : '外审老师' }}
