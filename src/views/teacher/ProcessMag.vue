@@ -6,20 +6,20 @@
     <div
         style="margin: 30px 0;width: 80vw;display: flex;justify-content: space-around;align-items: center;flex-wrap: wrap;">
         <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 300px;">
-            <el-input v-model="personFifter" placeholder="筛选" style="width: 200px;"></el-input>
+            <el-input v-model="personFifter" placeholder="筛选" :disabled="!allowFilter" style="width: 200px;"></el-input>
             <el-button type="primary" :icon="Search" plain />
         </div>
         <!-- 根据流程状态显示筛选 -->
         <el-radio-group v-model="flowStatusFifter"
             style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
             <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
-                @click="() => search()"></el-radio>
+                :disabled="!allowFilter" @click="() => search()"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
-                @click="() => search(FlowStatus.FLOW_START, null, 'verify')"></el-radio>
+                :disabled="!allowFilter" @click="() => search(FlowStatus.FLOW_START, null, 'verify')"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
-                @click="() => search(FlowStatus.THESIS_AUDIT, null, 'inner')"></el-radio>
+                :disabled="!allowFilter" @click="() => search(FlowStatus.THESIS_AUDIT, null, 'inner')"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
-                @click="() => search(FlowStatus.THESIS_AUDIT, null, 'outer')"></el-radio>
+                :disabled="!allowFilter" @click="() => search(FlowStatus.THESIS_AUDIT, null, 'outer')"></el-radio>
         </el-radio-group>
     </div>
 
@@ -309,7 +309,7 @@ import webApi from '~/util/webApi';
 import { GetDefenceGroupsRes, GetFlowDetailRes, GetTeacherInfoRes } from '~/util/webRes';
 import { Download, Upload, WarningFilled, CircleCheckFilled, ArrowLeft, ArrowRight, Search, Delete } from '@element-plus/icons-vue';
 import { useAuthStore } from '~/store/authStore';
-import { ElMessage } from 'element-plus';
+import { ElLoading, ElMessage } from 'element-plus';
 
 
 const userInfo = useAuthStore();
@@ -345,7 +345,11 @@ watch([flows, flowStatusFifter, personFifter], () => {
             i.studentId?.toString().includes(personFifter.value) ||
             i.studentName?.includes(personFifter.value) ||
             i.thesisName?.includes(personFifter.value))
+    flowIndex.value = 0
 }, { deep: true })
+
+
+const allowFilter = ref(true)
 
 const fileList = ref([])
 
@@ -487,6 +491,8 @@ function getTeacherInfo(pageIndex = 1, type?: Role) {
 }
 
 function getFlowInfo(pageIndex = 1, filter: any) {
+    //搜索时禁止筛选
+    allowFilter.value = false
     webApi.post<GetFlowDetailRes>(`/getFlowInfo?current= ${pageIndex}`, filter).then(res => {
         flows.value.push(...res.data.data)
         flowsFilter.value = flows.value
@@ -497,6 +503,9 @@ function getFlowInfo(pageIndex = 1, filter: any) {
         })
         if (res.data.page * res.data.size < res.data.total) {
             getFlowInfo(pageIndex + 1, filter)
+        } else {
+            //搜索结束后允许筛选
+            allowFilter.value = true
         }
     })
 }
