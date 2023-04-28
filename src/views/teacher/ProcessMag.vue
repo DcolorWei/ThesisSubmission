@@ -347,13 +347,15 @@ watch(flowStatusFifter, (value, old) => {
 })
 
 //监听flowStatusFifter和perSonFifter的变化，过滤flows
-watch([flows, flowStatusFifter, personFifter], () => {
+watch([flows, flowStatusFifter, personFifter], (value, old) => {
     flowsFilter.value = flows.value
         .filter(i => String(i.id).includes(personFifter.value) ||
             i.studentId?.toString().includes(personFifter.value) ||
             i.studentName?.includes(personFifter.value) ||
             i.thesisName?.includes(personFifter.value))
-    flowIndex.value = 0
+    if (value[1] !== old[1]) {
+        flowIndex.value = 0
+    }
 }, { deep: true })
 
 
