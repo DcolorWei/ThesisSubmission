@@ -13,13 +13,13 @@
         <el-radio-group v-model="flowStatusFifter"
             style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
             <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
-                 @click="() => search()"></el-radio>
+                @click="() => search()"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
-                 @click="() => search(FlowStatus.FLOW_START, null, 'verify')"></el-radio>
+                @click="() => search(FlowStatus.FLOW_START, null, 'verify')"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
-                 @click="() => search(FlowStatus.THESIS_AUDIT, null, 'inner')"></el-radio>
+                @click="() => search(FlowStatus.THESIS_AUDIT, null, 'inner')"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
-                 @click="() => search(FlowStatus.THESIS_AUDIT, null, 'outer')"></el-radio>
+                @click="() => search(FlowStatus.THESIS_AUDIT, null, 'outer')"></el-radio>
         </el-radio-group>
     </div>
 
@@ -334,8 +334,16 @@ setTimeout(() => {
 
 
 const personFifter: Ref<string> = ref('')
-watch(personFifter, () => {
-    flowIndex.value = 0
+
+//监听flowStatusFifter的变化，用于限制加载时的切换
+watch(flowStatusFifter, (value, old) => {
+    if (old == '') { }
+    else {
+        if (!allowFilter) {
+            flowStatusFifter.value = old
+            ElMessage.warning('请等待加载完成')
+        }
+    }
 })
 
 //监听flowStatusFifter和perSonFifter的变化，过滤flows
