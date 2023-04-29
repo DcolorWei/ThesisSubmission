@@ -108,6 +108,7 @@
                         <el-tag v-if="$index == 0 && flowsFilter[flowIndex]?.verifier"
                             :type="flowsFilter[flowIndex].verifyPass == true ? 'success' : flowsFilter[flowIndex].verifyPass == false ? 'danger' : 'warning'">
                             {{ flowsFilter[flowIndex].verifyPass == true ? 'pass' : flowsFilter[flowIndex].verifyPass ==
+
                                 false ? 'fail' : 'waiting' }}
                         </el-tag>
                         <el-tag v-else-if="$index == 1 && flowsFilter[flowIndex]?.innerAuditor"

@@ -51,6 +51,7 @@ export interface ProcessDetail {
 
 
     verifyPass: boolean;
+
     innerPass: boolean;
     outerPass1: boolean;
     outerPass2: boolean;
