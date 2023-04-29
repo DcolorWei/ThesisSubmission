@@ -346,6 +346,7 @@ watch(flowStatusFifter, (value, old) => {
         flowStatusFifter.value = old
         ElMessage.warning('请等待加载完成')
     }
+    ElMessage(value)
 })
 
 //监听flowStatusFifter和perSonFifter的变化，过滤flows
