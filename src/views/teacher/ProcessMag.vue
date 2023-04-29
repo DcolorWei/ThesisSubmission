@@ -377,7 +377,7 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
         while (flows.value.length) flows.value.pop()
         getFlowInfo(1, fifter)
     } else {
-        ElMessage.warning('请等待加载完成')
+        ElMessage.warning('请等待加载')
         switch (flowsFilter.value[0]?.status) {
             case FlowStatus.FLOW_START:
                 flowStatusFifter.value = '待确定'
