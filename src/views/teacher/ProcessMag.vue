@@ -390,17 +390,20 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
                 } else if (userInfo.roles.includes(Role.OUTER_AUDITOR)) {
                     flowStatusFifter.value = '待外审'
                     break;
+                } else if (userInfo.roles.includes(Role.ACADEMIC_REGISTRY)) {
+                    flowStatusFifter.value = '全部'
+                    break;
                 }
                 break;
             default:
-                if (userInfo.roles.includes(Role.INNER_AUDITOR)) {
+                if (userInfo.roles.includes(Role.ACADEMIC_REGISTRY)) {
+                    flowStatusFifter.value = '全部'
+                    break;
+                } else if (userInfo.roles.includes(Role.INNER_AUDITOR)) {
                     flowStatusFifter.value = '待内审'
                     break;
                 } else if (userInfo.roles.includes(Role.OUTER_AUDITOR)) {
                     flowStatusFifter.value = '待外审'
-                    break;
-                } else if (userInfo.roles.includes(Role.ACADEMIC_REGISTRY)) {
-                    flowStatusFifter.value = '全部'
                     break;
                 }
                 break;
