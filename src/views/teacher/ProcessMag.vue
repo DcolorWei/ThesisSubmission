@@ -376,39 +376,7 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
     if (allowFilter.value) {
         while (flows.value.length) flows.value.pop()
         getFlowInfo(1, fifter)
-    } else {
-        ElMessage.warning('请等待加载')
-        ElMessage(flowsFilter.value[0]?.status + " " + useAuthStore().roles)
-        switch (flowsFilter.value[0]?.status) {
-            case FlowStatus.FLOW_START:
-                flowStatusFifter.value = '待确定'
-                break;
-            case FlowStatus.THESIS_AUDIT:
-                if (userInfo.roles.includes(Role.INNER_AUDITOR)) {
-                    flowStatusFifter.value = '待内审'
-                    break;
-                } else if (userInfo.roles.includes(Role.OUTER_AUDITOR)) {
-                    flowStatusFifter.value = '待外审'
-                    break;
-                } else if (userInfo.roles.includes(Role.ACADEMIC_REGISTRY)) {
-                    flowStatusFifter.value = '全部'
-                    break;
-                }
-                break;
-            default:
-                if (userInfo.roles.includes(Role.ACADEMIC_REGISTRY)) {
-                    flowStatusFifter.value = '全部'
-                    break;
-                } else if (userInfo.roles.includes(Role.INNER_AUDITOR)) {
-                    flowStatusFifter.value = '待内审'
-                    break;
-                } else if (userInfo.roles.includes(Role.OUTER_AUDITOR)) {
-                    flowStatusFifter.value = '待外审'
-                    break;
-                }
-                break;
-        }
-    }
+    } 
 }
 
 //触发download事件，下载文件
