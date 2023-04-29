@@ -13,13 +13,13 @@
         <el-radio-group v-model="flowStatusFifter"
             style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
             <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
-                @click="() => { if (allowFilter) search() }"></el-radio>
+                @click="() => { if (allowFilter && flowStatusFifter !== '全部') search() }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
-                @click="() => { if (allowFilter) search(FlowStatus.FLOW_START, null, 'verify') }"></el-radio>
+                @click="() => { if (allowFilter && flowStatusFifter !== '待确认') search(FlowStatus.FLOW_START, null, 'verify') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
-                @click="() => { if (allowFilter) search(FlowStatus.THESIS_AUDIT, null, 'inner') }"></el-radio>
+                @click="() => { if (allowFilter && flowStatusFifter !== '待内审') search(FlowStatus.THESIS_AUDIT, null, 'inner') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
-                @click="() => { if (allowFilter) search(FlowStatus.THESIS_AUDIT, null, 'outer') }"></el-radio>
+                @click="() => { if (allowFilter && flowStatusFifter !== '待外审') search(FlowStatus.THESIS_AUDIT, null, 'outer') }"></el-radio>
         </el-radio-group>
     </div>
 
@@ -30,7 +30,7 @@
         <el-button :icon="ArrowRight" color="#fff" style="border:1px solid #efefef"
             @click="() => flowIndex < flowsFilter.length - 1 ? flowIndex++ : null" />
     </div>
-    <div v-for=" flow  in  flowsFilter.slice(flowIndex, flowIndex + pagesize) "
+    <div v-for="  flow   in   flowsFilter.slice(flowIndex, flowIndex + pagesize)  "
         style="border: 1px solid #999999;padding:1px 1.5vw  1.0vw 1.5vw;margin-bottom: 10px;border-radius: 15px;">
         <h3 style="color:#606266;width: 90%;margin-top: 20px;text-align: left">学生信息</h3>
         <el-card v-if="flow.id" body-style="width:85vw">
@@ -69,8 +69,7 @@
             </el-table>
             <el-table :data="[{}]" style="width: 90vw">
                 <el-table-column align="center">
-                    <el-button v-if="flow.thesisName" :icon="Download"
-                        @click="() => download(false)">下载匿名论文</el-button>
+                    <el-button v-if="flow.thesisName" :icon="Download" @click="() => download(false)">下载匿名论文</el-button>
                     <el-button :icon="Upload" v-if="flow.thesisName && userInfo.roled(Role.ACADEMIC_REGISTRY)"
                         @click="() => showUploadReportDialog = true">上传查重报告</el-button>
                     <el-button :icon="Delete" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" type="danger" plain
@@ -172,8 +171,7 @@
             <el-table-column prop="departmentName" label="学院" />
             <el-table-column width="80">
                 <template #default="{ row }">
-                    <el-button type="warning" plain round size="small"
-                        @click="() => updateFlow('i', row.id)">指定</el-button>
+                    <el-button type="warning" plain round size="small" @click="() => updateFlow('i', row.id)">指定</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -227,8 +225,7 @@
             </el-table-column>
             <el-table-column width="80">
                 <template #default="{ row }">
-                    <el-button type="warning" plain round size="small"
-                        @click="() => updateFlow('d', row.id)">指定</el-button>
+                    <el-button type="warning" plain round size="small" @click="() => updateFlow('d', row.id)">指定</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -259,8 +256,7 @@
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="评审意见" v-if="verifyForm.auditType != 'TEACHER_VERIFY'">
-                <el-input type="textarea" :autosize="{ minRows: 8 }" v-model="verifyForm.comment"
-                    placeholder="在此输入评审意见" />
+                <el-input type="textarea" :autosize="{ minRows: 8 }" v-model="verifyForm.comment" placeholder="在此输入评审意见" />
             </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -355,6 +351,7 @@ watch([flows, flowStatusFifter, personFifter], (value, old) => {
             i.studentId?.toString().includes(personFifter.value) ||
             i.studentName?.includes(personFifter.value) ||
             i.thesisName?.includes(personFifter.value))
+
     if (value[1] !== old[1]) {
         flowIndex.value = 0
     }
@@ -675,4 +672,5 @@ const duplicateRate = ref(0)
 .timeline {
     padding-left: 0;
     padding-top: 5px;
-}</style>
+}
+</style>
