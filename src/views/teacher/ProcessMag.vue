@@ -362,7 +362,6 @@ const searchOuter2 = ref('')
 
 //触发search事件，搜索流程信息
 const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner' | 'outer' | 'verify') => {
-    while (flows.value.length) flows.value.pop()
     let fifter: any = {};
     if (type) fifter.flowStatus = type;
     if (studentId) fifter.studentId = studentId;
@@ -378,7 +377,9 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
             fifter.verifierId = userInfo.teacherId
             break;
     }
+    ElMessage.info('加载中' + allowFilter.value)
     if (!allowFilter.value) {
+        ElMessage.warning('请等待加载完成')
         switch (auditType) {
             case 'inner':
                 flowStatusFifter.value = '待内审'
@@ -390,8 +391,8 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
                 flowStatusFifter.value = '待确认'
                 break;
         }
-        ElMessage.warning('请等待加载完成')
     } else {
+        while (flows.value.length) flows.value.pop()
         getFlowInfo(1, fifter)
     }
 }
