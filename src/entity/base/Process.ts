@@ -50,7 +50,8 @@ export interface ProcessDetail {
     verifier?: null | TeacherInfo;
 
 
-    verifierPass: boolean;
+    verifyPass: boolean;
+
     innerPass: boolean;
     outerPass1: boolean;
     outerPass2: boolean;

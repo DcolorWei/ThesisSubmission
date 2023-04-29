@@ -13,13 +13,13 @@
         <el-radio-group v-model="flowStatusFifter"
             style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
             <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
-                @click="() => search()"></el-radio>
+                @click="() => { if (allowFilter && flowStatusFifter !== '全部') search() }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
-                @click="() => search(FlowStatus.FLOW_START, null, 'verify')"></el-radio>
+                @click="() => { if (allowFilter && flowStatusFifter !== '待确认') search(FlowStatus.FLOW_START, null, 'verify') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
-                @click="() => search(FlowStatus.THESIS_AUDIT, null, 'inner')"></el-radio>
+                @click="() => { if (allowFilter && flowStatusFifter !== '待内审') search(FlowStatus.THESIS_AUDIT, null, 'inner') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
-                @click="() => search(FlowStatus.THESIS_AUDIT, null, 'outer')"></el-radio>
+                @click="() => { if (allowFilter && flowStatusFifter !== '待外审') search(FlowStatus.THESIS_AUDIT, null, 'outer') }"></el-radio>
         </el-radio-group>
     </div>
 
@@ -30,7 +30,7 @@
         <el-button :icon="ArrowRight" color="#fff" style="border:1px solid #efefef"
             @click="() => flowIndex < flowsFilter.length - 1 ? flowIndex++ : null" />
     </div>
-    <div v-for="flow in flowsFilter.slice(flowIndex, flowIndex + pagesize)"
+    <div v-for="  flow   in   flowsFilter.slice(flowIndex, flowIndex + pagesize)  "
         style="border: 1px solid #999999;padding:1px 1.5vw  1.0vw 1.5vw;margin-bottom: 10px;border-radius: 15px;">
         <h3 style="color:#606266;width: 90%;margin-top: 20px;text-align: left">学生信息</h3>
         <el-card v-if="flow.id" body-style="width:85vw">
@@ -106,8 +106,9 @@
                             {{ flowsFilter[flowIndex].verifierPass ? 'pass' : 'fail' }}
                         </el-tag> -->
                         <el-tag v-if="$index == 0 && flowsFilter[flowIndex]?.verifier"
-                            :type="flowsFilter[flowIndex].verifierPass == true ? 'success' : flowsFilter[flowIndex].verifierPass == false ? 'danger' : 'warning'">
-                            {{ flowsFilter[flowIndex].verifierPass == true ? 'pass' : flowsFilter[flowIndex].verifierPass ==
+                            :type="flowsFilter[flowIndex].verifyPass == true ? 'success' : flowsFilter[flowIndex].verifyPass == false ? 'danger' : 'warning'">
+                            {{ flowsFilter[flowIndex].verifyPass == true ? 'pass' : flowsFilter[flowIndex].verifyPass ==
+
                                 false ? 'fail' : 'waiting' }}
                         </el-tag>
                         <el-tag v-else-if="$index == 1 && flowsFilter[flowIndex]?.innerAuditor"
@@ -290,7 +291,8 @@
             :action="`${webApi.axios.defaults.baseURL}/upload/duplicateReport?id=${flowsFilter[flowIndex].id}&duplicateRate=${duplicateRate}`"
             :headers="{
                     token: userInfo.token, 'Content-Type': 'application/json'
-                }" :limit="1" multiple :data="{ duplicateRate: duplicateRate }"
+                }
+                " :limit="1" multiple :data="{ duplicateRate: duplicateRate }"
             :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)">
             <el-button :icon="Upload"
                 :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)">上传查重报告</el-button>
@@ -309,7 +311,7 @@ import webApi from '~/util/webApi';
 import { GetDefenceGroupsRes, GetFlowDetailRes, GetTeacherInfoRes } from '~/util/webRes';
 import { Download, Upload, WarningFilled, CircleCheckFilled, ArrowLeft, ArrowRight, Search, Delete } from '@element-plus/icons-vue';
 import { useAuthStore } from '~/store/authStore';
-import { ElMessage } from 'element-plus';
+import { ElLoading, ElMessage } from 'element-plus';
 
 
 const userInfo = useAuthStore();
@@ -334,18 +336,30 @@ setTimeout(() => {
 
 
 const personFifter: Ref<string> = ref('')
-watch(personFifter, () => {
-    flowIndex.value = 0
+
+//监听flowStatusFifter的变化，用于限制加载时的切换
+watch(flowStatusFifter, (value, old) => {
+    if (!allowFilter) {
+        flowStatusFifter.value = old
+        ElMessage.warning('请等待加载完成')
+    }
 })
 
 //监听flowStatusFifter和perSonFifter的变化，过滤flows
-watch([flows, flowStatusFifter, personFifter], () => {
+watch([flows, flowStatusFifter, personFifter], (value, old) => {
     flowsFilter.value = flows.value
         .filter(i => String(i.id).includes(personFifter.value) ||
             i.studentId?.toString().includes(personFifter.value) ||
             i.studentName?.includes(personFifter.value) ||
             i.thesisName?.includes(personFifter.value))
+
+    if (value[1] !== old[1]) {
+        flowIndex.value = 0
+    }
 }, { deep: true })
+
+
+const allowFilter = ref(true)
 
 const fileList = ref([])
 
@@ -487,16 +501,20 @@ function getTeacherInfo(pageIndex = 1, type?: Role) {
 }
 
 function getFlowInfo(pageIndex = 1, filter: any) {
+    //搜索时禁止筛选
+    allowFilter.value = false
     webApi.post<GetFlowDetailRes>(`/getFlowInfo?current= ${pageIndex}`, filter).then(res => {
         flows.value.push(...res.data.data)
         flowsFilter.value = flows.value
-        flowIndex.value = 0;
         //删除flows中的重复项
         flows.value = flows.value.filter((item, index, self) => {
             return self.findIndex(i => i.id == item.id) == index
         })
         if (res.data.page * res.data.size < res.data.total) {
             getFlowInfo(pageIndex + 1, filter)
+        } else {
+            //搜索结束后允许筛选
+            allowFilter.value = true
         }
     })
 }
