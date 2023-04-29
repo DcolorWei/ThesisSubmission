@@ -337,16 +337,6 @@ setTimeout(() => {
 
 const personFifter: Ref<string> = ref('')
 
-//监听flowStatusFifter的变化，用于限制加载时的切换
-watch(flowStatusFifter, (value, old) => {
-    ElMessage(String(allowFilter.value))
-    if (!allowFilter.value) {
-        flowStatusFifter.value = old
-        ElMessage.warning('请等待加载完成')
-    }
-    ElMessage(value)
-}, { deep: true })
-
 //监听flowStatusFifter和perSonFifter的变化，过滤flows
 watch([flows, flowStatusFifter, personFifter], (value, old) => {
     flowsFilter.value = flows.value
@@ -388,8 +378,22 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
             fifter.verifierId = userInfo.teacherId
             break;
     }
-
-    getFlowInfo(1, fifter)
+    if (!allowFilter.value) {
+        switch (auditType) {
+            case 'inner':
+                flowStatusFifter.value = '待内审'
+                break;
+            case 'outer':
+                flowStatusFifter.value = '待外审'
+                break;
+            case 'verify':
+                flowStatusFifter.value = '待确认'
+                break;
+        }
+        ElMessage.warning('请等待加载完成')
+    } else {
+        getFlowInfo(1, fifter)
+    }
 }
 
 //触发download事件，下载文件
