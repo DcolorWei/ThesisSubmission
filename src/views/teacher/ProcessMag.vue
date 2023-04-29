@@ -378,7 +378,7 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
             break;
     }
     ElMessage.info('加载中' + allowFilter.value)
-    if (!allowFilter.value) {
+    if (!(allowFilter.value)) {
         ElMessage.warning('请等待加载完成')
         switch (auditType) {
             case 'inner':
