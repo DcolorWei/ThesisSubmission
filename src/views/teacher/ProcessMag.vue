@@ -378,6 +378,7 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
         getFlowInfo(1, fifter)
     } else {
         ElMessage.warning('请等待加载')
+        ElMessage(flowsFilter.value[0]?.status + " " + useAuthStore().roles)
         switch (flowsFilter.value[0]?.status) {
             case FlowStatus.FLOW_START:
                 flowStatusFifter.value = '待确定'
