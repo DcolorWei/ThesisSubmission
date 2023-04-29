@@ -6,23 +6,19 @@
     <div
         style="margin: 30px 0;width: 80vw;display: flex;justify-content: space-around;align-items: center;flex-wrap: wrap;">
         <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 300px;">
-            <el-input :disabled="allowFilter" v-model="personFifter" placeholder="筛选" style="width: 200px;"></el-input>
+            <el-input v-model="personFifter" placeholder="筛选" style="width: 200px;"></el-input>
             <el-button type="primary" :icon="Search" plain />
         </div>
         <!-- 根据流程状态显示筛选 -->
         <el-radio-group v-model="flowStatusFifter"
             style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
             <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
-                :disabled="!allowFilter"
                 @click="() => { if (allowFilter && flowStatusFifter !== '全部') search() }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
-                :disabled="!allowFilter"
                 @click="() => { if (allowFilter && flowStatusFifter !== '待确认') search(FlowStatus.FLOW_START, null, 'verify') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
-                :disabled="!allowFilter"
                 @click="() => { if (allowFilter && flowStatusFifter !== '待内审') search(FlowStatus.THESIS_AUDIT, null, 'inner') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
-                :disabled="!allowFilter"
                 @click="() => { if (allowFilter && flowStatusFifter !== '待外审') search(FlowStatus.THESIS_AUDIT, null, 'outer') }"></el-radio>
         </el-radio-group>
     </div>
