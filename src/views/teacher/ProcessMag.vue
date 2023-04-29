@@ -339,8 +339,6 @@ const personFifter: Ref<string> = ref('')
 
 //监听flowStatusFifter的变化，用于限制加载时的切换
 watch(flowStatusFifter, (value, old) => {
-    ElMessage(old)
-    ElMessage(value)
     ElMessage(String(allowFilter.value))
     if (!allowFilter.value) {
         flowStatusFifter.value = old
@@ -518,6 +516,7 @@ function getFlowInfo(pageIndex = 1, filter: any) {
             getFlowInfo(pageIndex + 1, filter)
         } else {
             //搜索结束后允许筛选
+            ElMessage.success("加载完毕")
             allowFilter.value = true
         }
     })
