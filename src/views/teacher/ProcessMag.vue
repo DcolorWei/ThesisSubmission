@@ -339,6 +339,9 @@ const personFifter: Ref<string> = ref('')
 
 //监听flowStatusFifter的变化，用于限制加载时的切换
 watch(flowStatusFifter, (value, old) => {
+    ElMessage(old)
+    ElMessage(value)
+    ElMessage(String(allowFilter.value))
     if (!allowFilter.value) {
         flowStatusFifter.value = old
         ElMessage.warning('请等待加载完成')
