@@ -338,16 +338,12 @@ setTimeout(() => {
 const personFifter: Ref<string> = ref('')
 
 //监听flowStatusFifter和perSonFifter的变化，过滤flows
-watch([flows, flowStatusFifter, personFifter], (value, old) => {
+watch([flows, personFifter], (value, old) => {
     flowsFilter.value = flows.value
         .filter(i => String(i.id).includes(personFifter.value) ||
             i.studentId?.toString().includes(personFifter.value) ||
             i.studentName?.includes(personFifter.value) ||
             i.thesisName?.includes(personFifter.value))
-
-    if (value[1] !== old[1]) {
-        flowIndex.value = 0
-    }
 }, { deep: true })
 
 
@@ -382,18 +378,30 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
         getFlowInfo(1, fifter)
     } else {
         ElMessage.warning('请等待加载完成')
-        switch (auditType) {
-            case 'inner':
-                flowStatusFifter.value = '待内审'
+        switch (flowsFilter.value[0]?.status) {
+            case FlowStatus.FLOW_START:
+                flowStatusFifter.value = '待确定'
                 break;
-            case 'outer':
-                flowStatusFifter.value = '待外审'
-                break;
-            case 'verify':
-                flowStatusFifter.value = '待确认'
+            case FlowStatus.THESIS_AUDIT:
+                if (userInfo.roles.includes(Role.INNER_AUDITOR)) {
+                    flowStatusFifter.value = '待内审'
+                    break;
+                } else if (userInfo.roles.includes(Role.OUTER_AUDITOR)) {
+                    flowStatusFifter.value = '待外审'
+                    break;
+                }
                 break;
             default:
-                flowStatusFifter.value = '全部'
+                if (userInfo.roles.includes(Role.INNER_AUDITOR)) {
+                    flowStatusFifter.value = '待内审'
+                    break;
+                } else if (userInfo.roles.includes(Role.OUTER_AUDITOR)) {
+                    flowStatusFifter.value = '待外审'
+                    break;
+                } else if (userInfo.roles.includes(Role.ACADEMIC_REGISTRY)) {
+                    flowStatusFifter.value = '全部'
+                    break;
+                }
                 break;
         }
     }
