@@ -13,13 +13,13 @@
         <el-radio-group v-model="flowStatusFifter"
             style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
             <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
-                @click="() => { if (allowFilter && flowStatusFifter !== '全部') search() }"></el-radio>
+                @click="() => search()"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
-                @click="() => { if (allowFilter && flowStatusFifter !== '待确认') search(FlowStatus.FLOW_START, null, 'verify') }"></el-radio>
+                @click="() => search(FlowStatus.FLOW_START, null, 'verify')"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
-                @click="() => { if (allowFilter && flowStatusFifter !== '待内审') search(FlowStatus.THESIS_AUDIT, null, 'inner') }"></el-radio>
+                @click="() => search(FlowStatus.THESIS_AUDIT, null, 'inner')"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
-                @click="() => { if (allowFilter && flowStatusFifter !== '待外审') search(FlowStatus.THESIS_AUDIT, null, 'outer') }"></el-radio>
+                @click="() => search(FlowStatus.THESIS_AUDIT, null, 'outer')"></el-radio>
         </el-radio-group>
     </div>
 
@@ -377,7 +377,10 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
             fifter.verifierId = userInfo.teacherId
             break;
     }
-    if (!(allowFilter.value)) {
+    if (allowFilter.value) {
+        while (flows.value.length) flows.value.pop()
+        getFlowInfo(1, fifter)
+    } else {
         ElMessage.warning('请等待加载完成')
         switch (auditType) {
             case 'inner':
@@ -393,9 +396,6 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
                 flowStatusFifter.value = '全部'
                 break;
         }
-    } else {
-        while (flows.value.length) flows.value.pop()
-        getFlowInfo(1, fifter)
     }
 }
 
