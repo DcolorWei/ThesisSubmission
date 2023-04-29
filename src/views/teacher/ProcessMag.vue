@@ -377,7 +377,6 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
             fifter.verifierId = userInfo.teacherId
             break;
     }
-    ElMessage.info('加载中' + allowFilter.value)
     if (!(allowFilter.value)) {
         ElMessage.warning('请等待加载完成')
         switch (auditType) {
@@ -389,6 +388,9 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
                 break;
             case 'verify':
                 flowStatusFifter.value = '待确认'
+                break;
+            default:
+                flowStatusFifter.value = '全部'
                 break;
         }
     } else {
