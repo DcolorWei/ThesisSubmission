@@ -32,7 +32,6 @@
             @click="() => flowIndex < flowsFilter.length - 1 ? flowIndex++ : null" />
     </div>
     <div v-for="   flow    in    flowsFilter.slice(flowIndex, flowIndex + pagesize)   "
-
         style="border: 1px solid #999999;padding:1px 1.5vw  1.0vw 1.5vw;margin-bottom: 10px;border-radius: 15px;">
         <h3 style="color:#606266;width: 90%;margin-top: 20px;text-align: left">学生信息</h3>
         <el-card v-if="flow.id" body-style="width:85vw">
@@ -436,7 +435,7 @@ const exportAudit = () => {
 
             eLink.setAttribute("target", "_blank")
             eLink.style.display = "none";
-            eLink.download = id + '_' + thesisName;
+            eLink.download = id + '_' + flowsFilter.value[flowIndex.value].studentName + "评审意见.xlsx";
             eLink.href = URL.createObjectURL(blob);
             document.body.appendChild(eLink);
             eLink.click();
@@ -456,7 +455,6 @@ const deleteFlow = (id: string | number) => {
                 ElMessage.success(JSON.stringify(res.message))
             })
     }
-
 }
 
 const changeTeacher = (index: number, flowId: string | number) => {
