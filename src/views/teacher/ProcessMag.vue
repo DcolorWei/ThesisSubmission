@@ -8,6 +8,8 @@
         <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 300px;">
             <el-input v-model="personFifter" placeholder="筛选" style="width: 200px;"></el-input>
             <el-button type="primary" :icon="Search" plain />
+            <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)"
+                @click="() => exportAudit()">导出全部评审信息</el-button>
         </div>
         <!-- 根据流程状态显示筛选 -->
         <el-radio-group v-model="flowStatusFifter"
@@ -73,8 +75,6 @@
                     <el-button v-if="flow.thesisName" :icon="Download" @click="() => download(false)">下载匿名论文</el-button>
                     <el-button :icon="Upload" v-if="flow.thesisName && userInfo.roled(Role.ACADEMIC_REGISTRY)"
                         @click="() => showUploadReportDialog = true">上传查重报告</el-button>
-                    <el-button :icon="Upload" v-if="flow.thesisName && userInfo.roled(Role.ACADEMIC_REGISTRY)"
-                        @click="() => exportAudit()">导出评审信息</el-button>
                     <el-button :icon="Delete" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" type="danger" plain
                         @click="() => deleteFlow(flowsFilter[flowIndex].id)">强行终止流程</el-button>
                 </el-table-column>
@@ -419,7 +419,7 @@ const exportAudit = () => {
     webApi.axios({
         method: "POST",
         url: "/exportAudit",
-        data: [flowsFilter.value[flowIndex.value].id],
+        data: flowsFilter.value.map(i => i.id),
         responseType: "blob",
         headers: {
             token: userInfo.token
