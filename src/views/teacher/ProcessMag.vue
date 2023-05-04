@@ -72,6 +72,8 @@
                     <el-button v-if="flow.thesisName" :icon="Download" @click="() => download(false)">下载匿名论文</el-button>
                     <el-button :icon="Upload" v-if="flow.thesisName && userInfo.roled(Role.ACADEMIC_REGISTRY)"
                         @click="() => showUploadReportDialog = true">上传查重报告</el-button>
+                    <el-button :icon="Upload" v-if="flow.thesisName && userInfo.roled(Role.ACADEMIC_REGISTRY)"
+                        @click="() => exportAudit()">导出评审信息</el-button>
                     <el-button :icon="Delete" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" type="danger" plain
                         @click="() => deleteFlow(flowsFilter[flowIndex].id)">强行终止流程</el-button>
                 </el-table-column>
@@ -290,8 +292,8 @@
         <el-upload v-model="fileList" class="upload-demo"
             :action="`${webApi.axios.defaults.baseURL}/upload/duplicateReport?id=${flowsFilter[flowIndex].id}&duplicateRate=${duplicateRate}`"
             :headers="{
-                    token: userInfo.token, 'Content-Type': 'application/json'
-                }
+                token: userInfo.token, 'Content-Type': 'application/json'
+            }
                 " :limit="1" multiple :data="{ duplicateRate: duplicateRate }"
             :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)">
             <el-button :icon="Upload"
@@ -384,6 +386,35 @@ const download = (anonymous: boolean) => {
     webApi.axios({
         method: "GET",
         url: `/getThesis?id=${flowsFilter.value[flowIndex.value].id}&anonymous=${anonymous}`,
+        responseType: "blob",
+        headers: {
+            token: userInfo.token
+        }
+    })
+        .then(res => {
+            let blob = new Blob([res.data], {
+                type: "application/pdf" //这里需要根据不同的文件格式写不同的参数
+            });
+            let eLink = document.createElement("a");
+
+            const { thesisName, id } = flowsFilter.value[flowIndex.value]
+
+            eLink.setAttribute("target", "_blank")
+            eLink.style.display = "none";
+            eLink.download = id + '_' + thesisName;
+            eLink.href = URL.createObjectURL(blob);
+            document.body.appendChild(eLink);
+            eLink.click();
+            URL.revokeObjectURL(eLink.href);
+            document.body.removeChild(eLink);
+        })
+}
+
+const exportAudit = () => {
+    webApi.axios({
+        method: "POST",
+        url: "/exportAudit",
+        data: [flowsFilter.value[flowIndex.value].id],
         responseType: "blob",
         headers: {
             token: userInfo.token
