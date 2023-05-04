@@ -13,13 +13,14 @@
         <el-radio-group v-model="flowStatusFifter"
             style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
             <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
-                @click="() => { if (allowFilter && flowStatusFifter !== '全部') search() }"></el-radio>
+                @click="() => { if (flowStatusFifter !== '全部') search() }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
-                @click="() => { if (allowFilter && flowStatusFifter !== '待确认') search(FlowStatus.FLOW_START, null, 'verify') }"></el-radio>
+                @click="() => { if (flowStatusFifter !== '待确认') search(FlowStatus.FLOW_START, null, 'verify') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待内审" v-if="userInfo.roled(Role.INNER_AUDITOR)" border
-                @click="() => { if (allowFilter && flowStatusFifter !== '待内审') search(FlowStatus.THESIS_AUDIT, null, 'inner') }"></el-radio>
+                @click="() => { if (flowStatusFifter !== '待内审') search(FlowStatus.THESIS_AUDIT, null, 'inner') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
-                @click="() => { if (allowFilter && flowStatusFifter !== '待外审') search(FlowStatus.THESIS_AUDIT, null, 'outer') }"></el-radio>
+                @click="() => { if (flowStatusFifter !== '待外审') search(FlowStatus.THESIS_AUDIT, null, 'outer') }"></el-radio>
+
         </el-radio-group>
     </div>
 
@@ -30,7 +31,8 @@
         <el-button :icon="ArrowRight" color="#fff" style="border:1px solid #efefef"
             @click="() => flowIndex < flowsFilter.length - 1 ? flowIndex++ : null" />
     </div>
-    <div v-for="  flow   in   flowsFilter.slice(flowIndex, flowIndex + pagesize)  "
+    <div v-for="   flow    in    flowsFilter.slice(flowIndex, flowIndex + pagesize)   "
+
         style="border: 1px solid #999999;padding:1px 1.5vw  1.0vw 1.5vw;margin-bottom: 10px;border-radius: 15px;">
         <h3 style="color:#606266;width: 90%;margin-top: 20px;text-align: left">学生信息</h3>
         <el-card v-if="flow.id" body-style="width:85vw">
@@ -336,17 +338,9 @@ setTimeout(() => {
 
 
 const personFifter: Ref<string> = ref('')
-
-//监听flowStatusFifter的变化，用于限制加载时的切换
-watch(flowStatusFifter, (value, old) => {
-    if (!allowFilter) {
-        flowStatusFifter.value = old
-        ElMessage.warning('请等待加载完成')
-    }
-})
-
 //监听flowStatusFifter和perSonFifter的变化，过滤flows
-watch([flows, flowStatusFifter, personFifter], (value, old) => {
+watch([flows, personFifter], (value, old) => {
+
     flowsFilter.value = flows.value
         .filter(i => String(i.id).includes(personFifter.value) ||
             i.studentId?.toString().includes(personFifter.value) ||
@@ -370,7 +364,6 @@ const searchOuter2 = ref('')
 
 //触发search事件，搜索流程信息
 const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner' | 'outer' | 'verify') => {
-    while (flows.value.length) flows.value.pop()
     let fifter: any = {};
     if (type) fifter.flowStatus = type;
     if (studentId) fifter.studentId = studentId;
@@ -386,8 +379,10 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
             fifter.verifierId = userInfo.teacherId
             break;
     }
-
-    getFlowInfo(1, fifter)
+    if (allowFilter.value) {
+        while (flows.value.length) flows.value.pop()
+        getFlowInfo(1, fifter)
+    }
 }
 
 //触发download事件，下载文件
@@ -514,6 +509,7 @@ function getFlowInfo(pageIndex = 1, filter: any) {
             getFlowInfo(pageIndex + 1, filter)
         } else {
             //搜索结束后允许筛选
+            ElMessage.success("加载完毕")
             allowFilter.value = true
         }
     })
