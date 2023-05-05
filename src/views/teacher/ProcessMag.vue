@@ -4,15 +4,15 @@
         <h2 style="color:#606266">流程管理</h2>
     </div>
     <div
-        style="margin: 30px 0;width: 80vw;display: flex;justify-content: space-around;align-items: center;flex-wrap: wrap;">
-        <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 300px;">
-            <el-input v-model="personFifter" placeholder="筛选" style="width: 200px;"></el-input>
-            <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:100px"
+        style="margin: 10px 0;width: 80vw;display: flex;justify-content: space-around;align-items: center;flex-wrap: wrap;">
+        <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 350px;">
+            <el-input v-model="personFifter" placeholder="筛选" style="width: 180px;"></el-input>
+            <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:120px"
                 @click="() => exportAudit()">导出评审信息</el-button>
         </div>
         <!-- 根据流程状态显示筛选 -->
         <el-radio-group v-model="flowStatusFifter"
-            style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
+            style="margin-bottom: 2vh;width: 350px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
             <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
                 @click="() => { if (flowStatusFifter !== '全部') search() }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
