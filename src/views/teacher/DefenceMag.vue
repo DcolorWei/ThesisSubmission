@@ -89,9 +89,9 @@ import webApi from '~/util/webApi';
 import { GetDefenceGroupsRes, GetTeacherInfoRes, UsualRes } from '~/util/webRes';
 
 const defenceGroups = reactive([] as DefenceInfo[])
-webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
-    defenceGroups.push(...res.data.data)
-})
+// webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
+//     defenceGroups.push(...res.data.data)
+// })
 
 //表单数据
 const teacherInfo: Ref<Array<any>> = ref([])
