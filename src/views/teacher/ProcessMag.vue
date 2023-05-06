@@ -432,7 +432,7 @@ const downloadMul = (anonymous: boolean, list: Array<number>) => {
     })
         .then(res => {
             let blob = new Blob([res.data], {
-                type: "application/pdf" //这里需要根据不同的文件格式写不同的参数
+                type: "application/zip" //这里需要根据不同的文件格式写不同的参数
             });
             let eLink = document.createElement("a");
             eLink.setAttribute("target", "_blank")
