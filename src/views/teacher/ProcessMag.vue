@@ -23,9 +23,9 @@
         </el-radio-group>
 
         <div>
-            <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:120px" type="warning" plain
+            <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="warning" plain
                 @click="() => exportAudit()">导出评审信息</el-button>
-            <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:120px" type="warning" plain
+            <el-button :icon="Download" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="warning" plain
                 @click="() => downloadMul(false, flowsFilter.filter(i => i.status === FlowStatus.AUDIT_PASSED).map(i => i.id))">下载已通过论文</el-button>
         </div>
     </div>
@@ -421,7 +421,7 @@ const download = (anonymous: boolean) => {
 
 const downloadMul = (anonymous: boolean, list: Array<number>) => {
     webApi.axios({
-        method: "GET",
+        method: "POST",
         url: `/getMultipleThesis`,
         data: list,
         responseType: "blob",
@@ -524,6 +524,15 @@ const openAudit = (flowId: string | number) => {
         default:
             verifyForm.auditType = "";
             break;
+    }
+
+    //补丁修正
+    if (verifyForm.auditType === "") {
+        if (useAuthStore().roles.includes(Role.INNER_AUDITOR)) {
+            verifyForm.auditType = "INNER_AUDIT";
+        } else if (useAuthStore().roles.includes(Role.OUTER_AUDITOR)) {
+            verifyForm.auditType = "OUTER_AUDIT";
+        }
     }
 
 }
