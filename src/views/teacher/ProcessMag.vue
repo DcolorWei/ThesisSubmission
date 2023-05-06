@@ -436,7 +436,7 @@ const downloadMul = (anonymous: boolean, list: Array<number>) => {
             let eLink = document.createElement("a");
             eLink.setAttribute("target", "_blank")
             eLink.style.display = "none";
-            eLink.download = "已过审论文.";
+            eLink.download = "已过审论文.zip";
             eLink.href = URL.createObjectURL(blob);
             document.body.appendChild(eLink);
             eLink.click();
