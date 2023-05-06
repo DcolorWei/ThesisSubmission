@@ -607,9 +607,9 @@ const updateFlow = (type: 'i' | 'oa' | 'ob' | 'd', teacherId: string) => {
             while (innerAuditorInfos.value.length > 0) outerAuditorInfos.value.pop()
             getTeacherInfo(1, Role.INNER_AUDITOR)
             getTeacherInfo(1, Role.OUTER_AUDITOR)
-            webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
-                defenceGroupInfos.value = res.data.data;
-            });
+            // webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
+            //     defenceGroupInfos.value = res.data.data;
+            // });
             search()
             showInnerAuditorDialog.value = false
             showOuterAuditorDialog1.value = false
@@ -645,9 +645,9 @@ setTimeout(() => {
 const showDefenceGroupDialog: Ref<boolean> = ref(false)
 
 const defenceGroupInfos: Ref<DefenceInfo[]> = ref([]);
-webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
-    defenceGroupInfos.value = res.data.data;
-});
+// webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
+//     defenceGroupInfos.value = res.data.data;
+// });
 
 //审核相关
 const showAuditDialog: Ref<boolean> = ref(false);
