@@ -7,8 +7,7 @@
         style="margin: 10px 0;width: 80vw;display: flex;justify-content: space-around;align-items: center;flex-wrap: wrap;">
         <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 350px;">
             <el-input v-model="personFifter" placeholder="筛选" style="width: 180px;"></el-input>
-            <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:120px"
-                @click="() => exportAudit()">导出评审信息</el-button>
+            <el-button :icon="Search" type="success" plain style="width: 50px;"></el-button>
         </div>
         <!-- 根据流程状态显示筛选 -->
         <el-radio-group v-model="flowStatusFifter"
@@ -21,8 +20,14 @@
                 @click="() => { if (flowStatusFifter !== '待内审') search(FlowStatus.THESIS_AUDIT, null, 'inner') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
                 @click="() => { if (flowStatusFifter !== '待外审') search(FlowStatus.THESIS_AUDIT, null, 'outer') }"></el-radio>
-
         </el-radio-group>
+
+        <div>
+            <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:120px" type="warning"
+                @click="() => exportAudit()">导出评审信息</el-button>
+            <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:120px" type="warning"
+                @click="() => downloadMul(false, flowsFilter.filter(i => i.status === FlowStatus.AUDIT_PASSED).map(i => i.id))">下载已通过论文</el-button>
+        </div>
     </div>
 
     <div style="display:flex;align-items: center;margin:10px auto">
@@ -414,6 +419,32 @@ const download = (anonymous: boolean) => {
         })
 }
 
+const downloadMul = (anonymous: boolean, list: Array<number>) => {
+    webApi.axios({
+        method: "GET",
+        url: `/getMultipleThesis`,
+        data: list,
+        responseType: "blob",
+        headers: {
+            token: userInfo.token
+        }
+    })
+        .then(res => {
+            let blob = new Blob([res.data], {
+                type: "application/pdf" //这里需要根据不同的文件格式写不同的参数
+            });
+            let eLink = document.createElement("a");
+            eLink.setAttribute("target", "_blank")
+            eLink.style.display = "none";
+            eLink.download = "已过审论文.";
+            eLink.href = URL.createObjectURL(blob);
+            document.body.appendChild(eLink);
+            eLink.click();
+            URL.revokeObjectURL(eLink.href);
+            document.body.removeChild(eLink);
+        })
+}
+
 const exportAudit = () => {
     webApi.axios({
         method: "POST",
@@ -429,9 +460,6 @@ const exportAudit = () => {
                 type: "application/pdf" //这里需要根据不同的文件格式写不同的参数
             });
             let eLink = document.createElement("a");
-
-            const { thesisName, id } = flowsFilter.value[flowIndex.value]
-
             eLink.setAttribute("target", "_blank")
             eLink.style.display = "none";
             eLink.download = "评审意见.xlsx";
