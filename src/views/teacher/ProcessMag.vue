@@ -25,7 +25,7 @@
         <div>
             <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="warning" plain
                 @click="() => exportAudit()">导出评审信息</el-button>
-            <el-button :icon="Download" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="warning" plain
+            <el-button :icon="Download" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="success" plain
                 @click="() => downloadMul(false, flowsFilter.filter(i => i.status === FlowStatus.AUDIT_PASSED).map(i => i.id))">下载已通过论文</el-button>
         </div>
     </div>
@@ -420,6 +420,7 @@ const download = (anonymous: boolean) => {
 }
 
 const downloadMul = (anonymous: boolean, list: Array<number>) => {
+    ElMessage(JSON.stringify(list))
     webApi.axios({
         method: "POST",
         url: `/getMultipleThesis`,
