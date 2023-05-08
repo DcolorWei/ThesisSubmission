@@ -4,14 +4,14 @@
         <h2 style="color:#606266">流程管理</h2>
     </div>
     <div
-        style="margin: 30px 0;width: 80vw;display: flex;justify-content: space-around;align-items: center;flex-wrap: wrap;">
-        <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 300px;">
-            <el-input v-model="personFifter" placeholder="筛选" style="width: 200px;"></el-input>
-            <el-button type="primary" :icon="Search" plain />
+        style="margin: 10px 0;width: 80vw;display: flex;justify-content: space-around;align-items: center;flex-wrap: wrap;">
+        <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 350px;">
+            <el-input v-model="personFifter" placeholder="筛选" style="width: 180px;"></el-input>
+            <el-button :icon="Search" type="success" plain style="width: 50px;"></el-button>
         </div>
         <!-- 根据流程状态显示筛选 -->
         <el-radio-group v-model="flowStatusFifter"
-            style="margin-bottom: 2vh;width: 300px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
+            style="margin-bottom: 2vh;width: 350px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
             <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
                 @click="() => { if (flowStatusFifter !== '全部') search() }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
@@ -20,8 +20,14 @@
                 @click="() => { if (flowStatusFifter !== '待内审') search(FlowStatus.THESIS_AUDIT, null, 'inner') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
                 @click="() => { if (flowStatusFifter !== '待外审') search(FlowStatus.THESIS_AUDIT, null, 'outer') }"></el-radio>
-
         </el-radio-group>
+
+        <div>
+            <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="warning" plain
+                @click="() => exportAudit()">导出评审信息</el-button>
+            <el-button :icon="Download" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="success" plain
+                @click="() => downloadMul(false, flowsFilter.filter(i => i.status === FlowStatus.AUDIT_PASSED).map(i => i.id))">下载已通过论文</el-button>
+        </div>
     </div>
 
     <div style="display:flex;align-items: center;margin:10px auto">
@@ -32,7 +38,6 @@
             @click="() => flowIndex < flowsFilter.length - 1 ? flowIndex++ : null" />
     </div>
     <div v-for="   flow    in    flowsFilter.slice(flowIndex, flowIndex + pagesize)   "
-
         style="border: 1px solid #999999;padding:1px 1.5vw  1.0vw 1.5vw;margin-bottom: 10px;border-radius: 15px;">
         <h3 style="color:#606266;width: 90%;margin-top: 20px;text-align: left">学生信息</h3>
         <el-card v-if="flow.id" body-style="width:85vw">
@@ -292,8 +297,8 @@
         <el-upload v-model="fileList" class="upload-demo"
             :action="`${webApi.axios.defaults.baseURL}/upload/duplicateReport?id=${flowsFilter[flowIndex].id}&duplicateRate=${duplicateRate}`"
             :headers="{
-                    token: userInfo.token, 'Content-Type': 'application/json'
-                }
+                token: userInfo.token, 'Content-Type': 'application/json'
+            }
                 " :limit="1" multiple :data="{ duplicateRate: duplicateRate }"
             :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)">
             <el-button :icon="Upload"
@@ -414,6 +419,59 @@ const download = (anonymous: boolean) => {
         })
 }
 
+const downloadMul = (anonymous: boolean, list: Array<number>) => {
+    ElMessage(JSON.stringify(list))
+    webApi.axios({
+        method: "POST",
+        url: `/getMultipleThesis`,
+        data: list,
+        responseType: "blob",
+        headers: {
+            token: userInfo.token
+        }
+    })
+        .then(res => {
+            let blob = new Blob([res.data], {
+                type: "application/zip" //这里需要根据不同的文件格式写不同的参数
+            });
+            let eLink = document.createElement("a");
+            eLink.setAttribute("target", "_blank")
+            eLink.style.display = "none";
+            eLink.download = "已过审论文.zip";
+            eLink.href = URL.createObjectURL(blob);
+            document.body.appendChild(eLink);
+            eLink.click();
+            URL.revokeObjectURL(eLink.href);
+            document.body.removeChild(eLink);
+        })
+}
+
+const exportAudit = () => {
+    webApi.axios({
+        method: "POST",
+        url: "/exportAudit",
+        data: flowsFilter.value.map(i => i.id),
+        responseType: "blob",
+        headers: {
+            token: userInfo.token
+        }
+    })
+        .then(res => {
+            let blob = new Blob([res.data], {
+                type: "application/pdf" //这里需要根据不同的文件格式写不同的参数
+            });
+            let eLink = document.createElement("a");
+            eLink.setAttribute("target", "_blank")
+            eLink.style.display = "none";
+            eLink.download = "评审意见.xlsx";
+            eLink.href = URL.createObjectURL(blob);
+            document.body.appendChild(eLink);
+            eLink.click();
+            URL.revokeObjectURL(eLink.href);
+            document.body.removeChild(eLink);
+        })
+}
+
 const deleteFlow = (id: string | number) => {
     const target = flows.value.find(i => i.id == id)
 
@@ -425,7 +483,6 @@ const deleteFlow = (id: string | number) => {
                 ElMessage.success(JSON.stringify(res.message))
             })
     }
-
 }
 
 const changeTeacher = (index: number, flowId: string | number) => {
@@ -468,6 +525,15 @@ const openAudit = (flowId: string | number) => {
         default:
             verifyForm.auditType = "";
             break;
+    }
+
+    //补丁修正
+    if (verifyForm.auditType === "") {
+        if (useAuthStore().roles.includes(Role.INNER_AUDITOR)) {
+            verifyForm.auditType = "INNER_AUDIT";
+        } else if (useAuthStore().roles.includes(Role.OUTER_AUDITOR)) {
+            verifyForm.auditType = "OUTER_AUDIT";
+        }
     }
 
 }
@@ -541,9 +607,9 @@ const updateFlow = (type: 'i' | 'oa' | 'ob' | 'd', teacherId: string) => {
             while (innerAuditorInfos.value.length > 0) outerAuditorInfos.value.pop()
             getTeacherInfo(1, Role.INNER_AUDITOR)
             getTeacherInfo(1, Role.OUTER_AUDITOR)
-            webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
-                defenceGroupInfos.value = res.data.data;
-            });
+            // webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
+            //     defenceGroupInfos.value = res.data.data;
+            // });
             search()
             showInnerAuditorDialog.value = false
             showOuterAuditorDialog1.value = false
@@ -579,9 +645,9 @@ setTimeout(() => {
 const showDefenceGroupDialog: Ref<boolean> = ref(false)
 
 const defenceGroupInfos: Ref<DefenceInfo[]> = ref([]);
-webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
-    defenceGroupInfos.value = res.data.data;
-});
+// webApi.post<GetDefenceGroupsRes>('/getDefenceGroupInfo', {}).then(res => {
+//     defenceGroupInfos.value = res.data.data;
+// });
 
 //审核相关
 const showAuditDialog: Ref<boolean> = ref(false);
