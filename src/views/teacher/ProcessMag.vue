@@ -5,13 +5,13 @@
     </div>
     <div
         style="margin: 10px 0;width: 80vw;display: flex;justify-content: space-around;align-items: center;flex-wrap: wrap;">
-        <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 350px;">
-            <el-input v-model="personFifter" placeholder="筛选" style="width: 180px;"></el-input>
-            <el-button :icon="Search" type="success" plain style="width: 50px;"></el-button>
+        <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 360px;">
+            <el-input v-model="personFifter" placeholder="搜索姓名/学号/相关信息" style="width: 220px;" />
+            <el-button :icon="Search" type="success" plain circle />
         </div>
         <!-- 根据流程状态显示筛选 -->
         <el-radio-group v-model="flowStatusFifter"
-            style="margin-bottom: 2vh;width: 350px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
+            style="margin-bottom: 2vh;width: 360px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
             <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
                 @click="() => { if (flowStatusFifter !== '全部') search() }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
@@ -20,12 +20,15 @@
                 @click="() => { if (flowStatusFifter !== '待内审') search(FlowStatus.THESIS_AUDIT, null, 'inner') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
                 @click="() => { if (flowStatusFifter !== '待外审') search(FlowStatus.THESIS_AUDIT, null, 'outer') }"></el-radio>
+            <el-radio style="margin-bottom: 10px;" label="已过审" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
+                @click="() => { if (flowStatusFifter !== '已过审') search(FlowStatus.AUDIT_PASSED, null, null) }"></el-radio>
         </el-radio-group>
 
         <div>
             <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="warning" plain
                 @click="() => exportAudit()">导出评审信息</el-button>
-            <el-button :icon="Download" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="success" plain
+            <el-button :icon="Download" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="success"
+                plain
                 @click="() => downloadMul(false, flowsFilter.filter(i => i.status === FlowStatus.AUDIT_PASSED).map(i => i.id))">下载已通过论文</el-button>
         </div>
     </div>
@@ -297,8 +300,8 @@
         <el-upload v-model="fileList" class="upload-demo"
             :action="`${webApi.axios.defaults.baseURL}/upload/duplicateReport?id=${flowsFilter[flowIndex].id}&duplicateRate=${duplicateRate}`"
             :headers="{
-                token: userInfo.token, 'Content-Type': 'application/json'
-            }
+                    token: userInfo.token, 'Content-Type': 'application/json'
+                }
                 " :limit="1" multiple :data="{ duplicateRate: duplicateRate }"
             :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)">
             <el-button :icon="Upload"
@@ -345,13 +348,11 @@ setTimeout(() => {
 const personFifter: Ref<string> = ref('')
 //监听flowStatusFifter和perSonFifter的变化，过滤flows
 watch([flows, personFifter], (value, old) => {
-
     flowsFilter.value = flows.value
         .filter(i => String(i.id).includes(personFifter.value) ||
             i.studentId?.toString().includes(personFifter.value) ||
             i.studentName?.includes(personFifter.value) ||
             i.thesisName?.includes(personFifter.value))
-
     if (value[1] !== old[1]) {
         flowIndex.value = 0
     }
@@ -368,7 +369,7 @@ const searchOuter1 = ref('')
 const searchOuter2 = ref('')
 
 //触发search事件，搜索流程信息
-const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner' | 'outer' | 'verify') => {
+const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner' | 'outer' | 'verify' | null) => {
     let fifter: any = {};
     if (type) fifter.flowStatus = type;
     if (studentId) fifter.studentId = studentId;
