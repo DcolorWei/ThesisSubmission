@@ -36,7 +36,7 @@
     <div style="display:flex;align-items: center;margin:10px auto">
         <el-button :icon="ArrowLeft" color="#fff" style="border:1px solid #efefef"
             @click="() => flowIndex > 0 ? flowIndex-- : null" />
-        <div style="margin: 0 2vh;">{{ flowsFilter.length && flowIndex + 1 }} / {{ flowsFilter.length }}</div>
+        <div style="margin: 0 2vh;">{{ flowsFilter.length && flowIndex + 1 }} / {{ flowTotal }}</div>
         <el-button :icon="ArrowRight" color="#fff" style="border:1px solid #efefef"
             @click="() => flowIndex < flowsFilter.length - 1 ? flowIndex++ : null" />
     </div>
@@ -331,6 +331,8 @@ const flowsFilter: Ref<ProcessDetail[]> = ref([])
 
 const flowIndex = ref(0)
 const pagesize = ref(1)
+const flowTotal = ref(0)
+
 const flowStatusFifter = ref('')
 setTimeout(() => {
     if (userInfo.roles.includes(Role.ACADEMIC_REGISTRY)) {
@@ -359,7 +361,6 @@ watch([flows, personFifter], (value, old) => {
 }, { deep: true })
 
 
-const allowFilter = ref(true)
 
 const fileList = ref([])
 
@@ -385,10 +386,8 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
             fifter.verifierId = userInfo.teacherId
             break;
     }
-    if (allowFilter.value) {
-        while (flows.value.length) flows.value.pop()
-        getFlowInfo(1, fifter)
-    }
+    while (flows.value.length) flows.value.pop()
+    getFlowInfo(1, fifter)
 }
 
 //触发download事件，下载文件
@@ -563,21 +562,34 @@ function getTeacherInfo(pageIndex = 1, type?: Role) {
 }
 
 function getFlowInfo(pageIndex = 1, filter: any) {
-    //搜索时禁止筛选
-    allowFilter.value = false
     webApi.post<GetFlowDetailRes>(`/getFlowInfo?current= ${pageIndex}`, filter).then(res => {
-        flows.value.push(...res.data.data)
-        flowsFilter.value = flows.value
-        //删除flows中的重复项
-        flows.value = flows.value.filter((item, index, self) => {
-            return self.findIndex(i => i.id == item.id) == index
-        })
-        if (res.data.page * res.data.size < res.data.total) {
-            getFlowInfo(pageIndex + 1, filter)
-        } else {
-            //搜索结束后允许筛选
-            ElMessage.success("加载完毕")
-            allowFilter.value = true
+        //获得返回的数据的所有流程状态是否相同，并获得该状态
+        const sameStatus = res.data.data.every((item, index, arr) => {
+            return item.status == arr[0].status
+        }) ? res.data.data[0].status : null
+
+        let allowAdd = false
+        //判断sameStatus和flowStatusFifter.value是否匹配
+        //只有在全部状态才添加不同状态的流程，否则要求状态和当前筛选器匹配
+        if ((sameStatus == FlowStatus.FLOW_START && flowStatusFifter.value == "待确认") ||
+            (sameStatus == FlowStatus.THESIS_AUDIT && flowStatusFifter.value == "待内审") ||
+            (sameStatus == FlowStatus.THESIS_AUDIT && flowStatusFifter.value == "待外审") ||
+            (sameStatus == FlowStatus.WAIT_STUDENT_CONFIRM_ORAL_DEFENSE && flowStatusFifter.value == "待答辩") ||
+            (sameStatus == FlowStatus.AUDIT_PASSED && flowStatusFifter.value == "已过审") ||
+            (flowStatusFifter.value == "全部")) {
+            allowAdd = true
+        }
+        if (allowAdd) {
+            flowTotal.value = res.data.total
+            flows.value.push(...res.data.data)
+            flowsFilter.value = flows.value
+            //删除flows中的重复项
+            flows.value = flows.value.filter((item, index, self) => {
+                return self.findIndex(i => i.id == item.id) == index
+            })
+            if (res.data.page * res.data.size < res.data.total) {
+                getFlowInfo(pageIndex + 1, filter)
+            }
         }
     })
 }
