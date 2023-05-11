@@ -300,7 +300,7 @@
         <el-upload v-model="fileList" class="upload-demo"
             :action="`${webApi.axios.defaults.baseURL}/upload/duplicateReport?id=${flowsFilter[flowIndex].id}&duplicateRate=${duplicateRate}`"
             :headers="{
-                token: userInfo.token, 'Content-Type': 'application/json'
+                token: userInfo.token, 
             }
                 " :limit="1" multiple
             :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)"
