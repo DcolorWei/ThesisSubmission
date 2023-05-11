@@ -300,10 +300,11 @@
         <el-upload v-model="fileList" class="upload-demo"
             :action="`${webApi.axios.defaults.baseURL}/upload/duplicateReport?id=${flowsFilter[flowIndex].id}&duplicateRate=${duplicateRate}`"
             :headers="{
-                    token: userInfo.token, 'Content-Type': 'application/json'
-                }
+                token: userInfo.token, 'Content-Type': 'application/json'
+            }
                 " :limit="1" multiple :data="{ duplicateRate: duplicateRate }"
-            :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)">
+            :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)"
+            :before-upload="(e) => showRollback(e)">
             <el-button :icon="Upload"
                 :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)">上传查重报告</el-button>
         </el-upload>
@@ -732,6 +733,10 @@ const verify = () => {
 }
 
 const showUploadReportDialog = ref(false)
+
+const showRollback = (e) => {
+    ElMessage(JSON.stringify(e))
+}
 const studentIdInput = ref()
 const duplicateRate = ref(0)
 </script>
