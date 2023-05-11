@@ -302,7 +302,7 @@
             :headers="{
                 token: userInfo.token, 'Content-Type': 'application/json'
             }
-                " :limit="1" multiple :data="{ duplicateRate: duplicateRate }"
+                " :limit="1" multiple
             :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)"
             :before-upload="(e) => showRollback(e)">
             <el-button :icon="Upload"
