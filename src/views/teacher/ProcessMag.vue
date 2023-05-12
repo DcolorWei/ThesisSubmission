@@ -5,13 +5,13 @@
     </div>
     <div
         style="margin: 10px 0;width: 80vw;display: flex;justify-content: space-around;align-items: center;flex-wrap: wrap;">
-        <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 350px;">
-            <el-input v-model="personFifter" placeholder="筛选" style="width: 180px;"></el-input>
-            <el-button :icon="Search" type="success" plain style="width: 50px;"></el-button>
+        <div style="margin-bottom: 2vh;display: flex; justify-content: space-around;align-items: center; width: 360px;">
+            <el-input v-model="personFifter" placeholder="搜索姓名/学号/相关信息" style="width: 220px;" />
+            <el-button :icon="Search" type="success" plain circle />
         </div>
         <!-- 根据流程状态显示筛选 -->
         <el-radio-group v-model="flowStatusFifter"
-            style="margin-bottom: 2vh;width: 350px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
+            style="margin-bottom: 2vh;width: 360px;display: flex; justify-content: space-between;align-items: center;flex-wrap: wrap;">
             <el-radio style="margin-bottom: 10px;" label="全部" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
                 @click="() => { if (flowStatusFifter !== '全部') search() }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待确认" v-if="userInfo.roled(Role.ACADEMIC_TUTOR)" border
@@ -20,12 +20,15 @@
                 @click="() => { if (flowStatusFifter !== '待内审') search(FlowStatus.THESIS_AUDIT, null, 'inner') }"></el-radio>
             <el-radio style="margin-bottom: 10px;" label="待外审" v-if="userInfo.roled(Role.OUTER_AUDITOR)" border
                 @click="() => { if (flowStatusFifter !== '待外审') search(FlowStatus.THESIS_AUDIT, null, 'outer') }"></el-radio>
+            <el-radio style="margin-bottom: 10px;" label="已过审" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" border
+                @click="() => { if (flowStatusFifter !== '已过审') search(FlowStatus.AUDIT_PASSED, null, null) }"></el-radio>
         </el-radio-group>
 
         <div>
             <el-button :icon="Upload" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="warning" plain
                 @click="() => exportAudit()">导出评审信息</el-button>
-            <el-button :icon="Download" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="success" plain
+            <el-button :icon="Download" v-if="userInfo.roled(Role.ACADEMIC_REGISTRY)" style="width:140px" type="success"
+                plain
                 @click="() => downloadMul(false, flowsFilter.filter(i => i.status === FlowStatus.AUDIT_PASSED).map(i => i.id))">下载已通过论文</el-button>
         </div>
     </div>
@@ -33,7 +36,7 @@
     <div style="display:flex;align-items: center;margin:10px auto">
         <el-button :icon="ArrowLeft" color="#fff" style="border:1px solid #efefef"
             @click="() => flowIndex > 0 ? flowIndex-- : null" />
-        <div style="margin: 0 2vh;">{{ flowsFilter.length && flowIndex + 1 }} / {{ flowsFilter.length }}</div>
+        <div style="margin: 0 2vh;">{{ flowsFilter.length && flowIndex + 1 }} / {{ flowTotal }}</div>
         <el-button :icon="ArrowRight" color="#fff" style="border:1px solid #efefef"
             @click="() => flowIndex < flowsFilter.length - 1 ? flowIndex++ : null" />
     </div>
@@ -297,10 +300,11 @@
         <el-upload v-model="fileList" class="upload-demo"
             :action="`${webApi.axios.defaults.baseURL}/upload/duplicateReport?id=${flowsFilter[flowIndex].id}&duplicateRate=${duplicateRate}`"
             :headers="{
-                token: userInfo.token, 'Content-Type': 'application/json'
+                token: userInfo.token, 
             }
-                " :limit="1" multiple :data="{ duplicateRate: duplicateRate }"
-            :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)">
+                " :limit="1" multiple
+            :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)"
+            :before-upload="(e) => showRollback(e)">
             <el-button :icon="Upload"
                 :disabled="!(studentIdInput == (flows.find(i => i.id == flowsFilter[flowIndex].id)?.studentId) && duplicateRate > 0)">上传查重报告</el-button>
         </el-upload>
@@ -328,6 +332,8 @@ const flowsFilter: Ref<ProcessDetail[]> = ref([])
 
 const flowIndex = ref(0)
 const pagesize = ref(1)
+const flowTotal = ref(0)
+
 const flowStatusFifter = ref('')
 setTimeout(() => {
     if (userInfo.roles.includes(Role.ACADEMIC_REGISTRY)) {
@@ -345,20 +351,17 @@ setTimeout(() => {
 const personFifter: Ref<string> = ref('')
 //监听flowStatusFifter和perSonFifter的变化，过滤flows
 watch([flows, personFifter], (value, old) => {
-
     flowsFilter.value = flows.value
         .filter(i => String(i.id).includes(personFifter.value) ||
             i.studentId?.toString().includes(personFifter.value) ||
             i.studentName?.includes(personFifter.value) ||
             i.thesisName?.includes(personFifter.value))
-
     if (value[1] !== old[1]) {
         flowIndex.value = 0
     }
 }, { deep: true })
 
 
-const allowFilter = ref(true)
 
 const fileList = ref([])
 
@@ -368,7 +371,7 @@ const searchOuter1 = ref('')
 const searchOuter2 = ref('')
 
 //触发search事件，搜索流程信息
-const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner' | 'outer' | 'verify') => {
+const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner' | 'outer' | 'verify' | null) => {
     let fifter: any = {};
     if (type) fifter.flowStatus = type;
     if (studentId) fifter.studentId = studentId;
@@ -384,10 +387,8 @@ const search = (type?: FlowStatus, studentId?: string | null, auditType?: 'inner
             fifter.verifierId = userInfo.teacherId
             break;
     }
-    if (allowFilter.value) {
-        while (flows.value.length) flows.value.pop()
-        getFlowInfo(1, fifter)
-    }
+    while (flows.value.length) flows.value.pop()
+    getFlowInfo(1, fifter)
 }
 
 //触发download事件，下载文件
@@ -562,21 +563,34 @@ function getTeacherInfo(pageIndex = 1, type?: Role) {
 }
 
 function getFlowInfo(pageIndex = 1, filter: any) {
-    //搜索时禁止筛选
-    allowFilter.value = false
     webApi.post<GetFlowDetailRes>(`/getFlowInfo?current= ${pageIndex}`, filter).then(res => {
-        flows.value.push(...res.data.data)
-        flowsFilter.value = flows.value
-        //删除flows中的重复项
-        flows.value = flows.value.filter((item, index, self) => {
-            return self.findIndex(i => i.id == item.id) == index
-        })
-        if (res.data.page * res.data.size < res.data.total) {
-            getFlowInfo(pageIndex + 1, filter)
-        } else {
-            //搜索结束后允许筛选
-            ElMessage.success("加载完毕")
-            allowFilter.value = true
+        //获得返回的数据的所有流程状态是否相同，并获得该状态
+        const sameStatus = res.data.data.every((item, index, arr) => {
+            return item.status == arr[0].status
+        }) ? res.data.data[0].status : null
+
+        let allowAdd = false
+        //判断sameStatus和flowStatusFifter.value是否匹配
+        //只有在全部状态才添加不同状态的流程，否则要求状态和当前筛选器匹配
+        if ((sameStatus == FlowStatus.FLOW_START && flowStatusFifter.value == "待确认") ||
+            (sameStatus == FlowStatus.THESIS_AUDIT && flowStatusFifter.value == "待内审") ||
+            (sameStatus == FlowStatus.THESIS_AUDIT && flowStatusFifter.value == "待外审") ||
+            (sameStatus == FlowStatus.WAIT_STUDENT_CONFIRM_ORAL_DEFENSE && flowStatusFifter.value == "待答辩") ||
+            (sameStatus == FlowStatus.AUDIT_PASSED && flowStatusFifter.value == "已过审") ||
+            (flowStatusFifter.value == "全部")) {
+            allowAdd = true
+        }
+        if (allowAdd) {
+            flowTotal.value = res.data.total
+            flows.value.push(...res.data.data)
+            flowsFilter.value = flows.value
+            //删除flows中的重复项
+            flows.value = flows.value.filter((item, index, self) => {
+                return self.findIndex(i => i.id == item.id) == index
+            })
+            if (res.data.page * res.data.size < res.data.total) {
+                getFlowInfo(pageIndex + 1, filter)
+            }
         }
     })
 }
@@ -719,6 +733,10 @@ const verify = () => {
 }
 
 const showUploadReportDialog = ref(false)
+
+const showRollback = (e) => {
+    ElMessage(JSON.stringify(e))
+}
 const studentIdInput = ref()
 const duplicateRate = ref(0)
 </script>
