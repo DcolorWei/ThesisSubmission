@@ -357,9 +357,7 @@ watch([flows, personFifter], (value, old) => {
             i.studentName?.includes(personFifter.value) ||
             i.thesisName?.includes(personFifter.value))
     flowTotal.value = flowsFilter.value.length
-    if (value[1] !== old[1]) {
-        flowIndex.value = 0
-    }
+    flowIndex.value = 0
 }, { deep: true })
 
 
@@ -735,7 +733,7 @@ const verify = () => {
 
 const showUploadReportDialog = ref(false)
 
-const showRollback = (e) => {
+const showRollback = (e: any) => {
     ElMessage(JSON.stringify(e))
 }
 const studentIdInput = ref()
