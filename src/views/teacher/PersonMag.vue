@@ -243,7 +243,6 @@ function getTeacherInfo(pageIndex = 1, content: string = '') {
             )
         tableData.value.push(...targets)
         const { page, size, total } = res.data
-        if (page > 20) return
         if (page * size < total) {
             setTimeout(() => { getTeacherInfo(pageIndex + 1, content) }, 500)
         }
@@ -261,7 +260,6 @@ function getStudentInfo(pageIndex = 1, content: string = '') {
             )
         tableData.value.push(...targets)
         const { page, size, total } = res.data
-        if (page > 20) return
         if (page * size < total) {
             setTimeout(() => { getStudentInfo(pageIndex + 1, content) }, 500)
         }
