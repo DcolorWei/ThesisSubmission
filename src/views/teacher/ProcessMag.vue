@@ -544,7 +544,7 @@ function getTeacherInfo(pageIndex = 1, type?: Role) {
                 return arr.findIndex(i => i.id == item.id) == index
             })
             const { page, size, total } = res.data
-            if (page * size < total) return getTeacherInfo(pageIndex + 1, type)
+            if (page * size < total) getTeacherInfo(pageIndex + 1, type)
         })
     } else if (type == Role.OUTER_AUDITOR) {
         webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, { role: [Role.OUTER_AUDITOR] }).then(res => {
@@ -554,7 +554,7 @@ function getTeacherInfo(pageIndex = 1, type?: Role) {
                 return arr.findIndex(i => i.id == item.id) == index
             })
             const { page, size, total } = res.data
-            if (page * size < total) return getTeacherInfo(pageIndex + 1, type)
+            if (page * size < total) getTeacherInfo(pageIndex + 1, type)
         })
     }
 }
