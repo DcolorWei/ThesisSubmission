@@ -30,6 +30,6 @@ const toPage = (path: string) => {
 }
 
 const showVersion = () => {
-  ElMessage('v0.2.11 05231548')
+  ElMessage('v0.2.11 05231613')
 }
 </script>
