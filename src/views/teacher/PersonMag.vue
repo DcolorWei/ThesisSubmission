@@ -39,9 +39,9 @@
                 <el-upload v-model:file-list="file1" class="upload-demo"
                     :action="`${webApi.axios.defaults.baseURL}/upload/student`" :headers="{ 'token': useAuthStore().token }"
                     multiple :limit="1" :show-file-list="false" :on-success="() => {
-                            ElMessage.success('导入成功');
-                            search();
-                        }">
+                        ElMessage.success('导入成功');
+                        search();
+                    }">
                     <el-button type="warning" plain style="width: 80px;">导入学生</el-button>
                 </el-upload>
             </el-col>
@@ -49,9 +49,9 @@
                 <el-upload v-model:file-list="file2" class="upload-demo"
                     :action="`${webApi.axios.defaults.baseURL}/upload/teacher`" :headers="{ 'token': useAuthStore().token }"
                     multiple :limit="1" :show-file-list="false" :on-success="() => {
-                            ElMessage.success('导入成功');
-                            search();
-                        }">
+                        ElMessage.success('导入成功');
+                        search();
+                    }">
                     <el-button type="warning" plain style="width: 80px;">导入教师</el-button>
                 </el-upload>
             </el-col>
@@ -258,12 +258,12 @@ function getStudentInfo(pageIndex = 1, content: string = '') {
             )
         tableData.value.push(...targets)
         const { page, size, total } = res.data
+        if (page > 10) return
         if (page * size < total) return getStudentInfo(pageIndex + 1, content)
     })
 }
 
 setTimeout(() => {
-    ElMessage.success('加载完毕');
     getTeacherInfo()
     getStudentInfo()
 }, 850)
