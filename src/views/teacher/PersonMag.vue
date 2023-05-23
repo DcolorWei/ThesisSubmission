@@ -259,7 +259,9 @@ function getStudentInfo(pageIndex = 1, content: string = '') {
         tableData.value.push(...targets)
         const { page, size, total } = res.data
         if (page > 10) return
-        if (page * size < total) return getStudentInfo(pageIndex + 1, content)
+        if (page * size < total) {
+            setTimeout(() => { return getStudentInfo(pageIndex + 1, content) }, 300)
+        }
     })
 }
 
