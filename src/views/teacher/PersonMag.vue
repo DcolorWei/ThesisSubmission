@@ -266,8 +266,8 @@ function getStudentInfo(pageIndex = 1, content: string = '') {
 }
 
 setTimeout(() => {
-    getTeacherInfo()
-    getStudentInfo()
+    getTeacherInfo(1)
+    getStudentInfo(1)
 }, 850)
 
 const pageIndex = ref(0)
