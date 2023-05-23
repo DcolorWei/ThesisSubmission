@@ -59,7 +59,7 @@
     </div>
     <div>
         <el-table
-            :data="tableData.sort((a, b) => a.id > b.id ? 1 : -1).slice(pageIndex * 10, pageIndex * 10 + 10).filter(i => i.name != 'admin')"
+            :data="tableData.slice(pageIndex * 10, pageIndex * 10 + 10).filter(i => i.name != 'admin')"
             border>
             <el-table-column label="学号/工号" width="150">
                 <template #default="{ row }">
@@ -221,10 +221,10 @@ import { TeacherInfo } from '~/entity/base/Teacher';
 const filter = ref({
     identify: '' as Role | ''
 })
-watch(filter, (val) => {
-    searchContent.value = ''
-    search(val.identify)
-}, { deep: true })
+// watch(filter, (val) => {
+//     searchContent.value = ''
+//     search(val.identify)
+// }, { deep: true })
 //表单数据
 const tableData: Ref<Array<any>> = ref([])
 
