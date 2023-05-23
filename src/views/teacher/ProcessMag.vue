@@ -356,7 +356,7 @@ watch([flows, personFifter], (value, old) => {
             i.studentId?.toString().includes(personFifter.value) ||
             i.studentName?.includes(personFifter.value) ||
             i.thesisName?.includes(personFifter.value))
-    flowTotal.value = flowsFilter.value.length
+    // flowTotal.value = flowsFilter.value.length
     flowIndex.value = 0
 }, { deep: true })
 
