@@ -221,10 +221,10 @@ import { TeacherInfo } from '~/entity/base/Teacher';
 const filter = ref({
     identify: '' as Role | ''
 })
-// watch(filter, (val) => {
-//     searchContent.value = ''
-//     search(val.identify)
-// }, { deep: true })
+watch(filter, (val) => {
+    searchContent.value = ''
+    search(val.identify)
+}, { deep: true })
 //表单数据
 const tableData: Ref<Array<any>> = ref([])
 
