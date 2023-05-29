@@ -358,6 +358,25 @@ watch([flows, personFifter], (value, old) => {
             i.thesisName?.includes(personFifter.value))
 }, { deep: true })
 
+watch(personFifter, () => {
+    flowTotal.value = flowsFilter.value.length
+    setTimeout(() => {
+        flowTotal.value = flowsFilter.value.length
+    }, 1000)
+    setTimeout(() => {
+        flowTotal.value = flowsFilter.value.length
+    }, 2000)
+    setTimeout(() => {
+        flowTotal.value = flowsFilter.value.length
+    }, 3000)
+    setTimeout(() => {
+        flowTotal.value = flowsFilter.value.length
+    }, 4000)
+    setTimeout(() => {
+        flowTotal.value = flowsFilter.value.length
+    }, 5000)
+}, { deep: true })
+
 
 
 const fileList = ref([])
