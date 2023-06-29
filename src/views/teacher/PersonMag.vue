@@ -39,9 +39,9 @@
                 <el-upload v-model:file-list="file1" class="upload-demo"
                     :action="`${webApi.axios.defaults.baseURL}/upload/student`" :headers="{ 'token': useAuthStore().token }"
                     multiple :limit="1" :show-file-list="false" :on-success="() => {
-                            ElMessage.success('导入成功');
-                            search();
-                        }">
+                        ElMessage.success('导入成功');
+                        search();
+                    }">
                     <el-button type="warning" plain style="width: 80px;">导入学生</el-button>
                 </el-upload>
             </el-col>
@@ -49,9 +49,9 @@
                 <el-upload v-model:file-list="file2" class="upload-demo"
                     :action="`${webApi.axios.defaults.baseURL}/upload/teacher`" :headers="{ 'token': useAuthStore().token }"
                     multiple :limit="1" :show-file-list="false" :on-success="() => {
-                            ElMessage.success('导入成功');
-                            search();
-                        }">
+                        ElMessage.success('导入成功');
+                        search();
+                    }">
                     <el-button type="warning" plain style="width: 80px;">导入教师</el-button>
                 </el-upload>
             </el-col>
@@ -59,7 +59,7 @@
     </div>
     <div>
         <el-table
-            :data="tableData.sort((a, b) => a.id > b.id ? 1 : -1).slice(pageIndex * 10, pageIndex * 10 + 10).filter(i => i.name != 'admin')"
+            :data="tableData.slice(pageIndex * 10, pageIndex * 10 + 10).filter(i => i.name != 'admin')"
             border>
             <el-table-column label="学号/工号" width="150">
                 <template #default="{ row }">
@@ -243,7 +243,9 @@ function getTeacherInfo(pageIndex = 1, content: string = '') {
             )
         tableData.value.push(...targets)
         const { page, size, total } = res.data
-        if (page * size < total) return getTeacherInfo(pageIndex + 1, content)
+        if (page * size < total) {
+            setTimeout(() => { getTeacherInfo(pageIndex + 1, content) }, 500)
+        }
     })
 }
 
@@ -258,14 +260,15 @@ function getStudentInfo(pageIndex = 1, content: string = '') {
             )
         tableData.value.push(...targets)
         const { page, size, total } = res.data
-        if (page * size < total) return getStudentInfo(pageIndex + 1, content)
+        if (page * size < total) {
+            setTimeout(() => { getStudentInfo(pageIndex + 1, content) }, 500)
+        }
     })
 }
 
 setTimeout(() => {
-    ElMessage.success('加载完毕');
-    getTeacherInfo()
-    getStudentInfo()
+    getTeacherInfo(1)
+    getStudentInfo(1)
 }, 850)
 
 const pageIndex = ref(0)

@@ -100,7 +100,7 @@ function getTeacherInfo(pageIndex = 1) {
     webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, {}).then(res => {
         teacherInfo.value.push(...res.data.data)
         const { page, size, total } = res.data
-        if (page * size < total) return getTeacherInfo(pageIndex + 1)
+        if (page * size < total) getTeacherInfo(pageIndex + 1)
     })
 }
 

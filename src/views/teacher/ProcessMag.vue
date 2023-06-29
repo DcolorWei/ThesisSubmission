@@ -356,8 +356,25 @@ watch([flows, personFifter], (value, old) => {
             i.studentId?.toString().includes(personFifter.value) ||
             i.studentName?.includes(personFifter.value) ||
             i.thesisName?.includes(personFifter.value))
+}, { deep: true })
+
+watch(personFifter, () => {
     flowTotal.value = flowsFilter.value.length
-    flowIndex.value = 0
+    setTimeout(() => {
+        flowTotal.value = flowsFilter.value.length
+    }, 1000)
+    setTimeout(() => {
+        flowTotal.value = flowsFilter.value.length
+    }, 2000)
+    setTimeout(() => {
+        flowTotal.value = flowsFilter.value.length
+    }, 3000)
+    setTimeout(() => {
+        flowTotal.value = flowsFilter.value.length
+    }, 4000)
+    setTimeout(() => {
+        flowTotal.value = flowsFilter.value.length
+    }, 5000)
 }, { deep: true })
 
 
@@ -546,7 +563,7 @@ function getTeacherInfo(pageIndex = 1, type?: Role) {
                 return arr.findIndex(i => i.id == item.id) == index
             })
             const { page, size, total } = res.data
-            if (page * size < total) return getTeacherInfo(pageIndex + 1, type)
+            if (page * size < total) getTeacherInfo(pageIndex + 1, type)
         })
     } else if (type == Role.OUTER_AUDITOR) {
         webApi.post<GetTeacherInfoRes>(`/getTeacherInfoBy?current= ${pageIndex}`, { role: [Role.OUTER_AUDITOR] }).then(res => {
@@ -556,7 +573,7 @@ function getTeacherInfo(pageIndex = 1, type?: Role) {
                 return arr.findIndex(i => i.id == item.id) == index
             })
             const { page, size, total } = res.data
-            if (page * size < total) return getTeacherInfo(pageIndex + 1, type)
+            if (page * size < total) getTeacherInfo(pageIndex + 1, type)
         })
     }
 }
